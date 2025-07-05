@@ -1,4 +1,4 @@
-package com.grepp.teamnotfound.infra.error.exception;
+package com.grepp.teamnotfound.infra.error.exception.dto;
 
 import java.time.LocalDateTime;
 
