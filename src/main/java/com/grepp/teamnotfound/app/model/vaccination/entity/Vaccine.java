@@ -1,5 +1,6 @@
 package com.grepp.teamnotfound.app.model.vaccination.entity;
 
+import com.grepp.teamnotfound.app.model.vaccination.code.VaccineType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -35,7 +36,7 @@ public class Vaccine {
 
     @Column(nullable = false, length = 20)
     @Enumerated(EnumType.STRING)
-    private Vaccination vaccination;
+    private VaccineType vaccination;
 
     @Column(nullable = false)
     private Integer period;

@@ -1,5 +1,6 @@
 package com.grepp.teamnotfound.app.model.board.entity;
 
+import com.grepp.teamnotfound.app.model.user.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
