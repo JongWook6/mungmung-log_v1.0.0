@@ -1,5 +1,6 @@
 package com.grepp.teamnotfound.app.model.ai_analysis.entity;
 
+import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
