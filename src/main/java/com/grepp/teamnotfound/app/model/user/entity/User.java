@@ -13,14 +13,16 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.EnumType;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 
+@Builder
 @Entity
 @Table(name = "Users")
 @Getter
-@Setter
+//@Setter
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends BaseEntity {
 
     @Id
@@ -40,8 +42,9 @@ public class User extends BaseEntity {
     @Column(nullable = false, unique = true, length = 50)
     private String email;
 
+    @Builder.Default
     @Column(nullable = false)
-    private Boolean state;
+    private Boolean state = true;
 
     @Column(nullable = false, length = 10)
     private String name;
@@ -61,5 +64,9 @@ public class User extends BaseEntity {
 
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
     private UserImg userImg;
+
+
+
+
 
 }
