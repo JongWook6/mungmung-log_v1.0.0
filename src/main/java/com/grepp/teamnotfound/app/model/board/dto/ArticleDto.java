@@ -2,9 +2,11 @@ package com.grepp.teamnotfound.app.model.board.dto;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class ArticleDto {
 
     private Long articleId;
