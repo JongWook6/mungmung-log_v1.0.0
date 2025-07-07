@@ -2,6 +2,7 @@ package com.grepp.teamnotfound.app.model.user;
 
 import com.grepp.teamnotfound.app.model.auth.code.Role;
 import com.grepp.teamnotfound.app.model.auth.dto.TokenResponseDto;
+import com.grepp.teamnotfound.app.model.auth.token.RefreshTokenService;
 import com.grepp.teamnotfound.app.model.user.dto.LoginRequestDto;
 import com.grepp.teamnotfound.app.model.user.dto.RegisterRequestDto;
 import com.grepp.teamnotfound.app.model.user.entity.User;
@@ -23,6 +24,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
+    private final RefreshTokenService refreshTokenService;
 
     @Transactional
     public Long registerUser(RegisterRequestDto requestDto) {
@@ -62,7 +64,17 @@ public class UserService {
             throw new BusinessException(UserErrorCode.USER_LOGIN_FAILED);
         }
 
+        // token 생성
+        TokenResponseDto responseDto = jwtProvider.createToken(user.getUserId(), user.getRole());
+
+        // rfToken 저장
+        refreshTokenService.saveRefreshToken(
+                String.valueOf(user.getUserId()),
+                responseDto.getRefreshToken(),
+                jwtProvider.getRtExpiration()
+        );
+
         // TODO jwt
-        return jwtProvider.createToken(user.getUserId(), user.getRole());
+        return responseDto;
     }
 }
