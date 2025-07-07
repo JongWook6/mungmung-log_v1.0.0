@@ -1,5 +1,5 @@
 package com.grepp.teamnotfound.app.model.board;
 
-public class BoardService {
+public class ArticleService {
 
 }

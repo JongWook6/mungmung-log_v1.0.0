@@ -3,6 +3,7 @@ package com.grepp.teamnotfound.app.model.report.entity;
 import com.grepp.teamnotfound.app.model.report.code.ReportCategory;
 import com.grepp.teamnotfound.app.model.report.code.ReportType;
 import com.grepp.teamnotfound.app.model.user.entity.User;
+import com.grepp.teamnotfound.infra.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -25,7 +26,7 @@ import lombok.Setter;
 @Table(name = "Reports")
 @Getter
 @Setter
-public class Report {
+public class Report extends BaseEntity {
 
     @Id
     @Column(nullable = false, updatable = false)
@@ -56,7 +57,7 @@ public class Report {
     private String reason;
 
     @Column(nullable = false)
-    private OffsetDateTime createdAt;
+    private OffsetDateTime reportedAt;
 
     @Column(nullable = false)
     private Boolean isDone;

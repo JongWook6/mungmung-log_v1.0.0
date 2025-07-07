@@ -1,21 +1,25 @@
-package com.grepp.teamnotfound.app.model.board.entity;
+package com.grepp.teamnotfound.app.model.notification.entity;
 
+import com.grepp.teamnotfound.app.model.user.entity.User;
 import com.grepp.teamnotfound.infra.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "Boards")
+@Table(name = "noti_management")
 @Getter
 @Setter
-public class Board extends BaseEntity {
+public class NotiManagement extends BaseEntity {
 
     @Id
     @Column(nullable = false, updatable = false)
@@ -29,9 +33,19 @@ public class Board extends BaseEntity {
         strategy = GenerationType.SEQUENCE,
         generator = "primary_sequence"
     )
-    private Long boardId;
+    private Long notiManageId;
 
-    @Column(nullable = false, length = 10)
-    private String name;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    private User user;
+
+    @Column(nullable = false)
+    private Boolean isNotiAll;
+
+    @Column(nullable = false)
+    private Boolean isNotiService;
+
+    @Column(nullable = false)
+    private Boolean isNotiSchedule;
 
 }

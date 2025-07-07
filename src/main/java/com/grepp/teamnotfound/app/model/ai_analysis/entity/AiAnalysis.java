@@ -1,6 +1,7 @@
 package com.grepp.teamnotfound.app.model.ai_analysis.entity;
 
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
+import com.grepp.teamnotfound.infra.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -11,7 +12,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import java.time.OffsetDateTime;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,7 +20,7 @@ import lombok.Setter;
 @Table(name = "AiAnalyses")
 @Getter
 @Setter
-public class AiAnalysis {
+public class AiAnalysis extends BaseEntity {
 
     @Id
     @Column(nullable = false, updatable = false)
@@ -38,9 +38,6 @@ public class AiAnalysis {
 
     @Column(nullable = false, columnDefinition = "text")
     private String content;
-
-    @Column(nullable = false)
-    private OffsetDateTime createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pet_id", nullable = false)

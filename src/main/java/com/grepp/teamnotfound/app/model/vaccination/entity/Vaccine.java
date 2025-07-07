@@ -1,6 +1,7 @@
 package com.grepp.teamnotfound.app.model.vaccination.entity;
 
 import com.grepp.teamnotfound.app.model.vaccination.code.VaccineType;
+import com.grepp.teamnotfound.infra.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -18,7 +19,7 @@ import lombok.Setter;
 @Table(name = "Vaccines")
 @Getter
 @Setter
-public class Vaccine {
+public class Vaccine extends BaseEntity {
 
     @Id
     @Column(nullable = false, updatable = false)

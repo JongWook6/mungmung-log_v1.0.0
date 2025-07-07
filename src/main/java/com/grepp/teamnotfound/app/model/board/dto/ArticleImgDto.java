@@ -4,11 +4,11 @@ import com.grepp.teamnotfound.infra.code.ImgType;
 import lombok.Data;
 
 @Data
-public class BoardImgDto {
+public class ArticleImgDto {
 
-    private Long boardImgId;
+    private Long articleImgId;
 
-    private Long boardId;
+    private Long articledId;
 
     private String savePath;
 

@@ -2,6 +2,7 @@ package com.grepp.teamnotfound.app.model.notification.entity;
 
 import com.grepp.teamnotfound.app.model.notification.code.NotiType;
 import com.grepp.teamnotfound.app.model.user.entity.User;
+import com.grepp.teamnotfound.infra.entity.BaseEntity;
 import jakarta.persistence.*;
 
 import java.time.OffsetDateTime;
@@ -10,10 +11,10 @@ import lombok.Setter;
 
 
 @Entity
-@Table(name = "Notifications")
+@Table(name = "ScheduleNoti")
 @Getter
 @Setter
-public class Notification {
+public class ServiceNoti extends BaseEntity {
 
     @Id
     @Column(nullable = false, updatable = false)
@@ -27,19 +28,13 @@ public class Notification {
         strategy = GenerationType.SEQUENCE,
         generator = "primary_sequence"
     )
-    private Long notiId;
+    private Long serviceNotiId;
 
     @Column(nullable = false)
     private String url;
 
     @Column(nullable = false)
     private String content;
-
-    @Column(nullable = false)
-    private OffsetDateTime createdAt;
-
-    @Column(nullable = false)
-    private Boolean isChecked;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -50,4 +45,3 @@ public class Notification {
     private User user;
 
 }
-

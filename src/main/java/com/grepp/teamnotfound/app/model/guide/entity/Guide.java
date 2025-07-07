@@ -1,5 +1,6 @@
 package com.grepp.teamnotfound.app.model.guide.entity;
 
+import com.grepp.teamnotfound.infra.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -15,7 +16,7 @@ import lombok.Setter;
 @Table(name = "Guides")
 @Getter
 @Setter
-public class Guide {
+public class Guide extends BaseEntity {
 
     @Id
     @Column(nullable = false, updatable = false)

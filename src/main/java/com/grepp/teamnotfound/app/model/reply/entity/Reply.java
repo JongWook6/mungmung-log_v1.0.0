@@ -1,7 +1,8 @@
 package com.grepp.teamnotfound.app.model.reply.entity;
 
-import com.grepp.teamnotfound.app.model.board.entity.Board;
+import com.grepp.teamnotfound.app.model.board.entity.Article;
 import com.grepp.teamnotfound.app.model.user.entity.User;
+import com.grepp.teamnotfound.infra.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -21,7 +22,7 @@ import lombok.Setter;
 @Table(name = "Replies")
 @Getter
 @Setter
-public class Reply {
+public class Reply extends BaseEntity {
 
     @Id
     @Column(nullable = false, updatable = false)
@@ -44,8 +45,8 @@ public class Reply {
     private OffsetDateTime reportedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "board_id", nullable = false)
-    private Board board;
+    @JoinColumn(name = "article_id", nullable = false)
+    private Article article;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

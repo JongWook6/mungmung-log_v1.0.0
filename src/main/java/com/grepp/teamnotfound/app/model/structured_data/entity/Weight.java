@@ -1,6 +1,7 @@
 package com.grepp.teamnotfound.app.model.structured_data.entity;
 
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
+import com.grepp.teamnotfound.infra.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -20,7 +21,7 @@ import lombok.Setter;
 @Table(name = "Weights")
 @Getter
 @Setter
-public class Weight {
+public class Weight  extends BaseEntity {
 
     @Id
     @Column(nullable = false, updatable = false)

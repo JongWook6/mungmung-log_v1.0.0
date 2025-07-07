@@ -1,8 +1,11 @@
 package com.grepp.teamnotfound.app.model.board.entity;
 
-import com.grepp.teamnotfound.app.model.user.entity.User;
+import com.grepp.teamnotfound.infra.code.ImgType;
+import com.grepp.teamnotfound.infra.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -14,12 +17,11 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
-
 @Entity
-@Table(name = "BoardLikes")
+@Table(name = "ArticleImgs")
 @Getter
 @Setter
-public class BoardLike {
+public class ArticleImg extends BaseEntity {
 
     @Id
     @Column(nullable = false, updatable = false)
@@ -33,14 +35,23 @@ public class BoardLike {
         strategy = GenerationType.SEQUENCE,
         generator = "primary_sequence"
     )
-    private Long likeId;
+    private Long articleImgId;
+
+    @Column(nullable = false)
+    private String savePath;
+
+    @Column(nullable = false, length = 20)
+    @Enumerated(EnumType.STRING)
+    private ImgType type;
+
+    @Column(nullable = false)
+    private String originName;
+
+    @Column(nullable = false)
+    private String renamedName;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "board_id", nullable = false)
-    private Board board;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "article_id", nullable = false)
+    private Article article;
 
 }

@@ -2,6 +2,7 @@ package com.grepp.teamnotfound.app.model.recommend.entity;
 
 
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
+import com.grepp.teamnotfound.infra.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -21,7 +22,7 @@ import lombok.Setter;
 @Table(name = "DailyRecommends")
 @Getter
 @Setter
-public class DailyRecommend {
+public class DailyRecommend extends BaseEntity {
 
     @Id
     @Column(nullable = false, updatable = false)

@@ -1,21 +1,26 @@
 package com.grepp.teamnotfound.app.model.board.entity;
 
-import com.grepp.teamnotfound.infra.entity.BaseEntity;
+import com.grepp.teamnotfound.app.model.user.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import java.time.OffsetDateTime;
 import lombok.Getter;
 import lombok.Setter;
 
+
 @Entity
-@Table(name = "Boards")
+@Table(name = "ArticleLikes")
 @Getter
 @Setter
-public class Board extends BaseEntity {
+public class ArticleLike {
 
     @Id
     @Column(nullable = false, updatable = false)
@@ -29,9 +34,16 @@ public class Board extends BaseEntity {
         strategy = GenerationType.SEQUENCE,
         generator = "primary_sequence"
     )
-    private Long boardId;
+    private Long likeId;
 
-    @Column(nullable = false, length = 10)
-    private String name;
+    private OffsetDateTime createdAt = OffsetDateTime.now();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "article_id", nullable = false)
+    private Article article;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
 }
