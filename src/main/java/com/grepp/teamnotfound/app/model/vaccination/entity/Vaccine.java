@@ -37,7 +37,7 @@ public class Vaccine extends BaseEntity {
 
     @Column(nullable = false, length = 20)
     @Enumerated(EnumType.STRING)
-    private VaccineType vaccination;
+    private VaccineType name;
 
     @Column(nullable = false)
     private Integer period;

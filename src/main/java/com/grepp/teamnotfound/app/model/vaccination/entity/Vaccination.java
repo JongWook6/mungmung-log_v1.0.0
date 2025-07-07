@@ -1,10 +1,13 @@
 package com.grepp.teamnotfound.app.model.vaccination.entity;
 
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
+import com.grepp.teamnotfound.app.model.vaccination.code.VaccineType;
 import com.grepp.teamnotfound.infra.entity.BaseEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;

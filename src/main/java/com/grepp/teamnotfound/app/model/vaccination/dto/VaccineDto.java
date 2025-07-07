@@ -1,5 +1,6 @@
 package com.grepp.teamnotfound.app.model.vaccination.dto;
 
+import com.grepp.teamnotfound.app.model.vaccination.code.VaccineType;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -8,13 +9,13 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class VaccineDto {
+public class VaccineDTO {
 
     private Long vaccineId;
 
     @NotNull
     @Size(max = 20)
-    private String name;
+    private VaccineType name;
 
     @NotNull
     private Integer period;

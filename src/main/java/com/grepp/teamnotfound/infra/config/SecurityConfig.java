@@ -24,7 +24,7 @@ public class SecurityConfig {
                         (requests) -> requests
                                 .requestMatchers(GET, "/", "/error", "/favicon.ico").permitAll()
                                 .requestMatchers(GET, "/test/**").permitAll()
-                                .anyRequest().authenticated()
+                                .anyRequest().permitAll()
                 );
 
         return http.build();
