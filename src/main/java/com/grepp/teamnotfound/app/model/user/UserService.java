@@ -1,10 +1,12 @@
 package com.grepp.teamnotfound.app.model.user;
 
 import com.grepp.teamnotfound.app.model.auth.code.Role;
+import com.grepp.teamnotfound.app.model.auth.dto.TokenResponseDto;
 import com.grepp.teamnotfound.app.model.user.dto.LoginRequestDto;
 import com.grepp.teamnotfound.app.model.user.dto.RegisterRequestDto;
 import com.grepp.teamnotfound.app.model.user.entity.User;
 import com.grepp.teamnotfound.app.model.user.repository.UserRepository;
+import com.grepp.teamnotfound.infra.auth.token.JwtProvider;
 import com.grepp.teamnotfound.infra.error.exception.BusinessException;
 import com.grepp.teamnotfound.infra.error.exception.code.UserErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtProvider jwtProvider;
 
     @Transactional
     public Long registerUser(RegisterRequestDto requestDto) {
@@ -50,7 +53,7 @@ public class UserService {
 
 
     @Transactional(readOnly = true)
-    public User login(LoginRequestDto requestDto) {
+    public TokenResponseDto login(LoginRequestDto requestDto) {
         User user = userRepository.findByEmail(requestDto.getEmail())
                 .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
 
@@ -60,7 +63,6 @@ public class UserService {
         }
 
         // TODO jwt
-
-        return user;
+        return jwtProvider.createToken(user.getUserId(), user.getRole());
     }
 }

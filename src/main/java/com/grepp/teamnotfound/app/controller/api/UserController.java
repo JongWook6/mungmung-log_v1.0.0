@@ -1,10 +1,12 @@
 package com.grepp.teamnotfound.app.controller.api;
 
+import com.grepp.teamnotfound.app.model.auth.dto.TokenResponseDto;
 import com.grepp.teamnotfound.app.model.user.UserService;
 import com.grepp.teamnotfound.app.model.user.dto.LoginRequestDto;
 import com.grepp.teamnotfound.app.model.user.dto.RegisterRequestDto;
 import com.grepp.teamnotfound.app.model.user.dto.RegisterResponseDto;
 import lombok.RequiredArgsConstructor;
+import org.antlr.v4.runtime.Token;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,12 +32,13 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginRequestDto requestDto) {
-        userService.login(requestDto);
+    public ResponseEntity<TokenResponseDto> login(@RequestBody LoginRequestDto requestDto) {
+        TokenResponseDto responseDto = userService.login(requestDto);
 
         //TODO jwt
 
-        return ResponseEntity.ok("User logged in successfully");
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDto);
     }
 
 }
