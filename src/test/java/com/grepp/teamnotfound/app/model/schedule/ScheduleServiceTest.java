@@ -88,4 +88,10 @@ class ScheduleServiceTest {
     void deleteCycleSchedule() {
         scheduleService.deleteSchedule(10014L, 1L, true);
     }
+
+    // 일정완료 여부
+    @Test
+    void checkIsDone(){
+        scheduleService.checkIsDone(1L, 10014L);
+    }
 }
