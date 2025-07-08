@@ -54,7 +54,7 @@ public class UserService {
     }
 
 
-    @Transactional(readOnly = true)
+    @Transactional
     public TokenResponseDto login(LoginRequestDto requestDto) {
         User user = userRepository.findByEmail(requestDto.getEmail())
                 .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
@@ -65,16 +65,22 @@ public class UserService {
         }
 
         // token 생성
-        TokenResponseDto responseDto = jwtProvider.createToken(user.getUserId(), user.getRole());
+        String accessToken = jwtProvider.generateAccessToken(user.getUserId(), user.getRole());
+        String refreshToken = jwtProvider.generateRefreshToken(user.getUserId(), user.getRole());
 
-        // rfToken 저장
+        // Refresh Token은 DB에 저장
         refreshTokenService.saveRefreshToken(
                 String.valueOf(user.getUserId()),
-                responseDto.getRefreshToken(),
+                refreshToken,
                 jwtProvider.getRtExpiration()
         );
 
-        // TODO jwt
-        return responseDto;
+
+        return TokenResponseDto.builder()
+                .grantType("Bearer")
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
     }
+
 }

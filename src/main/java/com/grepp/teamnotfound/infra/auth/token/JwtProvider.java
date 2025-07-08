@@ -1,7 +1,6 @@
 package com.grepp.teamnotfound.infra.auth.token;
 
 import com.grepp.teamnotfound.app.model.auth.code.Role;
-import com.grepp.teamnotfound.app.model.auth.dto.TokenResponseDto;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -40,98 +38,36 @@ public class JwtProvider {
         this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
     }
 
-    // 우선 access/refresh 한 번에 제작
-    public TokenResponseDto createToken(Long userId, Role role){
+    // 1. accessToken 생성
+    public String generateAccessToken(Long userId, Role role) {
         Date now = new Date();
 
-        // access
-        String accessToken = Jwts.builder()
+        return Jwts.builder()
                 .subject(String.valueOf(userId))
                 .claim("role", role.name())
                 .issuedAt(now)
                 .expiration(new Date(now.getTime() + atExpiration * 1000))
                 .signWith(key)
                 .compact();
+    }
 
-        // 3-2. Refresh Token 생성 (지금은 특별한 정보 없이 만료 시간만 설정)
-        String refreshToken = Jwts.builder()
+    // 2. refreshToken 생성  // TODO (지금은 특별한 정보 없이 만료 시간만 설정)
+    public String generateRefreshToken(Long userId, Role role) {
+        Date now = new Date();
+
+        return Jwts.builder()
                 .issuedAt(now)
                 .expiration(new Date(now.getTime() + rtExpiration * 1000))
                 .signWith(key)
                 .compact();
-
-        // 3-3. DTO에 담아 반환
-        return TokenResponseDto.builder()
-                .grantType("Bearer")
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .build();
     }
 
+    // 3. token 검증
 
-//    public AccessTokenDto generateAccessToken(Authentication authentication){
-//        return generateAccessToken(authentication.getName());
-//    }
-//
-//    public AccessTokenDto generateAccessToken(String username){
-//        String id = UUID.randomUUID().toString();
-//        long now = new Date().getTime();
-//        Date atExpiresIn = new Date(now + atExpiration);
-//        String accessToken = Jwts.builder()
-//                .subject(username)
-//                .id(id)
-//                .expiration(atExpiresIn)
-//                .signWith(getSecretKey())
-//                .compact();
-//
-//        return AccessTokenDto.builder()
-//                .id(id)
-//                .token(accessToken)
-//                .expiresIn(atExpiration)
-//                .build();
-//    }
+    // 4. 토큰 내 정보 추출
 
-//    public Authentication genreateAuthentication(String accessToken){
-//        Claims claims = parseClaim(accessToken);
-//        List<? extends GrantedAuthority> authorities = userDetailsService.findAuthorities(claims.getSubject());
-//        Principal principal = new Principal(claims.getSubject(),"", authorities);
-//        return new UsernamePasswordAuthenticationToken(principal, "", authorities);
-//    }
-//
-//    public Claims parseClaim(String accessToken) {
-//        try{
-//            return Jwts.parser().verifyWith(getSecretKey()).build()
-//                    .parseSignedClaims(accessToken).getPayload();
-//        }catch (ExpiredJwtException ex){
-//            return ex.getClaims();
-//        }
-//    }
-//
-//    public boolean validateToken(String requestAccessToken) {
-//        try{
-//            Jwts.parser().verifyWith(getSecretKey()).build().parse(requestAccessToken);
-//            return true;
-//        }catch(SecurityException | MalformedJwtException | UnsupportedJwtException | IllegalArgumentException e){
-//            log.error(e.getMessage(), e);
-//        }
-//        return false;
-//    }
-//
-//    public String resolveToken(HttpServletRequest request, TokenType tokenType) {
-//        String headerToken = request.getHeader("Authorization");
-//        if (headerToken != null && headerToken.startsWith("Bearer")) {
-//            return headerToken.substring(7);
-//        }
-//
-//        Cookie[] cookies = request.getCookies();
-//        if (cookies == null) {
-//            return null;
-//        }
-//
-//        return Arrays.stream(cookies)
-//                .filter(e -> e.getName().equals(tokenType.name()))
-//                .map(Cookie::getValue).findFirst()
-//                .orElse(null);
-//    }
+    // 5. Authentication 제작
+
+    // 6. 토큰 추출 resolver
 
 }
