@@ -4,6 +4,7 @@ import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleListResp
 import com.grepp.teamnotfound.app.controller.api.reply.payload.ReplyListResponse;
 import com.grepp.teamnotfound.app.model.board.dto.ArticleListDto;
 import com.grepp.teamnotfound.app.model.reply.dto.ReplyListDto;
+import io.swagger.v3.oas.annotations.Operation;
 import java.time.OffsetDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -21,8 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/api/v1/community/articles/{articleId}", produces = MediaType.APPLICATION_JSON_VALUE)
 public class ReplyApiController {
 
-    // 댓글 리스트
     @GetMapping("/replies")
+    @Operation(summary = "특정 게시글의 댓글 리스트 조회")
     public ResponseEntity<ReplyListResponse> getAllReplies(
         @PathVariable int articleId
     ) {
@@ -41,16 +42,16 @@ public class ReplyApiController {
         return ResponseEntity.ok(response);
     }
 
-    // 댓글 작성
     @PostMapping("/replies")
+    @Operation(summary = "댓글 작성")
     public ResponseEntity<?> createReply(
         @PathVariable int articleId
     ) {
         return ResponseEntity.ok("댓글이 정상적으로 생성되었습니다.");
     }
 
-    // 댓글 수정
     @PatchMapping("/replies/{replyId}")
+    @Operation(summary = "댓글 수정")
     public ResponseEntity<?> updateReply(
         @PathVariable Long articleId,
         @PathVariable Long replyId
@@ -58,8 +59,8 @@ public class ReplyApiController {
         return ResponseEntity.ok("댓글이 정상적으로 수정되었습니다.");
     }
 
-    // 댓글 삭제
     @DeleteMapping("/replies/{replyId}")
+    @Operation(summary = "댓글 삭제")
     public ResponseEntity<?> deleteReply(
         @PathVariable Long articleId,
         @PathVariable Long replyId

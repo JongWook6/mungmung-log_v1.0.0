@@ -5,9 +5,14 @@ import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleListResp
 import com.grepp.teamnotfound.app.controller.api.article.payload.Pagination;
 import com.grepp.teamnotfound.app.model.board.ArticleService;
 import com.grepp.teamnotfound.app.model.board.code.BoardType;
+import com.grepp.teamnotfound.app.model.board.code.SearchType;
+import com.grepp.teamnotfound.app.model.board.code.SortType;
 import com.grepp.teamnotfound.app.model.board.dto.ArticleListDto;
+import io.swagger.v3.oas.annotations.Operation;
 import java.time.OffsetDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -27,13 +32,15 @@ public class ArticleApiController {
 
     private final ArticleService articleService;
 
-    // 특정 게시판의 게시글 리스트 조회
     @GetMapping
+    @Operation(summary = "특정 게시판의 게시글 리스트 조회")
     public ResponseEntity<ArticleListResponse> getAllArticles(
         @RequestParam int page,
         @RequestParam int size,
         @RequestParam BoardType boardType,
-        @RequestParam String sort
+        @RequestParam SortType sortType,
+        @RequestParam(required = false) SearchType searchType,
+        @RequestParam(required = false) String keyword
     ) {
         ArticleListResponse response = new ArticleListResponse();
 
@@ -60,14 +67,14 @@ public class ArticleApiController {
         return ResponseEntity.ok(response);
     }
 
-    // 새로운 게시글 작성
     @PostMapping
+    @Operation(summary = "새로운 게시글 작성")
     public ResponseEntity<?> createArticle() {
         return ResponseEntity.ok("게시글이 정상적으로 생성되었습니다.");
     }
 
-    // 게시글 상세 조회
     @GetMapping("/{articleId}")
+    @Operation(summary = "게시글 상세 조회")
     public ResponseEntity<ArticleDetailResponse> getArticle(
         @PathVariable Long articleId
     ) {
@@ -85,36 +92,63 @@ public class ArticleApiController {
         return ResponseEntity.ok(response);
     }
 
-    // 게시글 수정
     @PatchMapping("/{articleId}")
+    @Operation(summary = "게시글 수정")
     public ResponseEntity<?> updateArticle(
         @PathVariable Long articleId
     ) {
         return ResponseEntity.ok("게시글이 정상적으로 수정되었습니다.");
     }
 
-    // 게시글 삭제
     @DeleteMapping("/{articleId}")
+    @Operation(summary = "게시글 삭제")
     public ResponseEntity<?> deleteArticle(
         @PathVariable Long articleId
     ) {
         return ResponseEntity.ok("게시글이 정상적으로 삭제되었습니다.");
     }
 
-    // 게시글 좋아요 요청
     @PostMapping("/{articleId}/like")
+    @Operation(summary = "게시글 좋아요 요청")
     public ResponseEntity<?> likeArticle(
         @PathVariable Long articleId
     ) {
-        return ResponseEntity.ok("좋아요 + 1");
+        return ResponseEntity.ok("Like");
     }
 
-    // 게시글 좋아요 취소
     @DeleteMapping("/{articleId}/like")
+    @Operation(summary = "게시글 좋아요 취소")
     public ResponseEntity<?> undoLikeArticle(
         @PathVariable Long articleId
     ) {
-        return ResponseEntity.ok("좋아요 - 1");
+        return ResponseEntity.ok("Undo Like");
     }
 
+    @GetMapping("/{articleId}/reply")
+    @Operation(summary = "게시글 댓글 개수")
+    public ResponseEntity<?> getReplyCount(
+        @PathVariable Long articleId
+    ) {
+        Map<String, Integer> innerData = new HashMap<>();
+        innerData.put("replies", 20);
+
+        Map<String, Object> responseMap = new HashMap<>();
+        responseMap.put("data", innerData);
+
+        return ResponseEntity.ok(responseMap);
+    }
+
+    @GetMapping("/{articleId}/like")
+    @Operation(summary = "게시글 좋아요 개수")
+    public ResponseEntity<?> getLikeCount(
+        @PathVariable Long articleId
+    ) {
+        Map<String, Integer> innerData = new HashMap<>();
+        innerData.put("likes", 20);
+
+        Map<String, Object> responseMap = new HashMap<>();
+        responseMap.put("data", innerData);
+
+        return ResponseEntity.ok(responseMap);
+    }
 }
