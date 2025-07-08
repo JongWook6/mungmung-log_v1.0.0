@@ -55,7 +55,7 @@ public class MailService {
 
 
     // 회원가입 인증 메일 코드 검증
-    public boolean verifyEmailCode(String email, String code){
+    public void verifyEmailCode(String email, String code){
         String redisKey = "email: verifying " + email;
         String storedCode = stringRedisTemplate.opsForValue().get(redisKey);
 
@@ -66,6 +66,5 @@ public class MailService {
 
         // redis 코드 삭제
         stringRedisTemplate.delete(redisKey);
-        return true;
     }
 }

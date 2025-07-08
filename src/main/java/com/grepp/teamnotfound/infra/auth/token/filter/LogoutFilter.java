@@ -49,7 +49,7 @@ public class LogoutFilter extends OncePerRequestFilter {
                 authService.logout(accessToken);
                 response.setStatus(HttpStatus.OK.value());
                 response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                objectMapper.writeValue(response.getWriter(), ApiResponse.success("로그아웃 성공"));
+                objectMapper.writeValue(response.getWriter(), ApiResponse.success("로그아웃에 성공했습니다."));
             } else {
                 response.setStatus(HttpStatus.OK.value());
                 response.setContentType(MediaType.APPLICATION_JSON_VALUE);

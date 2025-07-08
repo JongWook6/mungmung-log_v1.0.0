@@ -10,12 +10,14 @@ public record ApiResponse<T>(
         return new ApiResponse<>(OkResponseCode.OK.getCode(), OkResponseCode.OK.getMessage(), data);
     }
 
-    public static ApiResponse<?> success() {
-        return new ApiResponse<>("OK", "정상적으로 완료되었습니다.", null);
+    public static <T> ApiResponse<T> success(String message) {
+        return new ApiResponse<>(OkResponseCode.OK.getCode(), message, null);
     }
 
+    public static <T> ApiResponse<T> noContent() {
+        return new ApiResponse<>(OkResponseCode.OK.getCode(), OkResponseCode.OK.getMessage(), null);
+    }
 
-    // TODO data field 없는 메서드도 구성하기
     public static ApiResponse<?> error(String code, String message) {
         return new ApiResponse<>(code, message, null);
     }

@@ -1,7 +1,5 @@
 package com.grepp.teamnotfound.app.model.auth;
 
-import com.grepp.teamnotfound.app.model.auth.code.Role;
-import com.grepp.teamnotfound.app.model.auth.mail.MailService;
 import com.grepp.teamnotfound.app.model.auth.payload.LoginRequest;
 import com.grepp.teamnotfound.app.model.auth.token.RefreshTokenService;
 import com.grepp.teamnotfound.app.model.auth.token.dto.AccessTokenDto;
@@ -9,22 +7,16 @@ import com.grepp.teamnotfound.app.model.auth.token.dto.TokenDto;
 import com.grepp.teamnotfound.app.model.auth.token.entity.RefreshToken;
 import com.grepp.teamnotfound.app.model.auth.token.entity.UserBlackList;
 import com.grepp.teamnotfound.app.model.auth.token.repository.UserBlackListRepository;
-import com.grepp.teamnotfound.app.model.user.dto.RegisterRequestDto;
-import com.grepp.teamnotfound.app.model.user.entity.User;
-import com.grepp.teamnotfound.app.model.user.repository.UserRepository;
 import com.grepp.teamnotfound.infra.auth.token.JwtProvider;
 import com.grepp.teamnotfound.infra.auth.token.code.GrantType;
 import com.grepp.teamnotfound.infra.error.exception.AuthException;
-import com.grepp.teamnotfound.infra.error.exception.BusinessException;
 import com.grepp.teamnotfound.infra.error.exception.code.AuthErrorCode;
-import com.grepp.teamnotfound.infra.error.exception.code.UserErrorCode;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

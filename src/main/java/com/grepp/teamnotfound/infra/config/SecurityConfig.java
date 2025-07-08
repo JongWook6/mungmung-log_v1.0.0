@@ -6,6 +6,7 @@ import com.grepp.teamnotfound.infra.auth.token.filter.LogoutFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -27,6 +28,7 @@ import static org.springframework.http.HttpMethod.POST;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
     private final AuthExceptionFilter authExceptionFilter;
@@ -51,7 +53,7 @@ public class SecurityConfig {
                         (requests) -> requests
                                 .requestMatchers(GET, "/", "/error", "/favicon.ico").permitAll()
                                 .requestMatchers(POST, "/api/v1/auth/register/**","/api/v1/auth/login",
-                                        "/api/v1/admin/register", "/api/v1/admin/login").permitAll()
+                                        "/api/v1/auth/admin/register", "/api/v1/auth/admin/login").permitAll()
 //                                .requestMatchers(POST, "/api/v1/auth/logout").permitAll()
                                 .requestMatchers(GET, "/**").permitAll()
                                 .anyRequest().authenticated()
