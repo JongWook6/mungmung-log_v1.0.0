@@ -3,6 +3,7 @@ package com.grepp.teamnotfound.app.controller.api.article;
 import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleDetailResponse;
 import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleListResponse;
 import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleRequest;
+import com.grepp.teamnotfound.app.controller.api.article.payload.LikeResponse;
 import com.grepp.teamnotfound.app.controller.api.article.payload.Pagination;
 import com.grepp.teamnotfound.app.model.board.ArticleService;
 import com.grepp.teamnotfound.app.model.board.code.BoardType;
@@ -78,12 +79,12 @@ public class ArticleApiController {
         @RequestPart(value = "images", required = false) List<MultipartFile> images
         // octet-stream 말고 다른 형식으로 변환
     ) {
-        return ResponseEntity.ok("게시글이 정상적으로 생성되었습니다.");
+        return ResponseEntity.ok(Map.of("data", Map.of("articleId", 1, "msg", "게시글이 정상적으로 등록되었습니다.")));
     }
 
     @GetMapping("/{articleId}")
     @Operation(summary = "게시글 상세 조회")
-    public ResponseEntity<ArticleDetailResponse> getArticle(
+    public ResponseEntity<?> getArticle(
         @PathVariable Long articleId
     ) {
         ArticleDetailResponse response = new ArticleDetailResponse();
@@ -97,7 +98,7 @@ public class ArticleApiController {
         response.setLikes(15);
         response.setViews(20);
         response.setArticleImgPathList(List.of("/upload/img1", "/upload/img2", "/upload/img3"));
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(Map.of("data", response));
     }
 
     @PatchMapping( value = "/{articleId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -107,7 +108,7 @@ public class ArticleApiController {
         @RequestPart("request") ArticleRequest request,
         @RequestPart(value = "images", required = false) List<MultipartFile> images
     ) {
-        return ResponseEntity.ok("게시글이 정상적으로 수정되었습니다.");
+        return ResponseEntity.ok(Map.of("data", Map.of("msg", "게시글이 정상적으로 수정되었습니다.")));
     }
 
     @DeleteMapping("/{articleId}")
@@ -115,7 +116,7 @@ public class ArticleApiController {
     public ResponseEntity<?> deleteArticle(
         @PathVariable Long articleId
     ) {
-        return ResponseEntity.ok("게시글이 정상적으로 삭제되었습니다.");
+        return ResponseEntity.ok(Map.of("data", Map.of("msg", "게시글이 정상적으로 삭제되었습니다.")));
     }
 
     @PostMapping("/{articleId}/like")
@@ -123,7 +124,10 @@ public class ArticleApiController {
     public ResponseEntity<?> likeArticle(
         @PathVariable Long articleId
     ) {
-        return ResponseEntity.ok("Like");
+        LikeResponse response = new LikeResponse();
+        response.setLike(15);
+        response.setIsLiked(true);
+        return ResponseEntity.ok(Map.of("data", response));
     }
 
     @DeleteMapping("/{articleId}/like")
@@ -131,7 +135,10 @@ public class ArticleApiController {
     public ResponseEntity<?> undoLikeArticle(
         @PathVariable Long articleId
     ) {
-        return ResponseEntity.ok("Undo Like");
+        LikeResponse response = new LikeResponse();
+        response.setLike(14);
+        response.setIsLiked(false);
+        return ResponseEntity.ok(Map.of("data", response));
     }
 
     @GetMapping("/{articleId}/reply")
@@ -139,13 +146,7 @@ public class ArticleApiController {
     public ResponseEntity<?> getReplyCount(
         @PathVariable Long articleId
     ) {
-        Map<String, Integer> innerData = new HashMap<>();
-        innerData.put("replies", 20);
-
-        Map<String, Object> responseMap = new HashMap<>();
-        responseMap.put("data", innerData);
-
-        return ResponseEntity.ok(responseMap);
+        return ResponseEntity.ok(Map.of("data", Map.of("replies", 15)));
     }
 
     @GetMapping("/{articleId}/like")
@@ -153,12 +154,6 @@ public class ArticleApiController {
     public ResponseEntity<?> getLikeCount(
         @PathVariable Long articleId
     ) {
-        Map<String, Integer> innerData = new HashMap<>();
-        innerData.put("likes", 20);
-
-        Map<String, Object> responseMap = new HashMap<>();
-        responseMap.put("data", innerData);
-
-        return ResponseEntity.ok(responseMap);
+        return ResponseEntity.ok(Map.of("data", Map.of("likes", 20)));
     }
 }

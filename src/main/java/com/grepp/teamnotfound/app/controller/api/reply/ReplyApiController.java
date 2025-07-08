@@ -5,6 +5,7 @@ import com.grepp.teamnotfound.app.controller.api.reply.payload.ReplyRequest;
 import com.grepp.teamnotfound.app.model.reply.dto.ReplyListDto;
 import io.swagger.v3.oas.annotations.Operation;
 import java.time.OffsetDateTime;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -48,7 +49,7 @@ public class ReplyApiController {
         @PathVariable int articleId,
         @ModelAttribute ReplyRequest request
     ) {
-        return ResponseEntity.ok("댓글이 정상적으로 생성되었습니다.");
+        return ResponseEntity.ok(Map.of("data", Map.of( "replyId", 5, "msg", "댓글이 정상적으로 등록되었습니다.")));
     }
 
     @PatchMapping("/replies/{replyId}")
@@ -59,7 +60,7 @@ public class ReplyApiController {
         @ModelAttribute ReplyRequest request
 
     ) {
-        return ResponseEntity.ok("댓글이 정상적으로 수정되었습니다.");
+        return ResponseEntity.ok(Map.of("data", Map.of("msg", "댓글이 정상적으로 수정되었습니다.")));
     }
 
     @DeleteMapping("/replies/{replyId}")
@@ -68,8 +69,6 @@ public class ReplyApiController {
         @PathVariable Long articleId,
         @PathVariable Long replyId
     ) {
-        return ResponseEntity.ok("댓글이 정상적으로 삭제되었습니다.");
+        return ResponseEntity.ok(Map.of("data", Map.of("msg", "댓글이 정상적으로 삭제되었습니다.")));
     }
-
-
 }

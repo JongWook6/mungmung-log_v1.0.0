@@ -20,7 +20,7 @@ public class ReportApiController {
     public ResponseEntity<?> createReport(
         @ModelAttribute ReportRequest request
     ) {
-        return ResponseEntity.ok(Map.of("message", "신고가 정상적으로 접수되었습니다."));
+        return ResponseEntity.ok(Map.of("data", Map.of("msg", "신고가 정상적으로 접수되었습니다.")));
     }
 
 }
