@@ -12,7 +12,6 @@ import com.grepp.teamnotfound.infra.auth.token.TokenCookieFactory;
 import com.grepp.teamnotfound.infra.auth.token.code.GrantType;
 import com.grepp.teamnotfound.infra.auth.token.code.TokenType;
 import com.grepp.teamnotfound.infra.response.ApiResponse;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -30,7 +29,6 @@ public class UserController {
 
     private final UserService userService;
     private final AuthService authService;
-    private final JwtProvider jwtProvider;
 
     @PostMapping("/register")
     public ResponseEntity<RegisterResponseDto> register(@RequestBody RegisterRequestDto requestDto) {
@@ -62,16 +60,5 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success(tokenResponse));
 
     }
-
-//    @PostMapping("/logout")
-//    public ResponseEntity<ApiResponse<?>> logout(HttpServletRequest request) {
-//        String accessToken = jwtProvider.resolveToken(request, TokenType.ACCESS_TOKEN);
-//        if (accessToken != null) {
-//            authService.logout(accessToken);
-//        }
-//
-//        return ResponseEntity.ok(ApiResponse.success("로그아웃 성공"));
-//    }
-
 
 }

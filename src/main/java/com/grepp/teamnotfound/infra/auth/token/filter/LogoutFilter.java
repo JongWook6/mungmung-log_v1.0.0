@@ -41,9 +41,8 @@ public class LogoutFilter extends OncePerRequestFilter {
             return;
         }
         
-        String accessToken = null;
         try {
-            accessToken = jwtProvider.resolveToken(request, TokenType.ACCESS_TOKEN);
+            String accessToken = jwtProvider.resolveToken(request, TokenType.ACCESS_TOKEN);
 
             if (accessToken != null) {
                 // 1. 로그아웃 수행
