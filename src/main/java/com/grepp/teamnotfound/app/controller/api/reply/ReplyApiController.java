@@ -1,8 +1,7 @@
 package com.grepp.teamnotfound.app.controller.api.reply;
 
-import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleListResponse;
 import com.grepp.teamnotfound.app.controller.api.reply.payload.ReplyListResponse;
-import com.grepp.teamnotfound.app.model.board.dto.ArticleListDto;
+import com.grepp.teamnotfound.app.controller.api.reply.payload.ReplyRequest;
 import com.grepp.teamnotfound.app.model.reply.dto.ReplyListDto;
 import io.swagger.v3.oas.annotations.Operation;
 import java.time.OffsetDateTime;
@@ -11,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -45,7 +45,8 @@ public class ReplyApiController {
     @PostMapping("/replies")
     @Operation(summary = "댓글 작성")
     public ResponseEntity<?> createReply(
-        @PathVariable int articleId
+        @PathVariable int articleId,
+        @ModelAttribute ReplyRequest request
     ) {
         return ResponseEntity.ok("댓글이 정상적으로 생성되었습니다.");
     }
@@ -54,7 +55,9 @@ public class ReplyApiController {
     @Operation(summary = "댓글 수정")
     public ResponseEntity<?> updateReply(
         @PathVariable Long articleId,
-        @PathVariable Long replyId
+        @PathVariable Long replyId,
+        @ModelAttribute ReplyRequest request
+
     ) {
         return ResponseEntity.ok("댓글이 정상적으로 수정되었습니다.");
     }

@@ -2,6 +2,7 @@ package com.grepp.teamnotfound.app.controller.api.article;
 
 import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleDetailResponse;
 import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleListResponse;
+import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleRequest;
 import com.grepp.teamnotfound.app.controller.api.article.payload.Pagination;
 import com.grepp.teamnotfound.app.model.board.ArticleService;
 import com.grepp.teamnotfound.app.model.board.code.BoardType;
@@ -18,12 +19,15 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -67,9 +71,13 @@ public class ArticleApiController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "새로운 게시글 작성")
-    public ResponseEntity<?> createArticle() {
+    public ResponseEntity<?> createArticle(
+        @RequestPart("request") ArticleRequest request,
+        @RequestPart(value = "images", required = false) List<MultipartFile> images
+        // octet-stream 말고 다른 형식으로 변환
+    ) {
         return ResponseEntity.ok("게시글이 정상적으로 생성되었습니다.");
     }
 
@@ -92,10 +100,12 @@ public class ArticleApiController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/{articleId}")
+    @PatchMapping( value = "/{articleId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "게시글 수정")
     public ResponseEntity<?> updateArticle(
-        @PathVariable Long articleId
+        @PathVariable Long articleId,
+        @RequestPart("request") ArticleRequest request,
+        @RequestPart(value = "images", required = false) List<MultipartFile> images
     ) {
         return ResponseEntity.ok("게시글이 정상적으로 수정되었습니다.");
     }
