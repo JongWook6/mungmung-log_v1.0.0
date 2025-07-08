@@ -54,6 +54,7 @@ public class UserController {
                 .accessToken(dto.getAccessToken())
                 .expiresIn(dto.getAtExpiresIn())
                 .grantType(GrantType.BEARER)
+                .refreshToken(dto.getRefreshToken())
                 .build();
         return ResponseEntity.ok(ApiResponse.success(tokenResponse));
 
