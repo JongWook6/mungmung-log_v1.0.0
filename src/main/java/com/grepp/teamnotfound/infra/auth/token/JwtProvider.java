@@ -82,8 +82,6 @@ public class JwtProvider {
         } catch (SecurityException | MalformedJwtException | UnsupportedJwtException | IllegalArgumentException e) {
             log.error(e.getMessage(), e);
             throw new JwtException("유효하지 않은 토큰입니다");
-        } catch (ExpiredJwtException e) {
-            throw e;
         }
     }
 

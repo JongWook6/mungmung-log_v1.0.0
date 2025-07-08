@@ -1,9 +1,7 @@
 package com.grepp.teamnotfound.app.model.user;
 
 import com.grepp.teamnotfound.app.model.auth.code.Role;
-import com.grepp.teamnotfound.app.model.auth.dto.TokenResponseDto;
 import com.grepp.teamnotfound.app.model.auth.token.RefreshTokenService;
-import com.grepp.teamnotfound.app.model.user.dto.LoginRequestDto;
 import com.grepp.teamnotfound.app.model.user.dto.RegisterRequestDto;
 import com.grepp.teamnotfound.app.model.user.entity.User;
 import com.grepp.teamnotfound.app.model.user.repository.UserRepository;
@@ -23,8 +21,6 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtProvider jwtProvider;
-    private final RefreshTokenService refreshTokenService;
 
     @Transactional
     public Long registerUser(RegisterRequestDto requestDto) {
@@ -52,35 +48,5 @@ public class UserService {
 
         return savedUser.getUserId();
     }
-
-
-//    @Transactional
-//    public TokenResponseDto login(LoginRequestDto requestDto) {
-//        User user = userRepository.findByEmail(requestDto.getEmail())
-//                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
-//
-//        // 비밀번호 확인
-//        if(!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
-//            throw new BusinessException(UserErrorCode.USER_LOGIN_FAILED);
-//        }
-//
-//        // token 생성
-//        String accessToken = jwtProvider.generateAccessToken(user.getUserId(), user.getRole());
-//        String refreshToken = jwtProvider.generateRefreshToken(user.getUserId(), user.getRole());
-//
-//        // Refresh Token은 DB에 저장
-//        refreshTokenService.saveRefreshToken(
-//                String.valueOf(user.getUserId()),
-//                refreshToken,
-//                jwtProvider.getRtExpiration()
-//        );
-//
-//
-//        return TokenResponseDto.builder()
-//                .grantType("Bearer")
-//                .accessToken(accessToken)
-//                .refreshToken(refreshToken)
-//                .build();
-//    }
 
 }

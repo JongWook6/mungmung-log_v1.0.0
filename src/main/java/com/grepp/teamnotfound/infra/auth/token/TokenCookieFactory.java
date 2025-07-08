@@ -16,6 +16,7 @@ public class TokenCookieFactory {
                 .build();
     }
 
+    // TODO : OAuth2
     public static ResponseCookie createExpiredToken(TokenType tokenType) {
         return from(tokenType.name(), "")
                 .httpOnly(true)
