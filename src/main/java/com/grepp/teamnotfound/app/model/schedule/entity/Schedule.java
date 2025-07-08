@@ -52,11 +52,11 @@ public class Schedule extends BaseEntity {
     @Column(nullable = false)
     private LocalDate scheduleDate;
 
-    @Column(nullable = false, length = 20)
+    @Column(nullable = true, length = 20)
     @Enumerated(EnumType.STRING)
     private ScheduleCycle cycle;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private LocalDate cycleEnd;
 
     @Column(nullable = false)
