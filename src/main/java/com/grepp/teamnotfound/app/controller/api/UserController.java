@@ -7,6 +7,7 @@ import com.grepp.teamnotfound.app.model.auth.token.dto.TokenDto;
 import com.grepp.teamnotfound.app.model.user.UserService;
 import com.grepp.teamnotfound.app.model.user.dto.RegisterRequestDto;
 import com.grepp.teamnotfound.app.model.user.dto.RegisterResponseDto;
+import com.grepp.teamnotfound.app.model.user.dto.VerifyEmailRequestDto;
 import com.grepp.teamnotfound.infra.auth.token.JwtProvider;
 import com.grepp.teamnotfound.infra.auth.token.TokenCookieFactory;
 import com.grepp.teamnotfound.infra.auth.token.code.GrantType;
@@ -27,18 +28,24 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/auth")
 public class UserController {
 
-    private final UserService userService;
     private final AuthService authService;
 
+    // 이메일 발송 완료 시점까지 작동
     @PostMapping("/register")
-    public ResponseEntity<RegisterResponseDto> register(@RequestBody RegisterRequestDto requestDto) {
-        Long userId = userService.registerUser(requestDto);
+    public ResponseEntity<ApiResponse<?>> register(@RequestBody RegisterRequestDto requestDto) {
+        authService.requestRegisterVerification(requestDto);
 
-        RegisterResponseDto responseDto = new RegisterResponseDto(userId);
-
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(responseDto);
+        return ResponseEntity.ok(ApiResponse.success("회원가입 인증 메일이 발송되었습니다. 이메일을 확인해주세요."));
     }
+
+    // 입력 인증코드 유효성 검증 및 가입 완료
+    @PostMapping("/register/verify-email")
+    public ResponseEntity<ApiResponse<RegisterResponseDto>> verifyEmail(@RequestBody VerifyEmailRequestDto requestDto){
+        Long userId = authService.completeRegistration(requestDto.getEmail(), requestDto.getVerificationCode());
+
+        return ResponseEntity.ok(ApiResponse.success(responseDto));
+    }
+
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<TokenResponse>> login(@RequestBody LoginRequest request, HttpServletResponse response) {
