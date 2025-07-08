@@ -42,8 +42,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         List<String> excludePath = new ArrayList<>();
         excludePath.addAll(List.of("/error", "/favicon.ico", "/img","/download"));
 
-        // TODO 관리자 회원가입/로그인 구현 시 추가
         excludePath.addAll(List.of("/api/v1/auth/register", "/api/v1/auth/login"));
+        excludePath.addAll(List.of("/api/v1/admin/register", "/api/v1/admin/login"));
         String path = request.getRequestURI();
         return excludePath.stream().anyMatch(path::startsWith);
     }

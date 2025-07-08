@@ -2,11 +2,9 @@ package com.grepp.teamnotfound.app.model.user;
 
 import com.grepp.teamnotfound.app.model.auth.code.Role;
 import com.grepp.teamnotfound.app.model.auth.mail.MailService;
-import com.grepp.teamnotfound.app.model.auth.token.RefreshTokenService;
 import com.grepp.teamnotfound.app.model.user.dto.RegisterRequestDto;
 import com.grepp.teamnotfound.app.model.user.entity.User;
 import com.grepp.teamnotfound.app.model.user.repository.UserRepository;
-import com.grepp.teamnotfound.infra.auth.token.JwtProvider;
 import com.grepp.teamnotfound.infra.error.exception.AuthException;
 import com.grepp.teamnotfound.infra.error.exception.BusinessException;
 import com.grepp.teamnotfound.infra.error.exception.code.UserErrorCode;

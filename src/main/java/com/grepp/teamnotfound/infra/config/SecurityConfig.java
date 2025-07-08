@@ -50,8 +50,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(
                         (requests) -> requests
                                 .requestMatchers(GET, "/", "/error", "/favicon.ico").permitAll()
-                                .requestMatchers(POST, "/api/v1/auth/register/**","/api/v1/auth/login").permitAll()
-                                .requestMatchers(POST, "/api/v1/auth/logout").permitAll()
+                                .requestMatchers(POST, "/api/v1/auth/register/**","/api/v1/auth/login",
+                                        "/api/v1/admin/register", "/api/v1/admin/login").permitAll()
+//                                .requestMatchers(POST, "/api/v1/auth/logout").permitAll()
                                 .requestMatchers(GET, "/**").permitAll()
                                 .anyRequest().authenticated()
                 )
