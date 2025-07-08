@@ -1,7 +1,6 @@
 package com.grepp.teamnotfound.app.model.schedule;
 
 import com.grepp.teamnotfound.app.controller.api.schedule.payload.ScheduleCreateRequest;
-import com.grepp.teamnotfound.app.controller.api.schedule.payload.ScheduleDeleteRequest;
 import com.grepp.teamnotfound.app.controller.api.schedule.payload.ScheduleEditRequest;
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.pet.repository.PetRepository;
@@ -18,6 +17,7 @@ import com.grepp.teamnotfound.infra.error.exception.code.UserErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -112,13 +112,13 @@ public class ScheduleService {
     }
 
     @Transactional
-    public void deleteSchedule(ScheduleDeleteRequest request){
+    public void deleteSchedule(Long userId, Long scheduleId, Boolean cycleLink){
         // userId 존재 여부 검증
-        userRepository.findById(request.getUserId()).orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+        userRepository.findById(userId).orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
-        Schedule schedule = scheduleRepository.findById(request.getScheduleId()).orElseThrow(() -> new ScheduleException(ScheduleErrorCode.SCHEDULE_NOT_FOUND));
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(() -> new ScheduleException(ScheduleErrorCode.SCHEDULE_NOT_FOUND));
         // 사이클 전체 or 해당 일정만 삭제
-        if (request.getCycleLink()){
+        if (cycleLink){
             List<Schedule> schedules = scheduleRepository.findByNameAndCycleAndCycleEnd(schedule.getName(), schedule.getCycle(), schedule.getCycleEnd());
             schedules.forEach(schedule1 -> {
                 schedule1.setDeletedAt(OffsetDateTime.now());

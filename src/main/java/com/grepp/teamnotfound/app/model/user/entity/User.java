@@ -61,12 +61,4 @@ public class User extends BaseEntity {
 
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
     private UserImg userImg;
-
-    public User(Long userId) {
-        this.userId = userId;
-    }
-
-    public User() {
-
-    }
 }

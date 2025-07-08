@@ -1,18 +1,22 @@
 package com.grepp.teamnotfound.app.controller.api.schedule;
 
+import com.grepp.teamnotfound.app.controller.api.schedule.payload.ScheduleCreateRequest;
+import com.grepp.teamnotfound.app.controller.api.schedule.payload.ScheduleEditRequest;
 import com.grepp.teamnotfound.app.model.schedule.ScheduleService;
-import com.grepp.teamnotfound.app.model.schedule.code.ScheduleCycle;
-import lombok.Builder;
-import lombok.Data;
+import com.grepp.teamnotfound.app.model.schedule.dto.ScheduleDto;
+import com.grepp.teamnotfound.app.model.schedule.entity.Schedule;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@AllArgsConstructor
 @RestController
 @RequestMapping(value = "/api/v1/dashboard", produces = MediaType.APPLICATION_JSON_VALUE)
 public class ScheduleApiController {
@@ -26,97 +30,49 @@ public class ScheduleApiController {
             @RequestParam Long userId,
             @RequestParam LocalDate date
             ){
-        // Mock Data
-        List<MockgetPetCalendarDto> mockgetPetCalendarDtos = List.of(
-                MockgetPetCalendarDto.builder().scheduleId(1L).date(LocalDate.now().minusDays(1)).name("병원방문").isDone(false).build(),
-                MockgetPetCalendarDto.builder().scheduleId(2L).date(LocalDate.now()).name("병원진료").isDone(false).build(),
-                MockgetPetCalendarDto.builder().scheduleId(3L).date(LocalDate.now().plusDays(1)).name("병원방문").isDone(false).build()
-        );
+        //todo 요청한 유저가 맞는지 검증로직
 
-        return ResponseEntity.ok(Map.of("data", mockgetPetCalendarDtos));
+        List<Schedule> schedules = scheduleService.getCalendar(petId, date);
+        List<ScheduleDto> scheduleDtos = new ArrayList<>();
+        schedules.forEach(schedule ->
+            scheduleDtos.add(ScheduleDto.builder()
+                            .scheduleId(schedule.getScheduleId())
+                            .date(schedule.getScheduleDate())
+                            .name(schedule.getName())
+                            .isDone(schedule.getIsDone()).build())
+        );
+        System.out.println(scheduleDtos);
+        return ResponseEntity.ok(Map.of("data", scheduleDtos));
     }
 
     @PostMapping("{petId}/calendar")
     public ResponseEntity<?> createSchedule(
             @PathVariable Long petId,
-            @RequestBody MockCreateScheduleRequestDto requestDto
+            @RequestBody ScheduleCreateRequest request
     ){
-        MockCreateScheduleResponseDto responseDto = MockCreateScheduleResponseDto.builder()
-                .scheduleId(1L)
-                .name("목욕시키는날")
-                .date(LocalDate.now().plusDays(3)).build();
+        scheduleService.createSchedule(request);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
+        return ResponseEntity.ok(HttpStatus.CREATED);
     }
 
     @PatchMapping("{petId}/calendar")
     public ResponseEntity<?> EditSchedule(
             @PathVariable Long petId,
-            @RequestBody MockEditScheduleRequestDto requestDto
+            @RequestBody ScheduleEditRequest request
     ){
-        MockCreateScheduleResponseDto responseDto = MockCreateScheduleResponseDto.builder()
-                .scheduleId(1L)
-                .name("목욕시키는날")
-                .date(LocalDate.now().plusDays(3)).build();
+        scheduleService.editSchedule(request);
 
-        return ResponseEntity.ok(responseDto);
+        return ResponseEntity.ok(HttpStatus.ACCEPTED);
     }
 
     @PatchMapping("{petId}/calendar/delete")
     public ResponseEntity<?> DeleteSchedule(
             @PathVariable Long petId,
             @RequestParam Long userId,
-            @RequestParam Long scheduleId
+            @RequestParam Long scheduleId,
+            @RequestParam Boolean cycleLink
     ){
-        return ResponseEntity.ok().build();
+        scheduleService.deleteSchedule(userId, scheduleId, cycleLink);
+        return ResponseEntity.ok(HttpStatus.ACCEPTED);
     }
-}
-
-@Data
-@Builder
-class MockgetPetCalendarDto {
-    private Long scheduleId;
-    private LocalDate date;
-    private String name;
-    private Boolean isDone;
-}
-
-@Data
-@Builder
-class MockCreateScheduleResponseDto {
-    private Long scheduleId;
-    private LocalDate date;
-    private String name;
-    private Long petId;
-    private ScheduleCycle cycle;
-    private LocalDate cycleEnd;
-}
-
-@Data
-@Builder
-class MockCreateScheduleRequestDto {
-    private Long userId;
-    private Long petId;
-    private String name;
-
-    private LocalDate date;
-
-    private ScheduleCycle cycle; // enum 타입 (아래에 정의)
-
-    private LocalDate cycleEnd;
-}
-
-@Data
-@Builder
-class MockEditScheduleRequestDto {
-    private Long userId;
-    private Long scheduleId;
-    private Long petId;
-    private String name;
-
-    private LocalDate date;
-
-    private ScheduleCycle cycle; // enum 타입 (아래에 정의)
-
-    private LocalDate cycleEnd;
 }

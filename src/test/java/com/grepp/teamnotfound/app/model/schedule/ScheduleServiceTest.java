@@ -1,7 +1,6 @@
 package com.grepp.teamnotfound.app.model.schedule;
 
 import com.grepp.teamnotfound.app.controller.api.schedule.payload.ScheduleCreateRequest;
-import com.grepp.teamnotfound.app.controller.api.schedule.payload.ScheduleDeleteRequest;
 import com.grepp.teamnotfound.app.controller.api.schedule.payload.ScheduleEditRequest;
 import com.grepp.teamnotfound.app.model.schedule.code.ScheduleCycle;
 import com.grepp.teamnotfound.app.model.schedule.entity.Schedule;
@@ -11,7 +10,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -82,16 +80,12 @@ class ScheduleServiceTest {
     // 반복 없는 일정 삭제
     @Test
     void deleteSchedule() {
-        ScheduleDeleteRequest request = ScheduleDeleteRequest.builder()
-                .scheduleId(10025L).userId(1L).cycleLink(false).build();
-        scheduleService.deleteSchedule(request);
+        scheduleService.deleteSchedule(10025L, 1L, false);
     }
 
     // 반복 있는 일정 삭제
     @Test
     void deleteCycleSchedule() {
-        ScheduleDeleteRequest request = ScheduleDeleteRequest.builder()
-                .scheduleId(10014L).userId(1L).cycleLink(true).build();
-        scheduleService.deleteSchedule(request);
+        scheduleService.deleteSchedule(10014L, 1L, true);
     }
 }

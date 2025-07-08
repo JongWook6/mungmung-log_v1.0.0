@@ -81,11 +81,4 @@ public class Pet extends BaseEntity {
 
     @OneToOne(mappedBy = "pet", fetch = FetchType.LAZY)
     private PetImg petImg;
-
-    public Pet(Long petId) {
-        this.petId = petId;
-    }
-
-    public Pet() {
-    }
 }
