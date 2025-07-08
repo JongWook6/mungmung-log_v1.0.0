@@ -6,9 +6,11 @@ import com.grepp.teamnotfound.app.model.auth.token.RefreshTokenService;
 import com.grepp.teamnotfound.app.model.auth.token.dto.AccessTokenDto;
 import com.grepp.teamnotfound.app.model.auth.token.dto.TokenDto;
 import com.grepp.teamnotfound.app.model.auth.token.entity.RefreshToken;
+import com.grepp.teamnotfound.app.model.auth.token.entity.UserBlackList;
 import com.grepp.teamnotfound.app.model.auth.token.repository.UserBlackListRepository;
 import com.grepp.teamnotfound.infra.auth.token.JwtProvider;
 import com.grepp.teamnotfound.infra.auth.token.code.GrantType;
+import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -52,5 +54,22 @@ public class AuthService {
                 .atExpiresIn(jwtProvider.getAtExpiration())
                 .rtExpiresIn(jwtProvider.getRtExpiration())
                 .build();
+    }
+
+    public void logout(String accessToken) {
+        Claims claims = jwtProvider.parseClaims(accessToken);
+        String userEmail = claims.getSubject();
+        String accessTokenId = claims.getId();
+
+        // 1. refreshToken 삭제
+        refreshTokenService.deleteByAccessTokenId(accessTokenId);
+
+        // 2. accessToken 블랙리스트에 추가 (남은 시간 계산)
+        long remainingExpirationSeconds = (claims.getExpiration().getTime() - System.currentTimeMillis()) / 1000;
+        if (remainingExpirationSeconds > 0) {
+            userBlackListRepository.save(new UserBlackList(userEmail, remainingExpirationSeconds));
+        }
+        SecurityContextHolder.clearContext();
+
     }
 }

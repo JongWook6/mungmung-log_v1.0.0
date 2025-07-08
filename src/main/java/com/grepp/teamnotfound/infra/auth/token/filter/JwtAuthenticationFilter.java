@@ -3,6 +3,7 @@ package com.grepp.teamnotfound.infra.auth.token.filter;
 import com.grepp.teamnotfound.app.model.auth.token.dto.AccessTokenDto;
 import com.grepp.teamnotfound.app.model.auth.token.RefreshTokenService;
 import com.grepp.teamnotfound.app.model.auth.token.entity.RefreshToken;
+import com.grepp.teamnotfound.app.model.auth.token.entity.UserBlackList;
 import com.grepp.teamnotfound.app.model.auth.token.repository.UserBlackListRepository;
 import com.grepp.teamnotfound.infra.auth.token.JwtProvider;
 import com.grepp.teamnotfound.infra.auth.token.TokenCookieFactory;
@@ -54,17 +55,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // 1. accessToken 확인 - 토큰이 없는 경우 filtering
         String accessToken = jwtProvider.resolveToken(request, TokenType.ACCESS_TOKEN);
         if (accessToken == null) {
-            filterChain.doFilter(request, response);
-            return;
+            throw new CommonException(AuthErrorCode.UNAUTHENTICATED);
         }
 
         // 2. parseClaim - // 블랙리스트 filtering
         Claims claims = jwtProvider.parseClaims(accessToken);
         if(userBlackListRepository.existsById(claims.getSubject())){
-            filterChain.doFilter(request, response);
-            return;
+            throw new CommonException(AuthErrorCode.INVALID_TOKEN);
         }
-
 
         // 3. 유효성 검증 validateToken
         try {
@@ -92,20 +90,30 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     // AccessToken 만료 시 재발급
     private AccessTokenDto renewingAccessToken(String accessToken, HttpServletRequest request) {
-        // 만료된 accessToken으로 인증 객체 생성?
+        // 만료된 accessToken로 인증 객체 생성
         Authentication authentication = jwtProvider.generateAuthentication(accessToken);
         String refreshToken = jwtProvider.resolveToken(request, TokenType.REFRESH_TOKEN);
+        // 인증 객체에서 정보 추출
         Claims claims = jwtProvider.parseClaims(accessToken);
 
-        // refresh 활성화(?) 여부 확인
+        // 추출된 정보의 id 값으로 refresh 토큰 접근
         RefreshToken storedRefreshToken = refreshTokenService.findByAccessTokenId(claims.getId());
         if(storedRefreshToken == null) {
-            return null;
+            throw new CommonException(AuthErrorCode.INVALID_TOKEN);
         }
 
-        //TODO 블랙리스트 추가
+        // 같은 값을 지닌 refresh 없을 때 (보안 이슈)
         if(!storedRefreshToken.getToken().equals(refreshToken)){
-            throw new CommonException(AuthErrorCode.INVALID_TOKEN);
+            long remainingExpirationSeconds = (claims.getExpiration().getTime() - System.currentTimeMillis()) / 1000;
+
+            // 유효 시간이 있을 때만 blacklist 처리
+            if (remainingExpirationSeconds > 0) {
+                userBlackListRepository.save(new UserBlackList(authentication.getName(), remainingExpirationSeconds));
+                throw new CommonException(AuthErrorCode.SECURITY_INCIDENT);
+            } else {
+                // access 만료 + re 만료 : 아예 자격이 없음
+                throw new CommonException(AuthErrorCode.INVALID_TOKEN);
+            }
         }
 
         return generateAccessToken(authentication);
@@ -126,10 +134,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     // 응답에 쿠키로 토큰 전달
     private void responseToken(HttpServletResponse response, AccessTokenDto newAccessToken, RefreshToken newRefreshToken) {
         ResponseCookie accessTokenCookie =
-                // TODO test용 브라우저 길이 : 추후 수정 필수
-                // jwtProvider.getAtExpiration()
                 TokenCookieFactory.create(TokenType.ACCESS_TOKEN.name(), newAccessToken.getToken(),
-                        3000000L);
+                        jwtProvider.getAtExpiration()
+                );
 
         ResponseCookie refreshTokenCookie =
                 TokenCookieFactory.create(TokenType.REFRESH_TOKEN.name(), newRefreshToken.getToken(),
