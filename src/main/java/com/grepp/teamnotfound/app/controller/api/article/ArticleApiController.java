@@ -2,12 +2,11 @@ package com.grepp.teamnotfound.app.controller.api.article;
 
 import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleDetailResponse;
 import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleListResponse;
+import com.grepp.teamnotfound.app.controller.api.article.payload.Pagination;
 import com.grepp.teamnotfound.app.model.board.ArticleService;
 import com.grepp.teamnotfound.app.model.board.code.BoardType;
-import com.grepp.teamnotfound.app.model.board.dto.ArticleDto;
 import com.grepp.teamnotfound.app.model.board.dto.ArticleListDto;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -37,20 +36,27 @@ public class ArticleApiController {
         @RequestParam String sort
     ) {
         ArticleListResponse response = new ArticleListResponse();
-        response.setPage(1);
-        response.setBoardType(BoardType.FREE);
 
         for (int i = 1; i <= 5; i++) {
             ArticleListDto dto = ArticleListDto.builder()
                 .articleId(Integer.toUnsignedLong(i))
                 .title("마음이의 산책 일상 " + i)
-                .writer("사용자 " + i)
+                .nickname("사용자 " + i)
                 .replies(i)
                 .views(i)
                 .date(OffsetDateTime.now())
                 .build();
-            response.getList().add(dto);
+
+            response.getData().add(dto);
         }
+
+        Pagination pagination = new Pagination();
+        pagination.setTotal(45); // 전체 게시글 수
+        pagination.setPage(page); // 요청 페이지
+        pagination.setSize(size); // 요청 게시글 수
+        pagination.setTotalPages((int) Math.ceil((double) pagination.getTotal() / pagination.getSize()));
+
+        response.setPagination(pagination);
         return ResponseEntity.ok(response);
     }
 
@@ -61,13 +67,13 @@ public class ArticleApiController {
     }
 
     // 게시글 상세 조회
-    @GetMapping("/{id}")
+    @GetMapping("/{articleId}")
     public ResponseEntity<ArticleDetailResponse> getArticle(
-        @PathVariable Long id
+        @PathVariable Long articleId
     ) {
         ArticleDetailResponse response = new ArticleDetailResponse();
-        response.setArticleId(id);
-        response.setWriter("사용자 1");
+        response.setArticleId(articleId);
+        response.setNickname("사용자 1");
         response.setProfileImgPath("/upload/profileImg");
         response.setDate(OffsetDateTime.now());
         response.setTitle("요즘 밥을 잘 안먹는데 왜 그럴까요?");
@@ -80,33 +86,33 @@ public class ArticleApiController {
     }
 
     // 게시글 수정
-    @PatchMapping("/{id}")
+    @PatchMapping("/{articleId}")
     public ResponseEntity<?> updateArticle(
-        @PathVariable Long id
+        @PathVariable Long articleId
     ) {
         return ResponseEntity.ok("게시글이 정상적으로 수정되었습니다.");
     }
 
     // 게시글 삭제
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{articleId}")
     public ResponseEntity<?> deleteArticle(
-        @PathVariable Long id
+        @PathVariable Long articleId
     ) {
         return ResponseEntity.ok("게시글이 정상적으로 삭제되었습니다.");
     }
 
     // 게시글 좋아요 요청
-    @PostMapping("/{id}/like")
+    @PostMapping("/{articleId}/like")
     public ResponseEntity<?> likeArticle(
-        @PathVariable Long id
+        @PathVariable Long articleId
     ) {
         return ResponseEntity.ok("좋아요 + 1");
     }
 
     // 게시글 좋아요 취소
-    @DeleteMapping("/{id}/like")
+    @DeleteMapping("/{articleId}/like")
     public ResponseEntity<?> undoLikeArticle(
-        @PathVariable Long id
+        @PathVariable Long articleId
     ) {
         return ResponseEntity.ok("좋아요 - 1");
     }

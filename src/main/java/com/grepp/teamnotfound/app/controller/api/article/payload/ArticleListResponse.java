@@ -9,7 +9,6 @@ import lombok.Data;
 @Data
 public class ArticleListResponse {
 
-    private Integer page;
-    private BoardType boardType;
-    private List<ArticleListDto> list = new ArrayList<>();
+    private List<ArticleListDto> data = new ArrayList<>();
+    private Pagination pagination;
 }

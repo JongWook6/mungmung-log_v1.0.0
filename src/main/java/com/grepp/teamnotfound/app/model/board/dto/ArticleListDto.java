@@ -10,7 +10,7 @@ public class ArticleListDto {
 
     private Long articleId;
     private String title;
-    private String writer;
+    private String nickname;
     private Integer replies;
     private Integer views;
     private OffsetDateTime date;

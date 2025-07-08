@@ -8,7 +8,7 @@ import lombok.Data;
 public class ArticleDetailResponse {
 
     private Long articleId;
-    private String writer;
+    private String nickname;
     private String profileImgPath;
     private OffsetDateTime date;
     private String title;
