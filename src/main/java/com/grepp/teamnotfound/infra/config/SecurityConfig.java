@@ -2,6 +2,7 @@ package com.grepp.teamnotfound.infra.config;
 
 import com.grepp.teamnotfound.infra.auth.token.filter.AuthExceptionFilter;
 import com.grepp.teamnotfound.infra.auth.token.filter.JwtAuthenticationFilter;
+import com.grepp.teamnotfound.infra.auth.token.filter.LogoutFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,6 +31,7 @@ public class SecurityConfig {
 
     private final AuthExceptionFilter authExceptionFilter;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final LogoutFilter logoutFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -49,12 +51,16 @@ public class SecurityConfig {
                         (requests) -> requests
                                 .requestMatchers(GET, "/", "/error", "/favicon.ico").permitAll()
                                 .requestMatchers(POST, "/api/v1/auth/register", "/api/v1/auth/login").permitAll()
+                                .requestMatchers(POST, "/api/v1/auth/logout").permitAll()
                                 .requestMatchers(GET, "/**").permitAll()
                                 .anyRequest().authenticated()
                 )
 
+                // 1. 커스텀 LogoutFilter가 가장 먼저 로그아웃 요청을 가로채서 처리하도록 합니다.
+                .addFilterBefore(logoutFilter, UsernamePasswordAuthenticationFilter.class)
+                // 2. JWT 인증 필터
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-//                .addFilterBefore(logoutFilter, JwtAuthenticationFilter.class)
+                // 3. 인증 예외 처리 필터 (JWT 필터에서 발생하는 예외를 잡도록 JWT 필터 뒤에 위치)
                 .addFilterBefore(authExceptionFilter, JwtAuthenticationFilter.class);
 
         return http.build();

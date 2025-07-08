@@ -9,6 +9,8 @@ import com.grepp.teamnotfound.app.model.auth.token.entity.UserBlackList;
 import com.grepp.teamnotfound.app.model.auth.token.repository.UserBlackListRepository;
 import com.grepp.teamnotfound.infra.auth.token.JwtProvider;
 import com.grepp.teamnotfound.infra.auth.token.code.GrantType;
+import com.grepp.teamnotfound.infra.error.exception.AuthException;
+import com.grepp.teamnotfound.infra.error.exception.code.AuthErrorCode;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -60,6 +62,11 @@ public class AuthService {
         String userEmail = claims.getSubject();
         String accessTokenId = claims.getId();
 
+        // 0. 블랙리스트 확인
+        if(userBlackListRepository.existsById(userEmail)){
+            throw new AuthException(AuthErrorCode.ALREADY_LOGGED_OUT);
+        }
+
         // 1. refreshToken 삭제
         refreshTokenService.deleteByAccessTokenId(accessTokenId);
 
@@ -68,7 +75,5 @@ public class AuthService {
         if (remainingExpirationSeconds > 0) {
             userBlackListRepository.save(new UserBlackList(userEmail, remainingExpirationSeconds));
         }
-        SecurityContextHolder.clearContext();
-
     }
 }

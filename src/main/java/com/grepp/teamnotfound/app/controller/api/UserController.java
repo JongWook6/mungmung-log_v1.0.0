@@ -63,15 +63,15 @@ public class UserController {
 
     }
 
-    @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<?>> logout(HttpServletRequest request) {
-        String accessToken = jwtProvider.resolveToken(request, TokenType.ACCESS_TOKEN);
-        if (accessToken != null) {
-            authService.logout(accessToken);
-        }
-
-        return ResponseEntity.ok(ApiResponse.success("로그아웃 성공"));
-    }
+//    @PostMapping("/logout")
+//    public ResponseEntity<ApiResponse<?>> logout(HttpServletRequest request) {
+//        String accessToken = jwtProvider.resolveToken(request, TokenType.ACCESS_TOKEN);
+//        if (accessToken != null) {
+//            authService.logout(accessToken);
+//        }
+//
+//        return ResponseEntity.ok(ApiResponse.success("로그아웃 성공"));
+//    }
 
 
 }

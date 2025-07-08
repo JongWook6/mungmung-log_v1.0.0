@@ -14,7 +14,9 @@ public record ApiResponse<T>(
         return new ApiResponse<>("OK", "정상적으로 완료되었습니다.", null);
     }
 
-    public static ApiResponse<?> failure(String code, String message) {
+
+    // TODO data field 없는 메서드도 구성하기
+    public static ApiResponse<?> error(String code, String message) {
         return new ApiResponse<>(code, message, null);
     }
 
