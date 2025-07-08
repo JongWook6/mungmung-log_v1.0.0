@@ -92,7 +92,7 @@ public class AuthService {
 
     // 요청
     @Transactional
-    public Long requestRegisterVerification(RegisterRequestDto requestDto) {
+    public void requestRegisterVerification(RegisterRequestDto requestDto) {
         // 1. 이메일 중복 확인
         if(userRepository.findByEmail(requestDto.getEmail()).isPresent()){
             throw new BusinessException(UserErrorCode.USER_EMAIL_ALREADY_EXISTS);
@@ -120,12 +120,11 @@ public class AuthService {
         // 4. 인증 이메일 발송 및 코드 Redis 저장
         mailService.sendVerificationEmail(requestDto.getEmail());
 
-        return newUser.getUserId(); // 새로 생성된 사용자 ID 반환
     }
 
     // 인증 코드 검증 및 최종 회원가입
     @Transactional
-    public void completeRegistration(String email, String verificationCode) {
+    public Long completeRegistration(String email, String verificationCode) {
         // 1. 인증 코드 검증
         mailService.verifyEmailCode(email, verificationCode);
 
@@ -139,5 +138,7 @@ public class AuthService {
 
         user.setVerifiedEmail(true);
         userRepository.save(user);
+
+        return user.getUserId();
     }
 }

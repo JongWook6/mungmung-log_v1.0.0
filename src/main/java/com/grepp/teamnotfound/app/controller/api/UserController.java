@@ -4,18 +4,15 @@ import com.grepp.teamnotfound.app.model.auth.AuthService;
 import com.grepp.teamnotfound.app.model.auth.payload.LoginRequest;
 import com.grepp.teamnotfound.app.model.auth.payload.TokenResponse;
 import com.grepp.teamnotfound.app.model.auth.token.dto.TokenDto;
-import com.grepp.teamnotfound.app.model.user.UserService;
 import com.grepp.teamnotfound.app.model.user.dto.RegisterRequestDto;
 import com.grepp.teamnotfound.app.model.user.dto.RegisterResponseDto;
 import com.grepp.teamnotfound.app.model.user.dto.VerifyEmailRequestDto;
-import com.grepp.teamnotfound.infra.auth.token.JwtProvider;
 import com.grepp.teamnotfound.infra.auth.token.TokenCookieFactory;
 import com.grepp.teamnotfound.infra.auth.token.code.GrantType;
 import com.grepp.teamnotfound.infra.auth.token.code.TokenType;
 import com.grepp.teamnotfound.infra.response.ApiResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -42,6 +39,8 @@ public class UserController {
     @PostMapping("/register/verify-email")
     public ResponseEntity<ApiResponse<RegisterResponseDto>> verifyEmail(@RequestBody VerifyEmailRequestDto requestDto){
         Long userId = authService.completeRegistration(requestDto.getEmail(), requestDto.getVerificationCode());
+
+        RegisterResponseDto responseDto = new RegisterResponseDto(userId);
 
         return ResponseEntity.ok(ApiResponse.success(responseDto));
     }
