@@ -46,9 +46,11 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private Boolean state = true;
 
+    @Setter
     @Column(nullable = false, length = 10)
     private String name;
 
+    @Setter
     @Column(nullable = false, length = 10)
     private String nickname;
 
@@ -56,6 +58,7 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Setter
     @Column(nullable = false, length = 200)
     private String password;
 

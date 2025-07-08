@@ -43,7 +43,7 @@ public class MailService {
 
             // redis에 인증코드 저장
             stringRedisTemplate.opsForValue().set(
-                    "email: verifying" + toEmail,
+                    "email: verifying " + toEmail,
                     verifyCode,
                     Duration.ofSeconds(expirationSeconds)
             );
@@ -56,7 +56,7 @@ public class MailService {
 
     // 회원가입 인증 메일 코드 검증
     public boolean verifyEmailCode(String email, String code){
-        String redisKey = "email: verification:" + email;
+        String redisKey = "email: verifying " + email;
         String storedCode = stringRedisTemplate.opsForValue().get(redisKey);
 
         // 코드 없음 또는 코드 만료
