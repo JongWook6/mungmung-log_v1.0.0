@@ -1,6 +1,7 @@
 package com.grepp.teamnotfound.app.model.schedule;
 
 import com.grepp.teamnotfound.app.controller.api.schedule.payload.ScheduleCreateRequest;
+import com.grepp.teamnotfound.app.controller.api.schedule.payload.ScheduleDeleteRequest;
 import com.grepp.teamnotfound.app.controller.api.schedule.payload.ScheduleEditRequest;
 import com.grepp.teamnotfound.app.model.schedule.code.ScheduleCycle;
 import com.grepp.teamnotfound.app.model.schedule.entity.Schedule;
@@ -56,7 +57,7 @@ class ScheduleServiceTest {
     @Test
     void editSchedule() {
         ScheduleEditRequest request = ScheduleEditRequest.builder()
-                .petId(1L).userId(1L).scheduleId(10014L)
+                .petId(1L).userId(1L).scheduleId(10025L)
                 .date(LocalDate.now().plusDays(2))
                 .name("병원가는날 수정")
                 .cycleLink(false)
@@ -81,10 +82,16 @@ class ScheduleServiceTest {
     // 반복 없는 일정 삭제
     @Test
     void deleteSchedule() {
+        ScheduleDeleteRequest request = ScheduleDeleteRequest.builder()
+                .scheduleId(10025L).userId(1L).cycleLink(false).build();
+        scheduleService.deleteSchedule(request);
     }
 
     // 반복 있는 일정 삭제
     @Test
     void deleteCycleSchedule() {
+        ScheduleDeleteRequest request = ScheduleDeleteRequest.builder()
+                .scheduleId(10014L).userId(1L).cycleLink(true).build();
+        scheduleService.deleteSchedule(request);
     }
 }
