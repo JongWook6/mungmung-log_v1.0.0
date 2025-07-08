@@ -18,12 +18,8 @@ public class RefreshTokenService {
     private final RedisTemplate<String, Object> redisTemplate;
     private final ObjectMapper objectMapper;
 
-//    public void saveRefreshToken(String userId, String refreshToken, long rtExpiration) {
-//        String key = "refresh_token_" + userId;
-//        redisTemplate.opsForValue().set(key, refreshToken, rtExpiration, TimeUnit.SECONDS);
-//    }
 
-        public RefreshToken saveWithAtId(String atId){
+    public RefreshToken saveWithAtId(String atId){
         RefreshToken refreshToken = new RefreshToken(atId);
         redisTemplate.opsForValue().set(atId, refreshToken, Duration.ofSeconds(refreshToken.getTtl()));
         return refreshToken;
@@ -54,10 +50,10 @@ public class RefreshTokenService {
     }
 
 
-//
-//    public void deleteByAccessTokenId(String atId) {
-//        redisTemplate.delete(atId);
-//    }
-//
+
+    public void deleteByAccessTokenId(String atId) {
+        redisTemplate.delete(atId);
+    }
+
 
 }

@@ -1,7 +1,7 @@
 package com.grepp.teamnotfound.infra.auth.token;
 
 import com.grepp.teamnotfound.app.model.auth.domain.Principal;
-import com.grepp.teamnotfound.app.model.auth.token.AccessTokenDto;
+import com.grepp.teamnotfound.app.model.auth.token.dto.AccessTokenDto;
 import com.grepp.teamnotfound.infra.auth.UserDetailsServiceImpl;
 import com.grepp.teamnotfound.infra.auth.token.code.TokenType;
 import io.jsonwebtoken.*;

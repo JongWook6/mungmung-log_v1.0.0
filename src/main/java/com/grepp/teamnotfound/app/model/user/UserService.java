@@ -54,33 +54,33 @@ public class UserService {
     }
 
 
-    @Transactional
-    public TokenResponseDto login(LoginRequestDto requestDto) {
-        User user = userRepository.findByEmail(requestDto.getEmail())
-                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
-
-        // 비밀번호 확인
-        if(!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
-            throw new BusinessException(UserErrorCode.USER_LOGIN_FAILED);
-        }
-
-        // token 생성
-        String accessToken = jwtProvider.generateAccessToken(user.getUserId(), user.getRole());
-        String refreshToken = jwtProvider.generateRefreshToken(user.getUserId(), user.getRole());
-
-        // Refresh Token은 DB에 저장
-        refreshTokenService.saveRefreshToken(
-                String.valueOf(user.getUserId()),
-                refreshToken,
-                jwtProvider.getRtExpiration()
-        );
-
-
-        return TokenResponseDto.builder()
-                .grantType("Bearer")
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .build();
-    }
+//    @Transactional
+//    public TokenResponseDto login(LoginRequestDto requestDto) {
+//        User user = userRepository.findByEmail(requestDto.getEmail())
+//                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+//
+//        // 비밀번호 확인
+//        if(!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
+//            throw new BusinessException(UserErrorCode.USER_LOGIN_FAILED);
+//        }
+//
+//        // token 생성
+//        String accessToken = jwtProvider.generateAccessToken(user.getUserId(), user.getRole());
+//        String refreshToken = jwtProvider.generateRefreshToken(user.getUserId(), user.getRole());
+//
+//        // Refresh Token은 DB에 저장
+//        refreshTokenService.saveRefreshToken(
+//                String.valueOf(user.getUserId()),
+//                refreshToken,
+//                jwtProvider.getRtExpiration()
+//        );
+//
+//
+//        return TokenResponseDto.builder()
+//                .grantType("Bearer")
+//                .accessToken(accessToken)
+//                .refreshToken(refreshToken)
+//                .build();
+//    }
 
 }

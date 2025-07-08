@@ -41,7 +41,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Cacheable("user-authorities")
     public List<SimpleGrantedAuthority> findAuthorities(String username){
-        User user = userRepository.findById(Long.valueOf(username))
+        User user = userRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException(username));
         //TODO JwtExceptionFilter가 잡을 수 있도록 처리
 

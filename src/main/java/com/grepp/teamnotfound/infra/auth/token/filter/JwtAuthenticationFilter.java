@@ -1,11 +1,13 @@
 package com.grepp.teamnotfound.infra.auth.token.filter;
 
-import com.grepp.teamnotfound.app.model.auth.token.AccessTokenDto;
+import com.grepp.teamnotfound.app.model.auth.token.dto.AccessTokenDto;
 import com.grepp.teamnotfound.app.model.auth.token.RefreshTokenService;
 import com.grepp.teamnotfound.app.model.auth.token.entity.RefreshToken;
 import com.grepp.teamnotfound.infra.auth.token.JwtProvider;
 import com.grepp.teamnotfound.infra.auth.token.TokenCookieFactory;
 import com.grepp.teamnotfound.infra.auth.token.code.TokenType;
+import com.grepp.teamnotfound.infra.error.exception.CommonException;
+import com.grepp.teamnotfound.infra.error.exception.code.AuthErrorCode;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
@@ -97,7 +99,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         //TODO 블랙리스트 추가
         if(!storedRefreshToken.getToken().equals(refreshToken)){
-            return null;
+            throw new CommonException(AuthErrorCode.INVALID_TOKEN);
         }
 
         return generateAccessToken(authentication);
