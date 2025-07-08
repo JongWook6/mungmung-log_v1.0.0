@@ -129,4 +129,10 @@ public class ScheduleService {
             scheduleRepository.save(schedule);
         }
     }
+
+    public void checkIsDone(Long petId, Long scheduleId) {
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(() -> new ScheduleException(ScheduleErrorCode.SCHEDULE_NOT_FOUND));
+        schedule.setIsDone(!schedule.getIsDone());
+        scheduleRepository.save(schedule);
+    }
 }

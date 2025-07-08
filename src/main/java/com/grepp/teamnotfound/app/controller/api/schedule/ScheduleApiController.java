@@ -75,4 +75,13 @@ public class ScheduleApiController {
         scheduleService.deleteSchedule(userId, scheduleId, cycleLink);
         return ResponseEntity.ok(HttpStatus.ACCEPTED);
     }
+
+    @GetMapping("{petId}/calendar/{scheduleId}")
+    public ResponseEntity<?> ScheduleIsDone(
+            @PathVariable Long petId,
+            @PathVariable Long scheduleId
+    ){
+        scheduleService.checkIsDone(petId, scheduleId);
+        return ResponseEntity.ok(HttpStatus.ACCEPTED);
+    }
 }
