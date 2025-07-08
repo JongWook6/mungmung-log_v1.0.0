@@ -1,5 +1,6 @@
 package com.grepp.teamnotfound.app.controller.api.schedule;
 
+import com.grepp.teamnotfound.app.model.schedule.ScheduleService;
 import com.grepp.teamnotfound.app.model.schedule.code.ScheduleCycle;
 import lombok.Builder;
 import lombok.Data;
@@ -15,6 +16,8 @@ import java.util.Map;
 @RestController
 @RequestMapping(value = "/api/v1/dashboard", produces = MediaType.APPLICATION_JSON_VALUE)
 public class ScheduleApiController {
+
+    private ScheduleService scheduleService;
 
     // 일정 조회 시 한달치의 일정 넘기기
     @GetMapping("/{petId}/calendar")

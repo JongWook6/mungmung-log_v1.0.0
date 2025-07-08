@@ -16,15 +16,20 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import lombok.Getter;
-import lombok.Setter;
+
+import lombok.*;
 
 
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "Schedules")
-@Getter
-@Setter
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Schedule extends BaseEntity {
 
     @Id
@@ -45,14 +50,14 @@ public class Schedule extends BaseEntity {
     private String name;
 
     @Column(nullable = false)
-    private LocalDateTime scheduleDate;
+    private LocalDate scheduleDate;
 
     @Column(nullable = false, length = 20)
     @Enumerated(EnumType.STRING)
     private ScheduleCycle cycle;
 
     @Column(nullable = false)
-    private LocalDateTime cycleEnd;
+    private LocalDate cycleEnd;
 
     @Column(nullable = false)
     private Boolean isDone;
