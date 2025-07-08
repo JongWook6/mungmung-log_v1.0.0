@@ -15,15 +15,14 @@ import com.grepp.teamnotfound.infra.error.exception.UserException;
 import com.grepp.teamnotfound.infra.error.exception.code.PetErrorCode;
 import com.grepp.teamnotfound.infra.error.exception.code.ScheduleErrorCode;
 import com.grepp.teamnotfound.infra.error.exception.code.UserErrorCode;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.YearMonth;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -45,6 +44,7 @@ public class ScheduleService {
     }
 
     // 일정 등록(생성)
+    @Transactional
     public void createSchedule(ScheduleCreateRequest request){
         // petId, userId 존재 검증
         Pet pet = petRepository.findById(request.getPetId()).orElseThrow(() -> new PetException(PetErrorCode.PET_NOT_FOUND));
@@ -60,7 +60,7 @@ public class ScheduleService {
                     .user(user).build();
             scheduleRepository.save(schedule);
         }else{
-            for(LocalDate date = request.getDate(); date.isBefore(request.getCycleEnd()); date = date.plusDays(request.getCycle().getDays(LocalDate.now()))){
+            for(LocalDate date = request.getDate(); date.isBefore(request.getCycleEnd()); date = date.plusDays(request.getCycle().getDays(request.getDate()))){
                 Schedule schedule = Schedule.builder()
                         .name(request.getName())
                         .scheduleDate(date)
@@ -76,30 +76,57 @@ public class ScheduleService {
     }
 
     // 일정 수정
-    public Schedule editSchedule(ScheduleEditRequest request){
+    @Transactional
+    public void editSchedule(ScheduleEditRequest request){
         // petId, userId 존재 여부 검증
         Pet pet = petRepository.findById(request.getPetId()).orElseThrow(() -> new PetException(PetErrorCode.PET_NOT_FOUND));
         User user = userRepository.findById(request.getUserId()).orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
         // 일정 존재 여부 검증
         Schedule schedule = scheduleRepository.findById(request.getScheduleId()).orElseThrow(() -> new ScheduleException(ScheduleErrorCode.SCHEDULE_NOT_FOUND));
+        // 사이클 전체 or 해당 일정만 수정
+        if (request.getCycleLink()){
+            List<Schedule> schedules = scheduleRepository.findByNameAndCycleAndCycleEnd(schedule.getName(), schedule.getCycle(), schedule.getCycleEnd());
+            LocalDate date = request.getDate();
+            for(Schedule schedule1: schedules){
+                schedule1.setName(request.getName());
+                schedule1.setScheduleDate(date);
+                schedule1.setCycle(request.getCycle());
+                schedule1.setCycleEnd(request.getCycleEnd());
 
-        schedule.setName(request.getName());
-        schedule.setScheduleDate(request.getDate());
-        schedule.setCycle(request.getCycle());
-        schedule.setCycleEnd(request.getCycleEnd());
-        schedule.setPet(pet);
-        schedule.setUser(user);
-        scheduleRepository.save(schedule);
-        return schedule;
+                if (date.isAfter(request.getCycleEnd())){ // 범위를 벗어나면 삭제
+                    schedule1.setDeletedAt(OffsetDateTime.now());
+                }else {
+                    schedule1.setUpdatedAt(OffsetDateTime.now());
+                }
+
+                date = date.plusDays(request.getCycle().getDays(date));
+            }
+            scheduleRepository.saveAll(schedules);
+        }else {
+            schedule.setName(request.getName());
+            schedule.setScheduleDate(request.getDate());
+            schedule.setUpdatedAt(OffsetDateTime.now());
+            scheduleRepository.save(schedule);
+        }
     }
 
+    @Transactional
     public void deleteSchedule(ScheduleDeleteRequest request){
         // userId 존재 여부 검증
-        User user = userRepository.findById(request.getUserId()).orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+        userRepository.findById(request.getUserId()).orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
         Schedule schedule = scheduleRepository.findById(request.getScheduleId()).orElseThrow(() -> new ScheduleException(ScheduleErrorCode.SCHEDULE_NOT_FOUND));
-
-        schedule.setDeletedAt(OffsetDateTime.now());
+        // 사이클 전체 or 해당 일정만 삭제
+        if (request.getCycleLink()){
+            List<Schedule> schedules = scheduleRepository.findByNameAndCycleAndCycleEnd(schedule.getName(), schedule.getCycle(), schedule.getCycleEnd());
+            schedules.forEach(schedule1 -> {
+                schedule1.setDeletedAt(OffsetDateTime.now());
+            });
+            scheduleRepository.saveAll(schedules);
+        }else {
+            schedule.setDeletedAt(OffsetDateTime.now());
+            scheduleRepository.save(schedule);
+        }
     }
 }

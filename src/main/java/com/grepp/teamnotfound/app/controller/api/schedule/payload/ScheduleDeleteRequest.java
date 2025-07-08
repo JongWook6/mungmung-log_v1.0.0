@@ -8,4 +8,5 @@ import lombok.Data;
 public class ScheduleDeleteRequest {
     private Long userId;
     private Long scheduleId;
+    private Boolean cycleLink;
 }

@@ -14,6 +14,7 @@ public class ScheduleEditRequest {
     private Long petId;
     private String name;
     private LocalDate date;
+    private Boolean cycleLink;
     private ScheduleCycle cycle;
     private LocalDate cycleEnd;
 }
