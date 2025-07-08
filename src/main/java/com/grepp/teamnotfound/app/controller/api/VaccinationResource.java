@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
-@RequestMapping(value = "/api/vaccinations", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/api/v1/vaccinations", produces = MediaType.APPLICATION_JSON_VALUE)
 public class VaccinationResource {
 
     private final VaccinationService vaccinationService;

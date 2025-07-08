@@ -31,6 +31,8 @@
                         <button type="button" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" id="navbarEntitiesLink"
                                 aria-expanded="false">[[#{navigation.entities}]]</button>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarEntitiesLink">
+                            <li><a th:href="@{/pets}" class="dropdown-item">[[#{pet.list.headline}]]</a></li>
+                            <li><a th:href="@{/petImgs}" class="dropdown-item">[[#{petImg.list.headline}]]</a></li>
                             <li><a th:href="@{/vaccines}" class="dropdown-item">[[#{vaccine.list.headline}]]</a></li>
                             <li><a th:href="@{/vaccinations}" class="dropdown-item">[[#{vaccination.list.headline}]]</a></li>
                         </ul>

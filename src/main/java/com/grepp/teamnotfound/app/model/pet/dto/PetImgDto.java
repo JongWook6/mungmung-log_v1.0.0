@@ -8,7 +8,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class PetImgDto {
+public class PetImgDTO {
 
     private Long petImgId;
 
@@ -30,4 +30,5 @@ public class PetImgDto {
 
     @NotNull
     private Long pet;
+
 }

@@ -1,7 +1,6 @@
 package com.grepp.teamnotfound.app.model.vaccination.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.grepp.teamnotfound.app.model.vaccination.code.VaccineType;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.OffsetDateTime;

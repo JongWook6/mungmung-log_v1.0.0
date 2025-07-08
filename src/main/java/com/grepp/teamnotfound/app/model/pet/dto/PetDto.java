@@ -1,7 +1,8 @@
 package com.grepp.teamnotfound.app.model.pet.dto;
 
-
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.grepp.teamnotfound.app.model.pet.code.PetSize;
+import com.grepp.teamnotfound.app.model.pet.code.PetType;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
@@ -11,7 +12,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class PetDto {
+public class PetDTO {
 
     private Long petId;
 
@@ -32,12 +33,10 @@ public class PetDto {
     private Integer age;
 
     @NotNull
-    @Size(max = 50)
-    private String breed;
+    private PetType breed;
 
     @NotNull
-    @Size(max = 10)
-    private String size;
+    private PetSize size;
 
     private Double weight;
 
