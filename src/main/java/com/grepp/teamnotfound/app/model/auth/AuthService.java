@@ -6,6 +6,7 @@ import com.grepp.teamnotfound.app.model.auth.token.RefreshTokenService;
 import com.grepp.teamnotfound.app.model.auth.token.dto.AccessTokenDto;
 import com.grepp.teamnotfound.app.model.auth.token.dto.TokenDto;
 import com.grepp.teamnotfound.app.model.auth.token.entity.RefreshToken;
+import com.grepp.teamnotfound.app.model.auth.token.repository.UserBlackListRepository;
 import com.grepp.teamnotfound.infra.auth.token.JwtProvider;
 import com.grepp.teamnotfound.infra.auth.token.code.GrantType;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ public class AuthService {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final JwtProvider jwtProvider;
     private final RefreshTokenService refreshTokenService;
+    private final UserBlackListRepository userBlackListRepository;
 
 
     public TokenDto login(LoginRequest loginRequest) {
@@ -38,8 +40,7 @@ public class AuthService {
 
     private TokenDto processTokenLogin(String email) {
 
-        // TODO BlackList
-//        userBlackListRepository.
+        userBlackListRepository.deleteById(email);
 
         AccessTokenDto accessToken = jwtProvider.generateAccessToken(email);
         RefreshToken refreshToken = refreshTokenService.saveWithAtId(accessToken.getId());

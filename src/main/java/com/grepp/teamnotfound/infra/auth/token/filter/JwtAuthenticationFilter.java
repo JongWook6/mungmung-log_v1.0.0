@@ -3,6 +3,7 @@ package com.grepp.teamnotfound.infra.auth.token.filter;
 import com.grepp.teamnotfound.app.model.auth.token.dto.AccessTokenDto;
 import com.grepp.teamnotfound.app.model.auth.token.RefreshTokenService;
 import com.grepp.teamnotfound.app.model.auth.token.entity.RefreshToken;
+import com.grepp.teamnotfound.app.model.auth.token.repository.UserBlackListRepository;
 import com.grepp.teamnotfound.infra.auth.token.JwtProvider;
 import com.grepp.teamnotfound.infra.auth.token.TokenCookieFactory;
 import com.grepp.teamnotfound.infra.auth.token.code.TokenType;
@@ -33,6 +34,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwtProvider;
     private final RefreshTokenService refreshTokenService;
+    private final UserBlackListRepository userBlackListRepository;
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
@@ -56,8 +58,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        // 2. parseClaim - // TODO 블랙리스트 filtering
+        // 2. parseClaim - // 블랙리스트 filtering
         Claims claims = jwtProvider.parseClaims(accessToken);
+        if(userBlackListRepository.existsById(claims.getSubject())){
+            filterChain.doFilter(request, response);
+            return;
+        }
 
 
         // 3. 유효성 검증 validateToken
