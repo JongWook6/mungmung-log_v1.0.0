@@ -39,16 +39,14 @@ jobs:
     runs-on: 'ubuntu-latest'
     
     steps:
-      - name: 'Checkout'
-        uses: 'actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332' # actions/checkout@v4
-
-      - name: Authenticate with Google Cloud (JSON Key)
-        uses: google-github-actions/setup-gcloud@v1
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v2
         with:
-          service_account_key: ${{ secrets.GCP_CREDENTIALS }}
-          project_id: ${{ secrets.GCP_PROJECT }}
-          export_default_credentials: true
+          credentials_json: '${{ secrets.GCP_CREDENTIALS }}' # 또는 WIF 방식
 
+      - uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT }}
 
       # BEGIN - Docker auth and build
       #
