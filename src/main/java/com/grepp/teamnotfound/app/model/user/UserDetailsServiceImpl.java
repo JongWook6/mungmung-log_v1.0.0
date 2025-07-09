@@ -1,4 +1,4 @@
-package com.grepp.teamnotfound.infra.auth;
+package com.grepp.teamnotfound.app.model.user;
 
 import com.grepp.teamnotfound.app.model.user.entity.User;
 import com.grepp.teamnotfound.app.model.user.repository.UserRepository;
