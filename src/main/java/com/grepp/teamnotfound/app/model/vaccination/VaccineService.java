@@ -32,7 +32,7 @@ public class VaccineService {
                 .toList();
     }
 
-    public VaccineDTO get(final Long vaccineId) {
+    public VaccineDTO get(Long vaccineId) {
         return vaccineRepository.findById(vaccineId)
                 .map(vaccine -> mapToDTO(vaccine, new VaccineDTO()))
                 .orElseThrow(NotFoundException::new);

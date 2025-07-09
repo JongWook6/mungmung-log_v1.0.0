@@ -1,32 +1,21 @@
 package com.grepp.teamnotfound.app.model.vaccination.dto;
 
-import com.grepp.teamnotfound.app.model.vaccination.code.VaccineType;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.Setter;
+import com.grepp.teamnotfound.app.model.vaccination.code.VaccineName;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 
-@Getter
-@Setter
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class VaccineDTO {
 
     private Long vaccineId;
-
-    @NotNull
-    @Size(max = 20)
-    private VaccineType name;
-
-    @NotNull
+    private VaccineName name;
     private Integer period;
-
-    @NotNull
     private Integer boosterCycle;
-
-    @NotNull
     private Integer boosterCount;
-
-    @NotNull
     private Integer additionalCycle;
 
 }

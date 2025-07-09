@@ -1,15 +1,20 @@
-package com.grepp.teamnotfound.app.controller.web;
+package com.grepp.teamnotfound.app.controller.web.vaccine;
 
 
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.pet.repository.PetRepository;
+import com.grepp.teamnotfound.app.model.user.entity.User;
 import com.grepp.teamnotfound.app.model.vaccination.VaccinationService;
 import com.grepp.teamnotfound.app.model.vaccination.dto.VaccinationDTO;
 import com.grepp.teamnotfound.app.model.vaccination.entity.Vaccine;
+import com.grepp.teamnotfound.app.model.vaccination.repository.VaccinationRepository;
 import com.grepp.teamnotfound.app.model.vaccination.repository.VaccineRepository;
 import com.grepp.teamnotfound.util.CustomCollectors;
 import com.grepp.teamnotfound.util.WebUtils;
 import jakarta.validation.Valid;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,31 +27,53 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 
+@Slf4j
 @Controller
+@RequiredArgsConstructor
 @RequestMapping("/vaccinations")
 public class VaccinationController {
 
     private final VaccinationService vaccinationService;
+    private final VaccineRepository vaccineRepository;
+    private final PetRepository petRepository;
 
-    public VaccinationController(final VaccinationService vaccinationService,
-            final VaccineRepository vaccineRepository, final PetRepository petRepository) {
-        this.vaccinationService = vaccinationService;
+    @ModelAttribute
+    public void prepareContext(Model model) {
+        model.addAttribute("petValues", petRepository.findAll(Sort.by("petId"))
+            .stream()
+            .collect(CustomCollectors.toSortedMap(Pet::getPetId, Pet::getName)));
+
+        model.addAttribute("vaccineValues", vaccineRepository.findAll(Sort.by("vaccineId"))
+            .stream()
+            .collect(CustomCollectors.toSortedMap(Vaccine::getVaccineId, Vaccine::getName)));
     }
 
+
     @GetMapping
-    public String list(final Model model) {
+    public String list(Model model) {
         model.addAttribute("vaccinations", vaccinationService.findAll());
         return "vaccination/list";
     }
 
     @GetMapping("/add")
-    public String add(@ModelAttribute("vaccination") final VaccinationDTO vaccinationDTO) {
+    public String add(
+        @ModelAttribute("vaccination") VaccinationDTO vaccinationDTO, Model model
+    ) {
+        List<Vaccine> vaccines = vaccineRepository.findAll();
+        List<Pet> pets = petRepository.findAll();
+
+        model.addAttribute("vaccines", vaccines);
+        model.addAttribute("pets", pets);
+
         return "vaccination/add";
     }
 
     @PostMapping("/add")
-    public String add(@ModelAttribute("vaccination") @Valid final VaccinationDTO vaccinationDTO,
-            final BindingResult bindingResult, final RedirectAttributes redirectAttributes) {
+    public String add(
+        @ModelAttribute("vaccination") @Valid VaccinationDTO vaccinationDTO,
+        BindingResult bindingResult,
+        RedirectAttributes redirectAttributes
+    ) {
         if (bindingResult.hasErrors()) {
             return "vaccination/add";
         }
@@ -56,16 +83,21 @@ public class VaccinationController {
     }
 
     @GetMapping("/edit/{vaccinationId}")
-    public String edit(@PathVariable(name = "vaccinationId") final Long vaccinationId,
-            final Model model) {
+    public String edit(
+        @PathVariable(name = "vaccinationId") Long vaccinationId,
+        final Model model
+    ) {
         model.addAttribute("vaccination", vaccinationService.get(vaccinationId));
         return "vaccination/edit";
     }
 
     @PostMapping("/edit/{vaccinationId}")
-    public String edit(@PathVariable(name = "vaccinationId") final Long vaccinationId,
-            @ModelAttribute("vaccination") @Valid final VaccinationDTO vaccinationDTO,
-            final BindingResult bindingResult, final RedirectAttributes redirectAttributes) {
+    public String edit(
+        @PathVariable(name = "vaccinationId") Long vaccinationId,
+        @ModelAttribute("vaccination") @Valid VaccinationDTO vaccinationDTO,
+        BindingResult bindingResult,
+        RedirectAttributes redirectAttributes
+    ) {
         if (bindingResult.hasErrors()) {
             return "vaccination/edit";
         }
@@ -75,8 +107,10 @@ public class VaccinationController {
     }
 
     @PostMapping("/delete/{vaccinationId}")
-    public String delete(@PathVariable(name = "vaccinationId") final Long vaccinationId,
-            final RedirectAttributes redirectAttributes) {
+    public String delete(
+        @PathVariable(name = "vaccinationId") Long vaccinationId,
+        RedirectAttributes redirectAttributes
+    ) {
         vaccinationService.delete(vaccinationId);
         redirectAttributes.addFlashAttribute(WebUtils.MSG_INFO, WebUtils.getMessage("vaccination.delete.success"));
         return "redirect:/vaccinations";

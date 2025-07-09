@@ -1,10 +1,12 @@
-package com.grepp.teamnotfound.app.controller.api;
+package com.grepp.teamnotfound.app.controller.api.vaccine;
 
 import com.grepp.teamnotfound.app.model.vaccination.VaccinationService;
 import com.grepp.teamnotfound.app.model.vaccination.dto.VaccinationDTO;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,28 +20,31 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 
+@Slf4j
 @RestController
-@RequestMapping(value = "/api/v1/vaccinations", produces = MediaType.APPLICATION_JSON_VALUE)
-public class VaccinationResource {
+@RequiredArgsConstructor
+@RequestMapping(value = "/api/vaccinations", produces = MediaType.APPLICATION_JSON_VALUE)
+public class VaccinationApiController {
 
     private final VaccinationService vaccinationService;
 
-    public VaccinationResource(final VaccinationService vaccinationService) {
-        this.vaccinationService = vaccinationService;
-    }
-
-    @GetMapping
+    @GetMapping("/v1")
     public ResponseEntity<List<VaccinationDTO>> getAllVaccinations() {
         return ResponseEntity.ok(vaccinationService.findAll());
     }
 
-    @GetMapping("/{vaccinationId}")
+    @GetMapping("/v1/{petId}")
+    public ResponseEntity<List<VaccinationDTO>> getPetVaccinations() {
+        return ResponseEntity.ok(vaccinationService.findAll());
+    }
+
+    @GetMapping("/v1/{vaccinationId}")
     public ResponseEntity<VaccinationDTO> getVaccination(
             @PathVariable(name = "vaccinationId") final Long vaccinationId) {
         return ResponseEntity.ok(vaccinationService.get(vaccinationId));
     }
 
-    @PostMapping
+    @PostMapping("/v1")
     @ApiResponse(responseCode = "201")
     public ResponseEntity<Long> createVaccination(
             @RequestBody @Valid final VaccinationDTO vaccinationDTO) {
@@ -47,20 +52,20 @@ public class VaccinationResource {
         return new ResponseEntity<>(createdVaccinationId, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{vaccinationId}")
-    public ResponseEntity<Long> updateVaccination(
-            @PathVariable(name = "vaccinationId") final Long vaccinationId,
-            @RequestBody @Valid final VaccinationDTO vaccinationDTO) {
-        vaccinationService.update(vaccinationId, vaccinationDTO);
-        return ResponseEntity.ok(vaccinationId);
-    }
-
-    @DeleteMapping("/{vaccinationId}")
-    @ApiResponse(responseCode = "204")
-    public ResponseEntity<Void> deleteVaccination(
-            @PathVariable(name = "vaccinationId") final Long vaccinationId) {
-        vaccinationService.delete(vaccinationId);
-        return ResponseEntity.noContent().build();
-    }
+//    @PutMapping("/{vaccinationId}")
+//    public ResponseEntity<Long> updateVaccination(
+//            @PathVariable(name = "vaccinationId") final Long vaccinationId,
+//            @RequestBody @Valid final VaccinationDTO vaccinationDTO) {
+//        vaccinationService.update(vaccinationId, vaccinationDTO);
+//        return ResponseEntity.ok(vaccinationId);
+//    }
+//
+//    @DeleteMapping("/{vaccinationId}")
+//    @ApiResponse(responseCode = "204")
+//    public ResponseEntity<Void> deleteVaccination(
+//            @PathVariable(name = "vaccinationId") final Long vaccinationId) {
+//        vaccinationService.delete(vaccinationId);
+//        return ResponseEntity.noContent().build();
+//    }
 
 }

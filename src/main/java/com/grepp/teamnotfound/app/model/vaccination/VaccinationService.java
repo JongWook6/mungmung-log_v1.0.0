@@ -10,23 +10,22 @@ import com.grepp.teamnotfound.app.model.vaccination.repository.VaccinationReposi
 import com.grepp.teamnotfound.app.model.vaccination.repository.VaccineRepository;
 import com.grepp.teamnotfound.util.NotFoundException;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service
+@Slf4j
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class VaccinationService {
 
     private final VaccinationRepository vaccinationRepository;
     private final VaccineRepository vaccineRepository;
     private final PetRepository petRepository;
-
-    public VaccinationService(final VaccinationRepository vaccinationRepository,
-            final VaccineRepository vaccineRepository, final PetRepository petRepository) {
-        this.vaccinationRepository = vaccinationRepository;
-        this.vaccineRepository = vaccineRepository;
-        this.petRepository = petRepository;
-    }
 
     public List<VaccinationDTO> findAll() {
         final List<Vaccination> vaccinations = vaccinationRepository.findAll(Sort.by("vaccinationId"));
@@ -35,14 +34,15 @@ public class VaccinationService {
                 .toList();
     }
 
-    public VaccinationDTO get(final Long vaccinationId) {
+    public VaccinationDTO get(Long vaccinationId) {
         return vaccinationRepository.findById(vaccinationId)
                 .map(vaccination -> mapToDTO(vaccination, new VaccinationDTO()))
                 .orElseThrow(NotFoundException::new);
     }
 
-    public Long create(final VaccinationDTO vaccinationDTO) {
-        final Vaccination vaccination = new Vaccination();
+    @Transactional
+    public Long create(VaccinationDTO vaccinationDTO) {
+        Vaccination vaccination = new Vaccination();
         mapToEntity(vaccinationDTO, vaccination);
         return vaccinationRepository.save(vaccination).getVaccinationId();
     }
@@ -65,21 +65,23 @@ public class VaccinationService {
         vaccinationDTO.setVaccineType(vaccination.getVaccineType());
         vaccinationDTO.setCount(vaccination.getCount());
         vaccinationDTO.setIsVaccine(vaccination.getIsVaccine());
-        vaccinationDTO.setVaccine(vaccination.getVaccine() == null ? null : vaccination.getVaccine().getVaccineId());
+        vaccinationDTO.setVaccinationId(vaccination.getVaccinationId());
         vaccinationDTO.setPet(vaccination.getPet() == null ? null : vaccination.getPet().getPetId());
         return vaccinationDTO;
     }
 
-    private Vaccination mapToEntity(final VaccinationDTO vaccinationDTO,
-            final Vaccination vaccination) {
+    private Vaccination mapToEntity(
+        VaccinationDTO vaccinationDTO,
+        Vaccination vaccination
+    ) {
         vaccination.setVaccineAt(vaccinationDTO.getVaccineAt());
         vaccination.setVaccineType(vaccinationDTO.getVaccineType());
         vaccination.setCount(vaccinationDTO.getCount());
         vaccination.setIsVaccine(vaccinationDTO.getIsVaccine());
-        final Vaccine vaccine = vaccinationDTO.getVaccine() == null ? null : vaccineRepository.findById(vaccinationDTO.getVaccine())
+        Vaccine vaccine = vaccinationDTO.getVaccine() == null ? null : vaccineRepository.findById(vaccinationDTO.getVaccine().getVaccineId())
                 .orElseThrow(() -> new NotFoundException("vaccine not found"));
         vaccination.setVaccine(vaccine);
-        final Pet pet = vaccinationDTO.getPet() == null ? null : petRepository.findById(vaccinationDTO.getPet())
+        Pet pet = vaccinationDTO.getPet() == null ? null : petRepository.findById(vaccinationDTO.getPet())
                 .orElseThrow(() -> new NotFoundException("pet not found"));
         vaccination.setPet(pet);
         return vaccination;

@@ -16,6 +16,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import lombok.Getter;
 import lombok.Setter;
@@ -41,10 +42,11 @@ public class Vaccination extends BaseEntity {
     private Long vaccinationId;
 
     @Column(nullable = false)
-    private OffsetDateTime vaccineAt;
+    private LocalDate vaccineAt;
 
     @Column(nullable = false, length = 20)
-    private String vaccineType;
+    @Enumerated(EnumType.STRING)
+    private VaccineType vaccineType;
 
     @Column(nullable = false)
     private Integer count;
@@ -52,11 +54,11 @@ public class Vaccination extends BaseEntity {
     @Column(nullable = false)
     private Boolean isVaccine;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "vaccine_id", nullable = false)
     private Vaccine vaccine;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "pet_id", nullable = false)
     private Pet pet;
 

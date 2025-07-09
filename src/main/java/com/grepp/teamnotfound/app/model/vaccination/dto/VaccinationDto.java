@@ -1,39 +1,24 @@
 package com.grepp.teamnotfound.app.model.vaccination.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import java.time.OffsetDateTime;
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.format.annotation.DateTimeFormat;
+import com.grepp.teamnotfound.app.model.vaccination.code.VaccineType;
+import com.grepp.teamnotfound.app.model.vaccination.entity.Vaccine;
+import java.time.LocalDate;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 
-@Getter
-@Setter
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class VaccinationDTO {
 
-    private Long vaccinationId;
-
-    @NotNull
-    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
-    private OffsetDateTime vaccineAt;
-
-    @NotNull
-    @Size(max = 20)
-    private String vaccineType;
-
-    @NotNull
-    private Integer count;
-
-    @NotNull
-    @JsonProperty("isVaccine")
-    private Boolean isVaccine;
-
-    @NotNull
-    private Long vaccine;
-
-    @NotNull
     private Long pet;
+    private Long vaccinationId;
+    private LocalDate vaccineAt;
+    private VaccineType vaccineType;
+    private Integer count;
+    private Boolean isVaccine;
+    private Vaccine vaccine;
 
 }

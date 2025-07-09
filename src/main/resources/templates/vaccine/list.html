@@ -34,15 +34,6 @@
                             <td>[[${vaccine.boosterCycle}]]</td>
                             <td>[[${vaccine.boosterCount}]]</td>
                             <td>[[${vaccine.additionalCycle}]]</td>
-                            <td>
-                                <div class="float-end text-nowrap">
-                                    <a th:href="@{/vaccines/edit/{vaccineId}(vaccineId=${vaccine.vaccineId})}" class="btn btn-sm btn-secondary">[[#{vaccine.list.edit}]]</a>
-                                    <form th:action="@{/vaccines/delete/{vaccineId}(vaccineId=${vaccine.vaccineId})}"
-                                            th:data-confirm-message="#{delete.confirm}" method="post" class="js-submit-confirm d-inline">
-                                        <button type="submit" class="btn btn-sm btn-secondary">[[#{vaccine.list.delete}]]</button>
-                                    </form>
-                                </div>
-                            </td>
                         </tr>
                     </tbody>
                 </table>
