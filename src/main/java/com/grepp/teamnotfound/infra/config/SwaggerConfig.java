@@ -34,8 +34,6 @@ public class SwaggerConfig {
                                                 .description(
                                                         "JWT 토큰을 입력하세요. Bearer 는 생략하세요")
                                 ))
-                .addSecurityItem(new SecurityRequirement().addList("404TNF"))
-                .addServersItem(server);
-
+                .addSecurityItem(new SecurityRequirement().addList("404TNF"));
     }
 }
