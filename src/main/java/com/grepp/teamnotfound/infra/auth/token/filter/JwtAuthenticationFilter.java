@@ -22,10 +22,12 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Component
@@ -37,13 +39,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final RefreshTokenService refreshTokenService;
     private final UserBlackListRepository userBlackListRepository;
 
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
+
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         List<String> excludePath = new ArrayList<>();
         excludePath.addAll(List.of("/error", "/favicon.ico", "/img","/download"));
 
-        excludePath.addAll(List.of("/api/v1/auth/register", "/api/v1/auth/login"));
-        excludePath.addAll(List.of("/api/v1/auth/admin/register", "/api/v1/auth/admin/login"));
+        excludePath.addAll(List.of("/api/auth/v1/register", "/api/auth/v1/login", "/api/auth/v1/test"));
+        excludePath.addAll(List.of("/api/auth/v1/admin/register", "/api/auth/v1/admin/login"));
+        excludePath.addAll(List.of("/swagger-ui","/swagger-ui/**","/swagger-ui.html",
+                "/v3/api-docs", "/v3/api-docs/swagger-config","/v3/api-docs/**"));
         String path = request.getRequestURI();
         return excludePath.stream().anyMatch(path::startsWith);
     }

@@ -18,22 +18,24 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/api/auth")
 public class UserController {
 
     private final AuthService authService;
     private final UserService userService;
     private final AdminService adminService;
 
+    @GetMapping("v1/test")
+    public ResponseEntity<String> test(){
+        return ResponseEntity.ok("모두에게 열린 api로 인증하지 않은 사용자도 접근 가능");
+    }
+
     // 이메일 발송 완료 시점까지 작동
-    @PostMapping("/register")
+    @PostMapping("v1/register")
     public ResponseEntity<ApiResponse<?>> register(@RequestBody RegisterRequestDto requestDto) {
         userService.requestRegisterVerification(requestDto);
 
@@ -41,7 +43,7 @@ public class UserController {
     }
 
     // 입력 인증코드 유효성 검증 및 가입 완료
-    @PostMapping("/register/verify-email")
+    @PostMapping("v1/register/verify-email")
     public ResponseEntity<ApiResponse<RegisterResponseDto>> verifyEmail(@RequestBody VerifyEmailRequestDto requestDto){
         Long userId = userService.completeRegistration(requestDto.getEmail(), requestDto.getVerificationCode());
 
@@ -51,7 +53,7 @@ public class UserController {
     }
 
 
-    @PostMapping("/login")
+    @PostMapping("v1/login")
     public ResponseEntity<ApiResponse<TokenResponse>> login(@RequestBody LoginRequest request, HttpServletResponse response) {
 
         TokenDto dto = authService.login(request);
@@ -73,7 +75,7 @@ public class UserController {
     }
 
 
-    @PostMapping("/admin/register")
+    @PostMapping("v1/admin/register")
     @PreAuthorize("permitAll()")
     public ResponseEntity<ApiResponse<RegisterResponseDto>> registerAdmin(@RequestBody RegisterRequestDto requestDto) {
         Long userId = adminService.registerAdmin(requestDto);
@@ -82,7 +84,7 @@ public class UserController {
     }
 
 
-    @PostMapping("/admin/login")
+    @PostMapping("v1/admin/login")
     @PreAuthorize("permitAll()")
     public ResponseEntity<ApiResponse<TokenResponse>> adminLogin(@RequestBody LoginRequest request, HttpServletResponse response) {
 

@@ -9,14 +9,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/admin")
+@RequestMapping("/api/admin")
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
 
 
-    @PostMapping("/hello")
+    @PostMapping("v1/hello")
     public ResponseEntity<String> adminTest(){
-        return ResponseEntity.ok("Hello admin");
+        return ResponseEntity.ok("Admin 사용자만 접근 가능");
     }
 
 }
