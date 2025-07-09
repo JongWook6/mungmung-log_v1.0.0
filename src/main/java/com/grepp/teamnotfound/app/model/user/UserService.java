@@ -3,7 +3,10 @@ package com.grepp.teamnotfound.app.model.user;
 import com.grepp.teamnotfound.app.model.auth.code.Role;
 import com.grepp.teamnotfound.app.model.auth.mail.MailService;
 import com.grepp.teamnotfound.app.model.user.dto.RegisterRequestDto;
+import com.grepp.teamnotfound.app.model.user.dto.UserDto;
+import com.grepp.teamnotfound.app.model.user.dto.UserImgDto;
 import com.grepp.teamnotfound.app.model.user.entity.User;
+import com.grepp.teamnotfound.app.model.user.entity.UserImg;
 import com.grepp.teamnotfound.app.model.user.repository.UserRepository;
 import com.grepp.teamnotfound.infra.error.exception.AuthException;
 import com.grepp.teamnotfound.infra.error.exception.BusinessException;
@@ -97,4 +100,32 @@ public class UserService {
         return user.getUserId();
     }
 
+    public UserDto findByUserId(Long userId) {
+        User user = userRepository.findByUserId(userId);
+
+        if (user == null) {
+            throw new BusinessException(UserErrorCode.USER_NOT_FOUND);
+        }
+
+        UserImg userImg = user.getUserImg();
+        UserImgDto userImgDto = null;
+
+        if (user.getUserImg() != null) {
+            userImgDto = UserImgDto.builder()
+                .userImgId(userImg.getUserImgId())
+                .url(userImg.getSavePath()+userImg.getRenamedName())
+                .build();
+        }
+
+        return UserDto.builder()
+            .userId(user.getUserId())
+            .email(user.getEmail())
+            .state(user.getState())
+            .name(user.getName())
+            .nickname(user.getNickname())
+            .role(user.getRole())
+            .provider(user.getProvider())
+            .userImg(userImgDto)
+            .build();
+    }
 }

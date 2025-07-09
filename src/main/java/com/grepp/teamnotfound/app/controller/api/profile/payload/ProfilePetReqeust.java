@@ -1,9 +1,9 @@
-package com.grepp.teamnotfound.app.controller.api.pet.payload;
+package com.grepp.teamnotfound.app.controller.api.profile.payload;
 
 import com.grepp.teamnotfound.app.model.pet.code.PetSize;
 import com.grepp.teamnotfound.app.model.pet.code.PetType;
-import com.grepp.teamnotfound.app.model.pet.dto.PetImgDTO;
-import com.grepp.teamnotfound.app.model.vaccination.dto.VaccinationDTO;
+import com.grepp.teamnotfound.app.model.pet.dto.PetImgDto;
+import com.grepp.teamnotfound.app.model.vaccination.dto.VaccinationDto;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PetAndVaccineReqeust {
+public class ProfilePetReqeust {
     private Long petId;
     private String registNumber;
     private LocalDate birthday;
@@ -26,7 +26,6 @@ public class PetAndVaccineReqeust {
     private Boolean sex;
     private Boolean isNeutered;
     private Long user;
-    private List<PetImgDTO> images;
-    private List<VaccinationDTO> vaccinations;
-
+    private List<PetImgDto> images;
+    private List<VaccinationDto> vaccinations;
 }

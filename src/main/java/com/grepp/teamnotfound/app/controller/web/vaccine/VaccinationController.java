@@ -3,11 +3,9 @@ package com.grepp.teamnotfound.app.controller.web.vaccine;
 
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.pet.repository.PetRepository;
-import com.grepp.teamnotfound.app.model.user.entity.User;
 import com.grepp.teamnotfound.app.model.vaccination.VaccinationService;
-import com.grepp.teamnotfound.app.model.vaccination.dto.VaccinationDTO;
+import com.grepp.teamnotfound.app.model.vaccination.dto.VaccinationDto;
 import com.grepp.teamnotfound.app.model.vaccination.entity.Vaccine;
-import com.grepp.teamnotfound.app.model.vaccination.repository.VaccinationRepository;
 import com.grepp.teamnotfound.app.model.vaccination.repository.VaccineRepository;
 import com.grepp.teamnotfound.util.CustomCollectors;
 import com.grepp.teamnotfound.util.WebUtils;
@@ -57,7 +55,8 @@ public class VaccinationController {
 
     @GetMapping("/add")
     public String add(
-        @ModelAttribute("vaccination") VaccinationDTO vaccinationDTO, Model model
+        @ModelAttribute("vaccination") VaccinationDto vaccinationDTO,
+        Model model
     ) {
         List<Vaccine> vaccines = vaccineRepository.findAll();
         List<Pet> pets = petRepository.findAll();
@@ -70,7 +69,7 @@ public class VaccinationController {
 
     @PostMapping("/add")
     public String add(
-        @ModelAttribute("vaccination") @Valid VaccinationDTO vaccinationDTO,
+        @ModelAttribute("vaccination") @Valid VaccinationDto vaccinationDTO,
         BindingResult bindingResult,
         RedirectAttributes redirectAttributes
     ) {
@@ -85,7 +84,7 @@ public class VaccinationController {
     @GetMapping("/edit/{vaccinationId}")
     public String edit(
         @PathVariable(name = "vaccinationId") Long vaccinationId,
-        final Model model
+        Model model
     ) {
         model.addAttribute("vaccination", vaccinationService.get(vaccinationId));
         return "vaccination/edit";
@@ -94,7 +93,7 @@ public class VaccinationController {
     @PostMapping("/edit/{vaccinationId}")
     public String edit(
         @PathVariable(name = "vaccinationId") Long vaccinationId,
-        @ModelAttribute("vaccination") @Valid VaccinationDTO vaccinationDTO,
+        @ModelAttribute("vaccination") @Valid VaccinationDto vaccinationDTO,
         BindingResult bindingResult,
         RedirectAttributes redirectAttributes
     ) {

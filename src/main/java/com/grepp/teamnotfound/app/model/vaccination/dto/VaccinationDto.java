@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class VaccinationDTO {
+public class VaccinationDto {
 
     private Long pet;
     private Long vaccinationId;

@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class VaccineDTO {
+public class VaccineDto {
 
     private Long vaccineId;
     private VaccineName name;

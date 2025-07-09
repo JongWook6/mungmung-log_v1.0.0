@@ -1,20 +1,32 @@
 package com.grepp.teamnotfound.app.model.pet;
 
-import com.grepp.teamnotfound.app.model.pet.dto.PetDTO;
+import com.grepp.teamnotfound.app.controller.api.mypage.payload.PetCreateRequest;
+import com.grepp.teamnotfound.app.controller.api.mypage.payload.PetCreateRequest.Vaccinated;
+import com.grepp.teamnotfound.app.controller.api.mypage.payload.PetEditRequest;
+import com.grepp.teamnotfound.app.controller.api.mypage.payload.VaccinatedItem;
+import com.grepp.teamnotfound.app.model.pet.code.PetSize;
+import com.grepp.teamnotfound.app.model.pet.code.PetType;
+import com.grepp.teamnotfound.app.model.pet.dto.PetDto;
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
-import com.grepp.teamnotfound.app.model.pet.entity.PetImg;
 import com.grepp.teamnotfound.app.model.pet.repository.PetImgRepository;
 import com.grepp.teamnotfound.app.model.pet.repository.PetRepository;
 import com.grepp.teamnotfound.app.model.user.entity.User;
 import com.grepp.teamnotfound.app.model.user.repository.UserRepository;
-import com.grepp.teamnotfound.app.model.vaccination.dto.VaccinationDTO;
+import com.grepp.teamnotfound.app.model.vaccination.dto.VaccinationDto;
 import com.grepp.teamnotfound.app.model.vaccination.entity.Vaccination;
 import com.grepp.teamnotfound.app.model.vaccination.entity.Vaccine;
 import com.grepp.teamnotfound.app.model.vaccination.repository.VaccinationRepository;
 import com.grepp.teamnotfound.app.model.vaccination.repository.VaccineRepository;
+import com.grepp.teamnotfound.infra.error.exception.BusinessException;
+import com.grepp.teamnotfound.infra.error.exception.code.PetErrorCode;
+import com.grepp.teamnotfound.infra.error.exception.code.UserErrorCode;
+import com.grepp.teamnotfound.infra.error.exception.code.VaccinationErrorCode;
 import com.grepp.teamnotfound.util.NotFoundException;
-import com.grepp.teamnotfound.util.ReferencedWarning;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.Period;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,11 +41,10 @@ public class PetService {
 
     private final PetRepository petRepository;
     private final UserRepository userRepository;
-    private final PetImgRepository petImgRepository;
     private final VaccinationRepository vaccinationRepository;
     private final VaccineRepository vaccineRepository;
 
-    public List<PetDTO> findAll() {
+    public List<PetDto> findAll() {
         List<Pet> pets = petRepository.findAll();
 
         return pets.stream()
@@ -42,7 +53,7 @@ public class PetService {
 
     }
 
-    public List<PetDTO> findByUserId(Long userId) {
+    public List<PetDto> findByUserId(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(NotFoundException::new);
         List<Pet> pets = petRepository.findAllByUser(user);
 
@@ -51,51 +62,185 @@ public class PetService {
             .toList();
     }
 
-    public PetDTO findOne(Long petId) {
+    public PetDto findOne(Long petId) {
         return petRepository.findById(petId)
                 .map(pet -> mapToDTO(pet))
                 .orElseThrow(NotFoundException::new);
     }
 
+//    @Transactional
+//    public Long create(PetCreateRequest request) {
+//        Pet pet = new Pet();
+//
+//        LocalDate birthday = request.getBirthday();
+//        LocalDate now = LocalDate.now();
+//
+//        Period period = Period.between(birthday, now);
+//        Integer age = period.getYears() * 12 + period.getMonths();
+//
+//        User user = userRepository.findById(request.getUser())
+//            .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+//
+//        pet.setRegistNumber(request.getRegistNumber());
+//        pet.setBirthday(request.getBirthday());
+//        pet.setMetday(request.getMetday());
+//        pet.setName(request.getName());
+//        pet.setAge(age);
+//        pet.setBreed(request.getBreed());
+//        pet.setSize(request.getSize());
+//        pet.setSex(request.getSex());
+//        pet.setIsNeutered(request.getIsNeutered());
+//        pet.setUser(user);
+//        petRepository.save(pet);
+//
+//        if (request.getVaccinations() != null) {
+//            for (Vaccinated item : request.getVaccinations()) {
+//                Vaccine vaccine = vaccineRepository.findById(item.getVaccineId())
+//                    .orElseThrow(() -> new BusinessException(VaccinationErrorCode.VACCINE_NOT_FOUND));
+//
+//                Vaccination vaccination = new Vaccination();
+//                vaccination.setPet(pet);
+//                vaccination.setVaccineAt(item.getVaccineAt());
+//                vaccination.setVaccineType(item.getVaccineType());
+//                vaccination.setCount(item.getCount());
+//                vaccination.setIsVaccine(item.getIsVaccine());
+//                vaccination.setVaccine(vaccine);
+//
+//                vaccinationRepository.save(vaccination);
+//            }
+//        }
+//
+//        return pet.getPetId();
+//    }
+//
+//    @Transactional
+//    public Long update(Long petId, PetEditRequest request) {
+//        Pet pet = petRepository.findById(petId)
+//            .orElseThrow(() -> new BusinessException(PetErrorCode.PET_NOT_FOUND));
+//
+//        LocalDate birthday = request.getBirthday();
+//        LocalDate now = LocalDate.now();
+//        OffsetDateTime nowTime = OffsetDateTime.now();
+//
+//        Period period = Period.between(birthday, now);
+//        Integer age = period.getYears() * 12 + period.getMonths();
+//
+//        pet.setRegistNumber(request.getRegistNumber());
+//        pet.setBirthday(request.getBirthday());
+//        pet.setMetday(request.getMetday());
+//        pet.setName(request.getName());
+//        pet.setAge(age);
+//        pet.setBreed(request.getBreed());
+//        pet.setSize(request.getSize());
+//        pet.setSex(request.getSex());
+//        pet.setIsNeutered(request.getIsNeutered());
+//        pet.setUpdatedAt(nowTime);
+//        petRepository.save(pet);
+//
+//        vaccinationRepository.softDelete(petId, nowTime);
+//
+//        if (request.getVaccinations() != null) {
+//            for (PetEditRequest.Vaccinated item : request.getVaccinations()) {
+//                Vaccine vaccine = vaccineRepository.findById(item.getVaccineId())
+//                    .orElseThrow(() -> new BusinessException(VaccinationErrorCode.VACCINE_NOT_FOUND));
+//
+//                Vaccination vaccination = new Vaccination();
+//                vaccination.setPet(pet);
+//                vaccination.setVaccineAt(item.getVaccineAt());
+//                vaccination.setVaccineType(item.getVaccineType());
+//                vaccination.setCount(item.getCount());
+//                vaccination.setIsVaccine(item.getIsVaccine());
+//                vaccination.setVaccine(vaccine);
+//
+//                vaccinationRepository.save(vaccination);
+//            }
+//        }
+//
+//        return pet.getPetId();
+//    }
     @Transactional
-    public Long create(PetDTO petDTO) {
+    public Long create(PetCreateRequest request) {
+        User user = userRepository.findById(request.getUser())
+            .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+
         Pet pet = new Pet();
-        mapToEntity(petDTO, pet);
+        updatePetDetails(pet, request.getRegistNumber(), request.getBirthday(), request.getMetday(),
+            request.getName(), request.getBreed(), request.getSize(), request.getSex(), request.getIsNeutered());
+        pet.setUser(user);
+
         petRepository.save(pet);
 
-        if (petDTO.getVaccinations() != null) {
-            for (VaccinationDTO dto : petDTO.getVaccinations()) {
-                Vaccine vaccine = vaccineRepository.findById(dto.getVaccine().getVaccineId())
-                    .orElseThrow(() -> new IllegalArgumentException("해당 백신이 존재하지 않습니다."));
+        saveVaccinations(pet, request.getVaccinations());
+
+        return pet.getPetId();
+    }
+
+    @Transactional
+    public Long update(Long petId, PetEditRequest request) {
+        Pet pet = petRepository.findById(petId)
+            .orElseThrow(() -> new BusinessException(PetErrorCode.PET_NOT_FOUND));
+
+        updatePetDetails(pet, request.getRegistNumber(), request.getBirthday(), request.getMetday(),
+            request.getName(), request.getBreed(), request.getSize(), request.getSex(), request.getIsNeutered());
+        pet.setUpdatedAt(OffsetDateTime.now());
+
+        petRepository.save(pet);
+
+        vaccinationRepository.softDelete(petId, OffsetDateTime.now());
+        saveVaccinations(pet, request.getVaccinations());
+
+        return pet.getPetId();
+    }
+
+    @Transactional
+    public void delete(Long petId) {
+        OffsetDateTime now = OffsetDateTime.now();
+        petRepository.softDelete(petId, now);
+        vaccinationRepository.softDelete(petId, now);
+    }
+
+    private Integer calculateAge(LocalDate birthday) {
+        if (birthday == null) {
+            return null;
+        }
+        Period period = Period.between(birthday, LocalDate.now());
+        return period.getYears() * 12 + period.getMonths();
+    }
+
+    private void updatePetDetails(Pet pet, String registNumber, LocalDate birthday, LocalDate metday,
+        String name, PetType breed, PetSize size, Boolean sex, Boolean isNeutered) {
+        pet.setRegistNumber(registNumber);
+        pet.setBirthday(birthday);
+        pet.setMetday(metday);
+        pet.setName(name);
+        pet.setAge(calculateAge(birthday));
+        pet.setBreed(breed);
+        pet.setSize(size);
+        pet.setSex(sex);
+        pet.setIsNeutered(isNeutered);
+    }
+
+    private void saveVaccinations(Pet pet, List<? extends VaccinatedItem> vaccinatedItems) {
+        if (vaccinatedItems != null && !vaccinatedItems.isEmpty()) {
+            for (VaccinatedItem item : vaccinatedItems) {
+                Vaccine vaccine = vaccineRepository.findById(item.getVaccineId())
+                    .orElseThrow(() -> new BusinessException(VaccinationErrorCode.VACCINE_NOT_FOUND));
 
                 Vaccination vaccination = new Vaccination();
                 vaccination.setPet(pet);
-                vaccination.setVaccineAt(dto.getVaccineAt());
-                vaccination.setVaccineType(dto.getVaccineType());
-                vaccination.setCount(dto.getCount());
-                vaccination.setIsVaccine(dto.getIsVaccine());
+                vaccination.setVaccineAt(item.getVaccineAt());
+                vaccination.setVaccineType(item.getVaccineType());
+                vaccination.setCount(item.getCount());
+                vaccination.setIsVaccine(item.getIsVaccine());
                 vaccination.setVaccine(vaccine);
 
                 vaccinationRepository.save(vaccination);
             }
         }
-
-        return pet.getPetId();
     }
-//
-//    public void update(final Long petId, final PetDTO petDTO) {
-//        final Pet pet = petRepository.findById(petId)
-//                .orElseThrow(NotFoundException::new);
-//        mapToEntity(petDTO, pet);
-//        petRepository.save(pet);
-//    }
-//
-//    public void delete(final Long petId) {
-//        petRepository.deleteById(petId);
-//    }
 
-    private PetDTO mapToDTO(Pet pet) {
-        PetDTO petDTO = new PetDTO();
+    private PetDto mapToDTO(Pet pet) {
+        PetDto petDTO = new PetDto();
         petDTO.setPetId(pet.getPetId());
         petDTO.setRegistNumber(pet.getRegistNumber());
         petDTO.setBirthday(pet.getBirthday());
@@ -107,10 +252,9 @@ public class PetService {
         petDTO.setWeight(pet.getWeight());
         petDTO.setSex(pet.getSex());
         petDTO.setIsNeutered(pet.getIsNeutered());
-        petDTO.setUser(pet.getUser() == null ? null : pet.getUser().getUserId());
+        petDTO.setUser(Optional.ofNullable(pet.getUser()).map(User::getUserId).orElse(null));
 
         List<Vaccination> vaccinations = vaccinationRepository.findAllByPetEquals(pet);
-
         petDTO.setVaccinations(vaccinations.stream()
             .map(this::mapToVaccinationDTO)
             .collect(Collectors.toList()));
@@ -118,8 +262,8 @@ public class PetService {
         return petDTO;
     }
 
-    private VaccinationDTO mapToVaccinationDTO(Vaccination vaccination) {
-        VaccinationDTO vaccinationDTO = new VaccinationDTO();
+    private VaccinationDto mapToVaccinationDTO(Vaccination vaccination) {
+        VaccinationDto vaccinationDTO = new VaccinationDto();
         vaccinationDTO.setVaccinationId(vaccination.getVaccinationId());
         vaccinationDTO.setVaccineAt(vaccination.getVaccineAt());
         vaccinationDTO.setVaccineType(vaccination.getVaccineType());
@@ -129,44 +273,4 @@ public class PetService {
 
         return vaccinationDTO;
     }
-
-    private Pet mapToEntity(final PetDTO petDTO, final Pet pet) {
-        pet.setRegistNumber(petDTO.getRegistNumber());
-        pet.setBirthday(petDTO.getBirthday());
-        pet.setMetday(petDTO.getMetday());
-        pet.setName(petDTO.getName());
-        pet.setAge(petDTO.getAge());
-        pet.setBreed(petDTO.getBreed());
-        pet.setSize(petDTO.getSize());
-        pet.setWeight(petDTO.getWeight());
-        pet.setSex(petDTO.getSex());
-        pet.setIsNeutered(petDTO.getIsNeutered());
-        final User user = petDTO.getUser() == null ? null : userRepository.findById(petDTO.getUser())
-                .orElseThrow(() -> new NotFoundException("user not found"));
-        pet.setUser(user);
-        return pet;
-    }
-
-    public ReferencedWarning getReferencedWarning(final Long petId) {
-        final ReferencedWarning referencedWarning = new ReferencedWarning();
-        final Pet pet = petRepository.findById(petId)
-                .orElseThrow(NotFoundException::new);
-
-        final PetImg petPetImg = petImgRepository.findFirstByPet(pet);
-        if (petPetImg != null) {
-            referencedWarning.setKey("pet.petImg.pet.referenced");
-            referencedWarning.addParam(petPetImg.getPetImgId());
-            return referencedWarning;
-        }
-
-        final Vaccination petVaccination = vaccinationRepository.findFirstByPet(pet);
-        if (petVaccination != null) {
-            referencedWarning.setKey("pet.vaccination.pet.referenced");
-            referencedWarning.addParam(petVaccination.getVaccinationId());
-            return referencedWarning;
-        }
-
-        return null;
-    }
-
 }

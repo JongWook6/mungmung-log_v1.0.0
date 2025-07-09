@@ -1,7 +1,8 @@
 package com.grepp.teamnotfound.app.controller.web.pet;
 
+import com.grepp.teamnotfound.app.controller.api.mypage.payload.PetCreateRequest;
 import com.grepp.teamnotfound.app.model.pet.PetService;
-import com.grepp.teamnotfound.app.model.pet.dto.PetDTO;
+import com.grepp.teamnotfound.app.model.pet.dto.PetDto;
 import com.grepp.teamnotfound.app.model.user.entity.User;
 import com.grepp.teamnotfound.app.model.user.repository.UserRepository;
 import com.grepp.teamnotfound.util.CustomCollectors;
@@ -16,7 +17,6 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -44,7 +44,7 @@ public class PetController {
     }
 
     @GetMapping("/add")
-    public String add(@ModelAttribute("pet") final PetDTO petDTO, Model model) {
+    public String add(@ModelAttribute("pet") final PetDto petDTO, Model model) {
         List<User> users = userRepository.findAll();
 
         model.addAttribute("users", users);
@@ -53,12 +53,15 @@ public class PetController {
     }
 
     @PostMapping("/add")
-    public String add(@ModelAttribute("pet") @Valid final PetDTO petDTO,
-        final BindingResult bindingResult, final RedirectAttributes redirectAttributes) {
+    public String add(
+        @ModelAttribute("pet") @Valid PetCreateRequest request,
+        BindingResult bindingResult,
+        RedirectAttributes redirectAttributes
+    ) {
         if (bindingResult.hasErrors()) {
             return "pet/add";
         }
-        petService.create(petDTO);
+        petService.create(request);
         redirectAttributes.addFlashAttribute(WebUtils.MSG_SUCCESS, WebUtils.getMessage("pet.create.success"));
         return "redirect:/pets";
     }

@@ -1,7 +1,7 @@
 package com.grepp.teamnotfound.app.model.vaccination;
 
 
-import com.grepp.teamnotfound.app.model.vaccination.dto.VaccineDTO;
+import com.grepp.teamnotfound.app.model.vaccination.dto.VaccineDto;
 import com.grepp.teamnotfound.app.model.vaccination.entity.Vaccination;
 import com.grepp.teamnotfound.app.model.vaccination.entity.Vaccine;
 import com.grepp.teamnotfound.app.model.vaccination.repository.VaccinationRepository;
@@ -25,26 +25,26 @@ public class VaccineService {
         this.vaccinationRepository = vaccinationRepository;
     }
 
-    public List<VaccineDTO> findAll() {
+    public List<VaccineDto> findAll() {
         final List<Vaccine> vaccines = vaccineRepository.findAll(Sort.by("vaccineId"));
         return vaccines.stream()
-                .map(vaccine -> mapToDTO(vaccine, new VaccineDTO()))
+                .map(vaccine -> mapToDTO(vaccine, new VaccineDto()))
                 .toList();
     }
 
-    public VaccineDTO get(Long vaccineId) {
+    public VaccineDto get(Long vaccineId) {
         return vaccineRepository.findById(vaccineId)
-                .map(vaccine -> mapToDTO(vaccine, new VaccineDTO()))
+                .map(vaccine -> mapToDTO(vaccine, new VaccineDto()))
                 .orElseThrow(NotFoundException::new);
     }
 
-    public Long create(final VaccineDTO vaccineDTO) {
+    public Long create(final VaccineDto vaccineDTO) {
         final Vaccine vaccine = new Vaccine();
         mapToEntity(vaccineDTO, vaccine);
         return vaccineRepository.save(vaccine).getVaccineId();
     }
 
-    public void update(final Long vaccineId, final VaccineDTO vaccineDTO) {
+    public void update(final Long vaccineId, final VaccineDto vaccineDTO) {
         final Vaccine vaccine = vaccineRepository.findById(vaccineId)
                 .orElseThrow(NotFoundException::new);
         mapToEntity(vaccineDTO, vaccine);
@@ -55,7 +55,7 @@ public class VaccineService {
         vaccineRepository.deleteById(vaccineId);
     }
 
-    private VaccineDTO mapToDTO(final Vaccine vaccine, final VaccineDTO vaccineDTO) {
+    private VaccineDto mapToDTO(final Vaccine vaccine, final VaccineDto vaccineDTO) {
         vaccineDTO.setVaccineId(vaccine.getVaccineId());
         vaccineDTO.setName(vaccine.getName());
         vaccineDTO.setPeriod(vaccine.getPeriod());
@@ -65,7 +65,7 @@ public class VaccineService {
         return vaccineDTO;
     }
 
-    private Vaccine mapToEntity(final VaccineDTO vaccineDTO, final Vaccine vaccine) {
+    private Vaccine mapToEntity(final VaccineDto vaccineDTO, final Vaccine vaccine) {
         vaccine.setName(vaccineDTO.getName());
         vaccine.setPeriod(vaccineDTO.getPeriod());
         vaccine.setBoosterCycle(vaccineDTO.getBoosterCycle());

@@ -4,12 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.grepp.teamnotfound.app.model.pet.code.PetSize;
 import com.grepp.teamnotfound.app.model.pet.code.PetType;
-import com.grepp.teamnotfound.app.model.pet.dto.PetDTO;
+import com.grepp.teamnotfound.app.model.pet.dto.PetDto;
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.pet.repository.PetRepository;
 import com.grepp.teamnotfound.app.model.vaccination.VaccineService;
 import com.grepp.teamnotfound.app.model.vaccination.code.VaccineType;
-import com.grepp.teamnotfound.app.model.vaccination.dto.VaccineDTO;
 import com.grepp.teamnotfound.app.model.vaccination.entity.Vaccination;
 import com.grepp.teamnotfound.app.model.vaccination.entity.Vaccine;
 import com.grepp.teamnotfound.app.model.vaccination.repository.VaccinationRepository;
@@ -17,7 +16,6 @@ import com.grepp.teamnotfound.app.model.vaccination.repository.VaccineRepository
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -45,28 +43,28 @@ class PetServiceTest {
 
     @Test
     void testFindAll() {
-        List<PetDTO> result = petService.findAll();
+        List<PetDto> result = petService.findAll();
 
         result.forEach(p -> System.out.println("PetDTO" + p));
     }
 
     @Test
     void testFindByUserId() {
-        List<PetDTO> result = petService.findByUserId(1L);
+        List<PetDto> result = petService.findByUserId(1L);
 
         result.forEach(p -> System.out.println("PetDTO" + p));
     }
 
     @Test
     void testFindOne() {
-        PetDTO result = petService.findOne(1L);
+        PetDto result = petService.findOne(1L);
 
         System.out.println("PetDTO" + result);
     }
 
     @Test
     void testCreatePet() throws Exception {
-        PetDTO petDTO = new PetDTO();
+        PetDto petDTO = new PetDto();
         petDTO.setName("뽀삐");
         petDTO.setAge(3);
         petDTO.setBirthday(LocalDate.of(2020, 1, 1));

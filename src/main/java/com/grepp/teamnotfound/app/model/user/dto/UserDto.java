@@ -1,9 +1,11 @@
 package com.grepp.teamnotfound.app.model.user.dto;
 
 import com.grepp.teamnotfound.app.model.auth.code.Role;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class UserDto {
 
     private Long userId;

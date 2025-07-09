@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PetImgDTO {
+public class PetImgDto {
 
     private Long petImgId;
     private String savePath;

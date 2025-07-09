@@ -3,7 +3,7 @@ package com.grepp.teamnotfound.app.model.vaccination;
 
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.pet.repository.PetRepository;
-import com.grepp.teamnotfound.app.model.vaccination.dto.VaccinationDTO;
+import com.grepp.teamnotfound.app.model.vaccination.dto.VaccinationDto;
 import com.grepp.teamnotfound.app.model.vaccination.entity.Vaccination;
 import com.grepp.teamnotfound.app.model.vaccination.entity.Vaccine;
 import com.grepp.teamnotfound.app.model.vaccination.repository.VaccinationRepository;
@@ -27,27 +27,27 @@ public class VaccinationService {
     private final VaccineRepository vaccineRepository;
     private final PetRepository petRepository;
 
-    public List<VaccinationDTO> findAll() {
+    public List<VaccinationDto> findAll() {
         final List<Vaccination> vaccinations = vaccinationRepository.findAll(Sort.by("vaccinationId"));
         return vaccinations.stream()
-                .map(vaccination -> mapToDTO(vaccination, new VaccinationDTO()))
+                .map(vaccination -> mapToDTO(vaccination, new VaccinationDto()))
                 .toList();
     }
 
-    public VaccinationDTO get(Long vaccinationId) {
+    public VaccinationDto get(Long vaccinationId) {
         return vaccinationRepository.findById(vaccinationId)
-                .map(vaccination -> mapToDTO(vaccination, new VaccinationDTO()))
+                .map(vaccination -> mapToDTO(vaccination, new VaccinationDto()))
                 .orElseThrow(NotFoundException::new);
     }
 
     @Transactional
-    public Long create(VaccinationDTO vaccinationDTO) {
+    public Long create(VaccinationDto vaccinationDTO) {
         Vaccination vaccination = new Vaccination();
         mapToEntity(vaccinationDTO, vaccination);
         return vaccinationRepository.save(vaccination).getVaccinationId();
     }
 
-    public void update(final Long vaccinationId, final VaccinationDTO vaccinationDTO) {
+    public void update(final Long vaccinationId, final VaccinationDto vaccinationDTO) {
         final Vaccination vaccination = vaccinationRepository.findById(vaccinationId)
                 .orElseThrow(NotFoundException::new);
         mapToEntity(vaccinationDTO, vaccination);
@@ -58,20 +58,19 @@ public class VaccinationService {
         vaccinationRepository.deleteById(vaccinationId);
     }
 
-    private VaccinationDTO mapToDTO(final Vaccination vaccination,
-            final VaccinationDTO vaccinationDTO) {
+    private VaccinationDto mapToDTO(final Vaccination vaccination,
+            final VaccinationDto vaccinationDTO) {
         vaccinationDTO.setVaccinationId(vaccination.getVaccinationId());
         vaccinationDTO.setVaccineAt(vaccination.getVaccineAt());
         vaccinationDTO.setVaccineType(vaccination.getVaccineType());
         vaccinationDTO.setCount(vaccination.getCount());
         vaccinationDTO.setIsVaccine(vaccination.getIsVaccine());
         vaccinationDTO.setVaccinationId(vaccination.getVaccinationId());
-        vaccinationDTO.setPet(vaccination.getPet() == null ? null : vaccination.getPet().getPetId());
         return vaccinationDTO;
     }
 
     private Vaccination mapToEntity(
-        VaccinationDTO vaccinationDTO,
+        VaccinationDto vaccinationDTO,
         Vaccination vaccination
     ) {
         vaccination.setVaccineAt(vaccinationDTO.getVaccineAt());
