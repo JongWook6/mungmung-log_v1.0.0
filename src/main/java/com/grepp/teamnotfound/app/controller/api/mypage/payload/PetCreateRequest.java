@@ -4,14 +4,11 @@ import com.grepp.teamnotfound.app.model.pet.code.PetSize;
 import com.grepp.teamnotfound.app.model.pet.code.PetType;
 import com.grepp.teamnotfound.app.model.pet.dto.PetImgDto;
 import com.grepp.teamnotfound.app.model.vaccination.code.VaccineType;
-import com.grepp.teamnotfound.app.model.vaccination.dto.VaccinationDto;
 import java.time.LocalDate;
 import java.util.List;
-import lombok.Builder;
 import lombok.Data;
 
 @Data
-@Builder
 public class PetCreateRequest {
 
     private String registNumber;
@@ -24,11 +21,10 @@ public class PetCreateRequest {
     private Boolean sex;
     private Boolean isNeutered;
     private Long user;
-    private List<PetImgDto> images;
+    private PetImgDto image;
     private List<Vaccinated> vaccinations;
 
     @Data
-    @Builder
     public static class Vaccinated implements VaccinatedItem {
 
         private Long vaccineId;

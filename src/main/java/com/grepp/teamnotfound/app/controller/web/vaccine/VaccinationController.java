@@ -90,29 +90,4 @@ public class VaccinationController {
         return "vaccination/edit";
     }
 
-    @PostMapping("/edit/{vaccinationId}")
-    public String edit(
-        @PathVariable(name = "vaccinationId") Long vaccinationId,
-        @ModelAttribute("vaccination") @Valid VaccinationDto vaccinationDTO,
-        BindingResult bindingResult,
-        RedirectAttributes redirectAttributes
-    ) {
-        if (bindingResult.hasErrors()) {
-            return "vaccination/edit";
-        }
-        vaccinationService.update(vaccinationId, vaccinationDTO);
-        redirectAttributes.addFlashAttribute(WebUtils.MSG_SUCCESS, WebUtils.getMessage("vaccination.update.success"));
-        return "redirect:/vaccinations";
-    }
-
-    @PostMapping("/delete/{vaccinationId}")
-    public String delete(
-        @PathVariable(name = "vaccinationId") Long vaccinationId,
-        RedirectAttributes redirectAttributes
-    ) {
-        vaccinationService.delete(vaccinationId);
-        redirectAttributes.addFlashAttribute(WebUtils.MSG_INFO, WebUtils.getMessage("vaccination.delete.success"));
-        return "redirect:/vaccinations";
-    }
-
 }

@@ -6,11 +6,9 @@ import com.grepp.teamnotfound.app.model.pet.dto.PetImgDto;
 import com.grepp.teamnotfound.app.model.vaccination.code.VaccineType;
 import java.time.LocalDate;
 import java.util.List;
-import lombok.Builder;
 import lombok.Data;
 
 @Data
-@Builder
 public class PetEditRequest {
 
     private String registNumber;
@@ -22,11 +20,10 @@ public class PetEditRequest {
     private Double weight;
     private Boolean sex;
     private Boolean isNeutered;
-    private List<PetImgDto> images;
+    private PetImgDto image;
     private List<Vaccinated> vaccinations;
 
     @Data
-    @Builder
     public static class Vaccinated implements VaccinatedItem{
         private Long vaccineId;
         private LocalDate vaccineAt;
