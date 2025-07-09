@@ -81,7 +81,7 @@ public class SecurityConfig {
                 // TODO 프론트 서버로 수정 필요
                 "http://localhost:8081"
         ));
-
+        corsConfig.addAllowedOrigin("https://mungnote-172598302113.asia-northeast3.run.app");
         corsConfig.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         corsConfig.setAllowedHeaders(Collections.singletonList("*"));
         corsConfig.setAllowCredentials(true);

@@ -9,9 +9,9 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry){
-        registry.addMapping("/**") // 모든 API 경로
-                .allowedOrigins("https://mungnote-172598302113.asia-northeast3.run.app") // 또는 "https://your-frontend.com"
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
+        registry.addMapping("/**")
+                .allowedOrigins("https://mungnote-172598302113.asia-northeast3.run.app") // Swagger-UI 주소
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true)
                 .maxAge(3600);
