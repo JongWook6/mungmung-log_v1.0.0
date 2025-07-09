@@ -69,7 +69,7 @@ jobs:
             --platform managed \
             --region ${{ secrets.GCP_REGION }} \
             --allow-unauthenticated \
-            --set-env-vars "JWT_SECRET=${{ secrets.JWT_SECRET }},REDIS_SECRET=${{ secrets.REDIS_SECRET }},POSTGRESQL_SECRET=${{ secrets.POSTGRESQL_SECRET }},SPRING_MAIN_SECRET=${{ secrets.SPRING_MAIN_SECRET }}"
+            --set-env-vars "JWT_SECRET=${{ secrets.JWT_SECRET }},REDIS_SECRET=${{ secrets.REDIS_SECRET }},POSTGRESQL_SECRET=${{ secrets.POSTGRESQL_SECRET }},SPRING_MAIN_SECRET=${{ secrets.SPRING_MAIL_SECRET }}"
 
         # END - Docker auth and build
 
