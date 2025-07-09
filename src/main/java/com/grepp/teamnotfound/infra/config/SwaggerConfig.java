@@ -11,9 +11,6 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class SwaggerConfig {
-    String jwt = "JWT";
-    SecurityRequirement securityRequirement = new SecurityRequirement().addList(jwt);
-
     @Bean
     public OpenAPI openApiSpec() {
         Server server = new Server();
