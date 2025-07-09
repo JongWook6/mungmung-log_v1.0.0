@@ -13,9 +13,11 @@ import org.springframework.context.annotation.Configuration;
 public class SwaggerConfig {
     String jwt = "JWT";
     SecurityRequirement securityRequirement = new SecurityRequirement().addList(jwt);
-    
+
     @Bean
     public OpenAPI openApiSpec() {
+        Server server = new Server();
+        server.setUrl("https://mungnote-172598302113.asia-northeast3.run.app");
         return new OpenAPI()
                 .info(new Info()
                         .title("API 문서")
@@ -35,29 +37,8 @@ public class SwaggerConfig {
                                                 .description(
                                                         "JWT 토큰을 입력하세요. Bearer 는 생략하세요")
                                 ))
-                .addSecurityItem(new SecurityRequirement().addList("404TNF"));
-
-        Server server = new Server();
-        server.setUrl("https://mungnote-172598302113.asia-northeast3.run.app");
-        return new OpenAPI()
-                .components(new Components())
-                .info(new Info()
-                        .title("API 문서")
-                        .description("API 명세입니다. 에러 코드는 [링크]를 참조해 주세요.")
-                        .version("v1.0.0"))
-                .addSecurityItem(securityRequirement)
-                .components(new Components()
-                        .addSecuritySchemes("bearerAuth"
-                                , new SecurityScheme()
-                                        .name("bearerAuth")
-                                        .type(
-                                                SecurityScheme.Type.HTTP)
-                                        .scheme(
-                                                "bearer")
-                                        .bearerFormat(
-                                                "JWT")
-                                        .description(
-                                                "JWT 토큰을 입력하세요. Bearer 는 생략하세요")))
+                .addSecurityItem(new SecurityRequirement().addList("404TNF"))
                 .addServersItem(server);
+
     }
 }
