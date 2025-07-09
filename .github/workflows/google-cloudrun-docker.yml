@@ -45,15 +45,19 @@ jobs:
       - name: Authenticate with Google Cloud (JSON Key)
         uses: google-github-actions/setup-gcloud@v1
         with:
-          project_id: ${{ secrets.GCP_PROJECT }}
           service_account_key: ${{ secrets.GCP_CREDENTIALS }}
+          project_id: ${{ secrets.GCP_PROJECT }}
+          export_default_credentials: true
 
 
       # BEGIN - Docker auth and build
       #
       # If you already have a container image, you can omit these steps.
       - name: 'Docker Auth'
-        run: gcloud auth configure-docker ${{ secrets.GCP_REGION }}-docker.pkg.dev
+        run: |
+          echo "${{ secrets.GCP_CREDENTIALS }}" > key.json
+          gcloud auth activate-service-account --key-file=key.json
+          gcloud auth configure-docker ${{ secrets.GCP_REGION }}-docker.pkg.dev --quiet
 
 
       - name: 'Build and Push Container'
