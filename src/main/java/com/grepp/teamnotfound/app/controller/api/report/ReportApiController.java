@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/community/reports")
+@RequestMapping("/api/community/reports")
 public class ReportApiController {
 
-    @PostMapping
+    @PostMapping("/v1")
     @Operation(summary = "커뮤니티 게시글/댓글 신고")
     public ResponseEntity<?> createReport(
         @ModelAttribute ReportRequest request

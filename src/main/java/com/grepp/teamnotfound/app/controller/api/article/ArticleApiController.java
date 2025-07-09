@@ -32,12 +32,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(value = "/api/v1/community/articles", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/api/community/articles", produces = MediaType.APPLICATION_JSON_VALUE)
 public class ArticleApiController {
 
     private final ArticleService articleService;
 
-    @GetMapping
+    @GetMapping("/v1")
     @Operation(summary = "특정 게시판의 게시글 리스트 조회")
     public ResponseEntity<ArticleListResponse> getAllArticles(
         @RequestParam int page,
@@ -72,7 +72,7 @@ public class ArticleApiController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/v1", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "새로운 게시글 작성")
     public ResponseEntity<?> createArticle(
         @RequestPart("request") ArticleRequest request,
@@ -82,7 +82,7 @@ public class ArticleApiController {
         return ResponseEntity.ok(Map.of("data", Map.of("articleId", 1, "msg", "게시글이 정상적으로 등록되었습니다.")));
     }
 
-    @GetMapping("/{articleId}")
+    @GetMapping("/v1/{articleId}")
     @Operation(summary = "게시글 상세 조회")
     public ResponseEntity<?> getArticle(
         @PathVariable Long articleId
@@ -101,7 +101,7 @@ public class ArticleApiController {
         return ResponseEntity.ok(Map.of("data", response));
     }
 
-    @PatchMapping( value = "/{articleId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PatchMapping( value = "/v1/{articleId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "게시글 수정")
     public ResponseEntity<?> updateArticle(
         @PathVariable Long articleId,
@@ -111,7 +111,7 @@ public class ArticleApiController {
         return ResponseEntity.ok(Map.of("data", Map.of("msg", "게시글이 정상적으로 수정되었습니다.")));
     }
 
-    @DeleteMapping("/{articleId}")
+    @DeleteMapping("/v1/{articleId}")
     @Operation(summary = "게시글 삭제")
     public ResponseEntity<?> deleteArticle(
         @PathVariable Long articleId
@@ -119,7 +119,7 @@ public class ArticleApiController {
         return ResponseEntity.ok(Map.of("data", Map.of("msg", "게시글이 정상적으로 삭제되었습니다.")));
     }
 
-    @PostMapping("/{articleId}/like")
+    @PostMapping("/v1/{articleId}/like")
     @Operation(summary = "게시글 좋아요 요청")
     public ResponseEntity<?> likeArticle(
         @PathVariable Long articleId
@@ -130,7 +130,7 @@ public class ArticleApiController {
         return ResponseEntity.ok(Map.of("data", response));
     }
 
-    @DeleteMapping("/{articleId}/like")
+    @DeleteMapping("/v1/{articleId}/like")
     @Operation(summary = "게시글 좋아요 취소")
     public ResponseEntity<?> undoLikeArticle(
         @PathVariable Long articleId
@@ -141,7 +141,7 @@ public class ArticleApiController {
         return ResponseEntity.ok(Map.of("data", response));
     }
 
-    @GetMapping("/{articleId}/reply")
+    @GetMapping("/v1/{articleId}/reply")
     @Operation(summary = "게시글 댓글 개수")
     public ResponseEntity<?> getReplyCount(
         @PathVariable Long articleId
@@ -149,7 +149,7 @@ public class ArticleApiController {
         return ResponseEntity.ok(Map.of("data", Map.of("replies", 15)));
     }
 
-    @GetMapping("/{articleId}/like")
+    @GetMapping("/v1/{articleId}/like")
     @Operation(summary = "게시글 좋아요 개수")
     public ResponseEntity<?> getLikeCount(
         @PathVariable Long articleId
