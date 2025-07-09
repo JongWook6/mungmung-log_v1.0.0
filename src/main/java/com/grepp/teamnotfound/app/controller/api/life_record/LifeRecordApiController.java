@@ -140,6 +140,73 @@ public class LifeRecordApiController {
     }
 
 
+    // 날짜, 애완동물 기준으로 기존 생활기록 데이터 있는지 체크
+    @GetMapping("/{petId}/{date}/check")
+    public ResponseEntity<Map<String, LifeRecordData>> checkLifeRecord(
+            @PathVariable Long petId,
+            @PathVariable LocalDate date
+    ){
+        // 기존 데이터가 있으면 기존 데이터 반환
+        if(noteService.existsLifeRecord(petId, date)){
+            LifeRecordData lifeRecord = findLifeRecord(petId, date);
+
+            return ResponseEntity.ok(Map.of("data", lifeRecord));
+        }
+
+        return ResponseEntity.ok().build();
+    }
+
+    // 생활기록 등록
+    @PostMapping
+    public ResponseEntity<Map<String, LifeRecordData>> registLifeRecord(
+            @RequestBody LifeRecordData data
+    ){
+        Pet pet = petService.getPet(data.getPetId());
+
+        // 관찰노트 등록
+        NoteDto noteDto = NoteDto.builder()
+                .content(data.getNote().getContent())
+                .pet(pet).build();
+        noteService.createNote(noteDto);
+
+        // 수면 등록
+        SleepingDto sleepingDto = SleepingDto.builder()
+                .sleepingTime(data.getSleepTime().getSleepTime())
+                .recordedAt(data.getRecordAt())
+                .pet(pet).build();
+        sleepingService.createSleeping(sleepingDto);
+
+        // 몸무게 등록
+        WeightDto weightDto = WeightDto.builder()
+                .weight(data.getWeight().getWeight())
+                .recordedAt(data.getRecordAt())
+                .pet(pet).build();
+        weightService.createWeight(weightDto);
+
+        // 산책 등록
+        data.getWalkingList().forEach(walking -> {
+            WalkingDto walkingDto = WalkingDto.builder()
+                    .startedAt(walking.getStartedAt())
+                    .endedAt(walking.getEndedAt())
+                    .pace(walking.getPace())
+                    .recordedAt(walking.getRecordedAt())
+                    .pet(pet).build();
+            walkingService.createWalking(walkingDto);
+        });
+
+        // 식사 등록
+        data.getFeedingList().forEach(feeding -> {
+            FeedingDto feedingDto = FeedingDto.builder()
+                    .mealTime(feeding.getMealtime())
+                    .amount(feeding.getAmount())
+                    .unit(feeding.getUnit())
+                    .recordedAt(feeding.getRecordedAt())
+                    .build();
+            feedingService.createFeeding(feedingDto);
+        });
+
+        return ResponseEntity.ok().build();
+    }
     // 생활기록 데이터 조회 및 합치기
     private LifeRecordData findLifeRecord(Long petId, LocalDate date){
         Pet pet = petService.getPet(petId);

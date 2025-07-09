@@ -18,6 +18,15 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class WeightService {
 
+    private final ModelMapper modelMapper;
+    private final WeightRepository weightRepository;
+
+    // 몸무게 정보 등록
+    @Transactional
+    public void createWeight(WeightDto weightDto){
+        Weight weight = modelMapper.map(weightDto, Weight.class);
+        weightRepository.save(weight);
+    }
 
     // 몸무게 정보 조회
     @Transactional(readOnly = true)

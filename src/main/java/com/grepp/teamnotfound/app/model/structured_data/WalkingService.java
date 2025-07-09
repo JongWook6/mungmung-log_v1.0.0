@@ -18,6 +18,15 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class WalkingService {
 
+    private final ModelMapper modelMapper;
+    private final WalkingRepository walkingRepository;
+
+    // 산책 정보 생성
+    @Transactional
+    public void createWalking(WalkingDto walkingDto){
+        Walking walking = modelMapper.map(walkingDto, Walking.class);
+        walkingRepository.save(walking);
+    }
 
     // 산책 정보 리스트 조회
     @Transactional(readOnly = true)

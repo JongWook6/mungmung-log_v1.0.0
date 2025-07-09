@@ -18,6 +18,15 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class FeedingService {
 
+    private final ModelMapper modelMapper;
+    private final FeedingRepository feedingRepository;
+
+    // 식사 정보 등록
+    @Transactional
+    public void createFeeding(FeedingDto feedingDto){
+        Feeding feeding = modelMapper.map(feedingDto, Feeding.class);
+        feedingRepository.save(feeding);
+    }
 
     // 식사 정보 조회
     @Transactional(readOnly = true)

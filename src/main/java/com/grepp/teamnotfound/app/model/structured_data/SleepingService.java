@@ -21,6 +21,12 @@ public class SleepingService {
     private final ModelMapper modelMapper;
     private final SleepingRepository sleepingRepository;
 
+    // 수면 정보 등록
+    @Transactional
+    public void createSleeping(SleepingDto sleepingDto){
+        Sleeping sleeping = modelMapper.map(sleepingDto, Sleeping.class);
+        sleepingRepository.save(sleeping);
+    }
 
     // 수면 정보 조회
     @Transactional(readOnly = true)

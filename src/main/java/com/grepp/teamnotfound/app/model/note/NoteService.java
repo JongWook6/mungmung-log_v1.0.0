@@ -21,6 +21,19 @@ public class NoteService {
     private final ModelMapper modelMapper;
     private final NoteRepository noteRepository;
 
+    // 관찰노트 정보 저장
+    @Transactional
+    public void createNote(NoteDto noteDto){
+        Note note = modelMapper.map(noteDto, Note.class);
+        noteRepository.save(note);
+    }
+    
+    // 기존 생활기록 데이터 있는지 확인
+    @Transactional(readOnly = true)
+    public boolean existsLifeRecord(Long petId, LocalDate date) {
+        return noteRepository.existsByPetIdAndRecordedAt(petId, date);
+    }
+
     // 관찰노트 정보 조회
     @Transactional(readOnly = true)
     public NoteData getNote(Pet pet, LocalDate recordedAt){
