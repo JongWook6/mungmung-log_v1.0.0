@@ -1,11 +1,25 @@
 package com.grepp.teamnotfound.app.controller.api.life_record;
 
-import com.grepp.teamnotfound.app.controller.api.life_record.payload.FeedingResponse;
+import com.grepp.teamnotfound.app.controller.api.life_record.payload.FeedingData;
 import com.grepp.teamnotfound.app.controller.api.life_record.payload.LifeRecordListResponse;
-import com.grepp.teamnotfound.app.controller.api.life_record.payload.LifeRecordResponse;
-import com.grepp.teamnotfound.app.controller.api.life_record.payload.NoteResponse;
-import com.grepp.teamnotfound.app.controller.api.life_record.payload.WalkingResponse;
+import com.grepp.teamnotfound.app.controller.api.life_record.payload.LifeRecordData;
+import com.grepp.teamnotfound.app.controller.api.life_record.payload.NoteData;
+import com.grepp.teamnotfound.app.controller.api.life_record.payload.SleepingData;
+import com.grepp.teamnotfound.app.controller.api.life_record.payload.WalkingData;
+import com.grepp.teamnotfound.app.controller.api.life_record.payload.WeightData;
+import com.grepp.teamnotfound.app.model.note.NoteService;
+import com.grepp.teamnotfound.app.model.note.dto.NoteDto;
+import com.grepp.teamnotfound.app.model.pet.PetService;
+import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.structured_data.FeedUnit;
+import com.grepp.teamnotfound.app.model.structured_data.FeedingService;
+import com.grepp.teamnotfound.app.model.structured_data.SleepingService;
+import com.grepp.teamnotfound.app.model.structured_data.WalkingService;
+import com.grepp.teamnotfound.app.model.structured_data.WeightService;
+import com.grepp.teamnotfound.app.model.structured_data.dto.FeedingDto;
+import com.grepp.teamnotfound.app.model.structured_data.dto.SleepingDto;
+import com.grepp.teamnotfound.app.model.structured_data.dto.WalkingDto;
+import com.grepp.teamnotfound.app.model.structured_data.dto.WeightDto;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
@@ -16,7 +30,10 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,6 +42,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping(value = "api/v1/life-record")
 public class LifeRecordApiController {
+
+    private final PetService petService;
+    private final SleepingService sleepingService;
+    private final WeightService weightService;
+    private final NoteService noteService;
+    private final WalkingService walkingService;
+    private final FeedingService feedingService;
 
     // 보호자의 반려견 생활기록 리스트 조회
     @GetMapping("/{userId}")
@@ -77,37 +101,73 @@ public class LifeRecordApiController {
 
     // 생활기록 상세정보 조회
     @GetMapping("/{petId}/{date}")
-    public ResponseEntity<Map<String, LifeRecordResponse>> getLifeRecordDetail(
+    public ResponseEntity<Map<String, LifeRecordData>> getLifeRecordDetail(
         @PathVariable Long petId,
         @PathVariable LocalDate date
     ){
-        // TODO: 상세정보 불러오는 Service 구현
+        // 상세정보 조회 Service
+        // LifeRecordData lifeRecord = findLifeRecord(petId, date);
 
         // Mock Data
-        LifeRecordResponse response = new LifeRecordResponse();
+        LifeRecordData response = new LifeRecordData();
         response.setPetId(petId);
         response.setRecordAt(date);
-        response.setNote(NoteResponse.builder().noteId(1L).content("관찰일지 내용").build());
-        response.setSleepTime(10);
-        response.setWeight(36.3);
+        response.setNote(NoteData.builder().noteId(1L).content("관찰일지 내용").build());
+        SleepingData sleeping = SleepingData.builder()
+                .sleepingId(1L).sleepTime(10).build();
+        response.setSleepTime(sleeping);
+        WeightData weight = WeightData.builder()
+                .weightId(1L).weight(10.0).build();
+        response.setWeight(weight);
 
-        WalkingResponse walking1 = new WalkingResponse();
-        walking1.setStartedAt(OffsetDateTime.of(LocalDate.of(2025,07,01), LocalTime.of(10, 30, 0), OffsetDateTime.now().getOffset()));
-        walking1.setEndedAt(OffsetDateTime.of(LocalDate.of(2025,07,01), LocalTime.of(11, 30, 0), OffsetDateTime.now().getOffset()));
-        WalkingResponse walking2 = new WalkingResponse();
-        walking2.setStartedAt(OffsetDateTime.of(LocalDate.of(2025,07,01), LocalTime.of(10, 30, 0), OffsetDateTime.now().getOffset()));
-        walking2.setEndedAt(OffsetDateTime.of(LocalDate.of(2025,07,01), LocalTime.of(11, 30, 0), OffsetDateTime.now().getOffset()));
+        WalkingData walking1 = WalkingData.builder().walkingId(1L)
+                .startedAt(OffsetDateTime.of(LocalDate.of(2025,07,01), LocalTime.of(10, 30, 0), OffsetDateTime.now().getOffset()))
+                .endedAt(OffsetDateTime.of(LocalDate.of(2025,07,01), LocalTime.of(11, 30, 0), OffsetDateTime.now().getOffset())).build();
+        WalkingData walking2 = WalkingData.builder().walkingId(1L)
+                .startedAt(OffsetDateTime.of(LocalDate.of(2025,07,01), LocalTime.of(10, 30, 0), OffsetDateTime.now().getOffset()))
+                .endedAt(OffsetDateTime.of(LocalDate.of(2025,07,01), LocalTime.of(11, 30, 0), OffsetDateTime.now().getOffset())).build();
         response.setWalkingList(List.of(walking1, walking2));
 
-        FeedingResponse feeding1 = new FeedingResponse();
-        feeding1.setAmount(5.0); feeding1.setMealtime(OffsetDateTime.now()); feeding1.setUnit(FeedUnit.CUP);
-        FeedingResponse feeding2 = new FeedingResponse();
-        feeding2.setAmount(150.0); feeding2.setMealtime(OffsetDateTime.now()); feeding2.setUnit(FeedUnit.GRAM);
-        FeedingResponse feeding3 = new FeedingResponse();
-        feeding3.setAmount(20.0); feeding3.setMealtime(OffsetDateTime.now()); feeding3.setUnit(FeedUnit.SCOOP);
+        FeedingData feeding1 = FeedingData.builder()
+                .feedingId(1L).amount(5.0).mealtime(OffsetDateTime.now()).unit(FeedUnit.CUP).build();
+        FeedingData feeding2 = FeedingData.builder()
+                .feedingId(2L).amount(150.0).mealtime(OffsetDateTime.now()).unit(FeedUnit.GRAM).build();
+        FeedingData feeding3 = FeedingData.builder()
+                .feedingId(3L).amount(20.0).mealtime(OffsetDateTime.now()).unit(FeedUnit.SCOOP).build();
         response.setFeedingList(List.of(feeding1, feeding2, feeding3));
 
         return ResponseEntity.ok(Map.of("data", response));
     }
 
+
+    // 생활기록 데이터 조회 및 합치기
+    private LifeRecordData findLifeRecord(Long petId, LocalDate date){
+        Pet pet = petService.getPet(petId);
+        // 관찰노드 조회
+        NoteData note = noteService.getNote(pet, date);
+
+        // 수면 조회
+        SleepingData sleeping = sleepingService.getSleeping(pet, date);
+
+        // 몸무게 조회
+        WeightData weight = weightService.getWeight(pet, date);
+
+        // 산책 조회
+        List<WalkingData> walkingList = walkingService.getWalkingList(pet, date);
+
+        // 식사 조회
+        List<FeedingData> feedingList = feedingService.getFeedingList(pet, date);
+
+        // 전체 데이터 합치기
+        LifeRecordData lifeRecord = new LifeRecordData();
+        lifeRecord.setPetId(petId);
+        lifeRecord.setRecordAt(date);
+        lifeRecord.setNote(note);
+        lifeRecord.setSleepTime(sleeping);
+        lifeRecord.setWeight(weight);
+        lifeRecord.setWalkingList(walkingList);
+        lifeRecord.setFeedingList(feedingList);
+
+        return lifeRecord;
+    }
 }

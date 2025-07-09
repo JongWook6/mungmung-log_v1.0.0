@@ -5,23 +5,23 @@ import java.util.List;
 import lombok.Data;
 
 @Data
-public class LifeRecordResponse {
+public class LifeRecordData {
 
     private Long petId;
     private LocalDate recordAt;
 
     // 관찰노트
-    private NoteResponse note;
+    private NoteData note;
 
     // 수면시간
-    private Integer sleepTime;
+    private SleepingData sleepTime;
     // 몸무게
-    private Double weight;
+    private WeightData weight;
 
     // 산책
-    private List<WalkingResponse> walkingList;
+    private List<WalkingData> walkingList;
 
     // 식사량
-    private List<FeedingResponse> feedingList;
+    private List<FeedingData> feedingList;
 
 }
