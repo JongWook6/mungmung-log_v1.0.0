@@ -5,6 +5,8 @@ import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.structured_data.dto.WalkingDto;
 import com.grepp.teamnotfound.app.model.structured_data.entity.Walking;
 import com.grepp.teamnotfound.app.model.structured_data.repository.WalkingRepository;
+import com.grepp.teamnotfound.infra.error.exception.StructuredDataException;
+import com.grepp.teamnotfound.infra.error.exception.code.WalkingErrorCode;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -42,6 +44,21 @@ public class WalkingService {
                 .endedAt(walking.getEndedAt())
                 .pace(walking.getPace())
                 .build()).collect(Collectors.toList());
+    }
+
+    // 산책 정보 수정
+    @Transactional
+    public void updateWalkingList(List<WalkingData> walkingDataList){
+        for(WalkingData walkingData : walkingDataList){
+            Walking walking = walkingRepository.findByWalkingId(walkingData.getWalkingId())
+                    .orElseThrow(() -> new StructuredDataException(WalkingErrorCode.WALKING_NOT_FOUND));
+            
+            walking.setStartedAt(walkingData.getStartedAt());
+            walking.setEndedAt(walkingData.getEndedAt());
+            walking.setPace(walkingData.getPace());
+            walking.setUpdatedAt(OffsetDateTime.now());
+            walkingRepository.save(walking);
+        }
     }
 
     // 산책 정보 삭제

@@ -14,4 +14,5 @@ public interface SleepingRepository extends JpaRepository<Sleeping, Long> {
 
     Optional<Sleeping> findByPetAndRecordedAt(Pet pet, LocalDate recordedAt);
 
+    Optional<Sleeping> findBySleepingId(Long sleepingId);
 }

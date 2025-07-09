@@ -10,4 +10,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface WeightRepository extends JpaRepository<Weight, Long> {
 
     Optional<Weight> findByPetAndRecordedAt(Pet pet, LocalDate recordedAt);
+
+    Optional<Weight> findByWeightId(Long weightId);
 }

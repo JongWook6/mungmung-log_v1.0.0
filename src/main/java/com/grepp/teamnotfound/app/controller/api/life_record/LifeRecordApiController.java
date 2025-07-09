@@ -207,6 +207,31 @@ public class LifeRecordApiController {
 
         return ResponseEntity.ok().build();
     }
+
+    // 생활기록 수정
+    @PatchMapping
+    public ResponseEntity<Map<String, LifeRecordData>> modifyLifeRecord(
+            @RequestBody LifeRecordData data
+    ){
+        Pet pet = petService.getPet(data.getPetId());
+
+        // 관찰기록이 수정됐을 경우
+        if(data.getNote() != null) noteService.updateNote(data.getNote());
+
+        // 수면기록이 수정됐을 경우
+        if(data.getSleepTime() != null) sleepingService.updateSleeping(data.getSleepTime());
+
+        // 몸무게가 수정됐을 경우
+        if(data.getWeight() != null) weightService.updateWeight(data.getWeight());
+
+        // 산책이 수정됐을 경우
+        if(data.getWalkingList() != null) walkingService.updateWalkingList(data.getWalkingList());
+
+        // 식사가 수정됐을 경우
+        if(data.getFeedingList() != null) feedingService.updateFeedingList(data.getFeedingList());
+
+        return ResponseEntity.ok(Map.of("data", data));
+    }
     // 생활기록 삭제
     @PatchMapping("{date}/{petId}/delete")
     public ResponseEntity<String> deleteLifeRecord(

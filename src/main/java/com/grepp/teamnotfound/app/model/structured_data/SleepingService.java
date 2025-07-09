@@ -40,6 +40,16 @@ public class SleepingService {
                 .build();
     }
 
+    // 수면 정보 수정
+    @Transactional
+    public void updateSleeping(SleepingData sleepingData){
+        Sleeping sleeping = sleepingRepository.findBySleepingId(sleepingData.getSleepingId())
+                .orElseThrow(() -> new StructuredDataException(SleepingErrorCode.SLEEPING_NOT_FOUND));
+        sleeping.setSleepingTime(sleepingData.getSleepTime());
+        sleeping.setUpdatedAt(OffsetDateTime.now());
+        sleepingRepository.save(sleeping);
+    }
+
     // 수면 정보 삭제
     public void deleteSleeping(Pet pet, LocalDate recordedAt) {
         Sleeping sleeping = sleepingRepository.findByPetAndRecordedAt(pet, recordedAt)

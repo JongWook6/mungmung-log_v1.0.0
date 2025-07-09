@@ -11,4 +11,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface WalkingRepository extends JpaRepository<Walking, Long> {
 
     List<Walking> findAllByPetAndRecordedAt(Pet pet, LocalDate recordedAt);
+
+    Optional<Walking> findByWalkingId(Long walkingId);
 }

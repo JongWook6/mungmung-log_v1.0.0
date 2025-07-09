@@ -5,6 +5,8 @@ import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.structured_data.dto.FeedingDto;
 import com.grepp.teamnotfound.app.model.structured_data.entity.Feeding;
 import com.grepp.teamnotfound.app.model.structured_data.repository.FeedingRepository;
+import com.grepp.teamnotfound.infra.error.exception.StructuredDataException;
+import com.grepp.teamnotfound.infra.error.exception.code.FeedingErrorCode;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -42,6 +44,20 @@ public class FeedingService {
                 .mealtime(feeding.getMealTime())
                 .unit(feeding.getUnit())
                 .build()).collect(Collectors.toList());
+    }
+
+    // 식사 정보 수정
+    @Transactional
+    public void updateFeedingList(List<FeedingData> feedingDataList){
+        for(FeedingData feedingData:feedingDataList){
+            Feeding feeding = feedingRepository.findByFeedingId(feedingData.getFeedingId())
+                    .orElseThrow(() -> new StructuredDataException(FeedingErrorCode.Feeding_NOT_FOUND));
+            feeding.setAmount(feedingData.getAmount());
+            feeding.setMealTime(feedingData.getMealtime());
+            feeding.setUnit(feedingData.getUnit());
+            feeding.setUpdatedAt(OffsetDateTime.now());
+            feedingRepository.save(feeding);
+        }
     }
 
     // 식사 정보 삭제

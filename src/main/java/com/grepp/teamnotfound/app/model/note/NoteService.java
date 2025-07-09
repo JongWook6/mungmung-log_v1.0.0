@@ -46,6 +46,16 @@ public class NoteService {
                 .build();
     }
 
+    // 생활기록 정보 수정
+    @Transactional
+    public void updateNote(NoteData noteData){
+        Note note = noteRepository.findById(noteData.getNoteId())
+                .orElseThrow(() -> new StructuredDataException(NoteErrorCode.NOTE_NOT_FOUND));
+        note.setContent(noteData.getContent());
+        note.setUpdatedAt(OffsetDateTime.now());
+        noteRepository.save(note);
+    }
+
     // 생활기록 정보 삭제
     @Transactional
     public void deleteNote(Pet pet, LocalDate recordedAt) {

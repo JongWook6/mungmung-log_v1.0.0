@@ -6,7 +6,9 @@ import com.grepp.teamnotfound.app.model.structured_data.dto.WeightDto;
 import com.grepp.teamnotfound.app.model.structured_data.entity.Weight;
 import com.grepp.teamnotfound.app.model.structured_data.repository.WeightRepository;
 import com.grepp.teamnotfound.infra.error.exception.StructuredDataException;
+import com.grepp.teamnotfound.infra.error.exception.code.NoteErrorCode;
 import com.grepp.teamnotfound.infra.error.exception.code.SleepingErrorCode;
+import com.grepp.teamnotfound.infra.error.exception.code.WeightErrorCode;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +34,7 @@ public class WeightService {
     @Transactional(readOnly = true)
     public WeightData getWeight(Pet pet, LocalDate recordedAt){
         Weight weight = weightRepository.findByPetAndRecordedAt(pet, recordedAt)
-                .orElseThrow(() -> new StructuredDataException(SleepingErrorCode.SLEEPING_NOT_FOUND));
+                .orElseThrow(() -> new StructuredDataException(WeightErrorCode.WEIGHT_NOT_FOUND));
 
         return WeightData.builder()
                 .weightId(weight.getWeightId())
@@ -40,11 +42,19 @@ public class WeightService {
                 .build();
     }
 
+    // 몸무게 정보 수정
+    @Transactional
+    public void updateWeight(WeightData weightData){
+        Weight weight = weightRepository.findByWeightId(weightData.getWeightId())
+                .orElseThrow(() -> new StructuredDataException(WeightErrorCode.WEIGHT_NOT_FOUND));
+
+    }
+
     // 몸무게 정보 삭제
     @Transactional
     public void deleteWeight(Pet pet, LocalDate recordedAt){
         Weight weight = weightRepository.findByPetAndRecordedAt(pet, recordedAt)
-                .orElseThrow(() -> new StructuredDataException(SleepingErrorCode.SLEEPING_NOT_FOUND));
+                .orElseThrow(() -> new StructuredDataException(WeightErrorCode.WEIGHT_NOT_FOUND));
         weight.setDeletedAt(OffsetDateTime.now());
         weightRepository.save(weight);
     }
