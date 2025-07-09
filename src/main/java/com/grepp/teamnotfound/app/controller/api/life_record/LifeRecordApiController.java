@@ -106,37 +106,9 @@ public class LifeRecordApiController {
         @PathVariable LocalDate date
     ){
         // 상세정보 조회 Service
-        // LifeRecordData lifeRecord = findLifeRecord(petId, date);
+         LifeRecordData lifeRecord = findLifeRecord(petId, date);
 
-        // Mock Data
-        LifeRecordData response = new LifeRecordData();
-        response.setPetId(petId);
-        response.setRecordAt(date);
-        response.setNote(NoteData.builder().noteId(1L).content("관찰일지 내용").build());
-        SleepingData sleeping = SleepingData.builder()
-                .sleepingId(1L).sleepTime(10).build();
-        response.setSleepTime(sleeping);
-        WeightData weight = WeightData.builder()
-                .weightId(1L).weight(10.0).build();
-        response.setWeight(weight);
-
-        WalkingData walking1 = WalkingData.builder().walkingId(1L)
-                .startedAt(OffsetDateTime.of(LocalDate.of(2025,07,01), LocalTime.of(10, 30, 0), OffsetDateTime.now().getOffset()))
-                .endedAt(OffsetDateTime.of(LocalDate.of(2025,07,01), LocalTime.of(11, 30, 0), OffsetDateTime.now().getOffset())).build();
-        WalkingData walking2 = WalkingData.builder().walkingId(1L)
-                .startedAt(OffsetDateTime.of(LocalDate.of(2025,07,01), LocalTime.of(10, 30, 0), OffsetDateTime.now().getOffset()))
-                .endedAt(OffsetDateTime.of(LocalDate.of(2025,07,01), LocalTime.of(11, 30, 0), OffsetDateTime.now().getOffset())).build();
-        response.setWalkingList(List.of(walking1, walking2));
-
-        FeedingData feeding1 = FeedingData.builder()
-                .feedingId(1L).amount(5.0).mealtime(OffsetDateTime.now()).unit(FeedUnit.CUP).build();
-        FeedingData feeding2 = FeedingData.builder()
-                .feedingId(2L).amount(150.0).mealtime(OffsetDateTime.now()).unit(FeedUnit.GRAM).build();
-        FeedingData feeding3 = FeedingData.builder()
-                .feedingId(3L).amount(20.0).mealtime(OffsetDateTime.now()).unit(FeedUnit.SCOOP).build();
-        response.setFeedingList(List.of(feeding1, feeding2, feeding3));
-
-        return ResponseEntity.ok(Map.of("data", response));
+         return ResponseEntity.ok(Map.of("data", lifeRecord));
     }
 
 
@@ -166,6 +138,7 @@ public class LifeRecordApiController {
         // 관찰노트 등록
         NoteDto noteDto = NoteDto.builder()
                 .content(data.getNote().getContent())
+                .recordedAt(data.getRecordAt())
                 .pet(pet).build();
         noteService.createNote(noteDto);
 
@@ -201,11 +174,11 @@ public class LifeRecordApiController {
                     .amount(feeding.getAmount())
                     .unit(feeding.getUnit())
                     .recordedAt(feeding.getRecordedAt())
-                    .build();
+                    .pet(pet).build();
             feedingService.createFeeding(feedingDto);
         });
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(Map.of("data", data));
     }
 
     // 생활기록 수정

@@ -1,5 +1,6 @@
 package com.grepp.teamnotfound.app.model.structured_data.dto;
 
+import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.structured_data.FeedUnit;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
@@ -21,7 +22,7 @@ public class FeedingDto {
 
     private LocalDate recordedAt;
 
-    private Long pet;
+    private Pet pet;
 
     private OffsetDateTime createdAt = OffsetDateTime.now();
 
