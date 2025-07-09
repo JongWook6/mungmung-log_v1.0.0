@@ -24,6 +24,7 @@ public class SecurityConfig {
                         (requests) -> requests
                                 .requestMatchers(GET, "/", "/error", "/favicon.ico").permitAll()
                                 .requestMatchers(GET, "/test/**").permitAll()
+                                .requestMatchers("/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                                 .anyRequest().authenticated()
                 );
 
