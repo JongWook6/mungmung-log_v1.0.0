@@ -13,6 +13,7 @@ import com.grepp.teamnotfound.infra.error.exception.BusinessException;
 import com.grepp.teamnotfound.infra.error.exception.code.UserErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +29,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final MailService mailService;
 
-
+    ModelMapper modelMapper = new ModelMapper();
 
     // 요청
     @Transactional
@@ -107,25 +108,17 @@ public class UserService {
             throw new BusinessException(UserErrorCode.USER_NOT_FOUND);
         }
 
-        UserImg userImg = user.getUserImg();
-        UserImgDto userImgDto = null;
+        UserDto userDto = modelMapper.map(user, UserDto.class);
 
-        if (user.getUserImg() != null) {
-            userImgDto = UserImgDto.builder()
-                .userImgId(userImg.getUserImgId())
-                .url(userImg.getSavePath()+userImg.getRenamedName())
-                .build();
+        UserImg userImg = user.getUserImg();
+        if (userImg != null) {
+            UserImgDto userImgDto = new UserImgDto();
+            userImgDto.setUserImgId(userImg.getUserImgId());
+            userImgDto.setUrl(userImg.getSavePath() + userImg.getRenamedName());
+
+            userDto.setUserImg(userImgDto);
         }
 
-        return UserDto.builder()
-            .userId(user.getUserId())
-            .email(user.getEmail())
-            .state(user.getState())
-            .name(user.getName())
-            .nickname(user.getNickname())
-            .role(user.getRole())
-            .provider(user.getProvider())
-            .userImg(userImgDto)
-            .build();
+        return userDto;
     }
 }
