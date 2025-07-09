@@ -5,8 +5,6 @@ import com.grepp.teamnotfound.app.controller.api.mypage.payload.PetCreateRequest
 import com.grepp.teamnotfound.app.controller.api.mypage.payload.PetEditRequest;
 import com.grepp.teamnotfound.app.model.pet.PetService;
 import com.grepp.teamnotfound.app.model.pet.dto.PetDto;
-import com.grepp.teamnotfound.util.ReferencedException;
-import com.grepp.teamnotfound.util.ReferencedWarning;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
