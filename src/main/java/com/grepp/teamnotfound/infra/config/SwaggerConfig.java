@@ -5,16 +5,14 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
-import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class SwaggerConfig {
+
     @Bean
     public OpenAPI openApiSpec() {
-        Server server = new Server();
-        server.setUrl("https://mungnote-172598302113.asia-northeast3.run.app");
         return new OpenAPI()
                 .info(new Info()
                         .title("API 문서")
@@ -34,7 +32,6 @@ public class SwaggerConfig {
                                                 .description(
                                                         "JWT 토큰을 입력하세요. Bearer 는 생략하세요")
                                 ))
-                .addSecurityItem(new SecurityRequirement().addList("404TNF"))
-                .addServersItem(server);
+                .addSecurityItem(new SecurityRequirement().addList("404TNF"));
     }
 }
