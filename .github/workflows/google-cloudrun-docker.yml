@@ -55,8 +55,6 @@ jobs:
       # If you already have a container image, you can omit these steps.
       - name: 'Docker Auth'
         run: |
-          echo "${{ secrets.GCP_CREDENTIALS }}" > key.json
-          gcloud auth activate-service-account --key-file=key.json
           gcloud auth configure-docker ${{ secrets.GCP_REGION }}-docker.pkg.dev --quiet
 
 
