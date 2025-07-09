@@ -44,5 +44,18 @@ public class FeedingService {
                 .build()).collect(Collectors.toList());
     }
 
+    // 식사 정보 삭제
+    @Transactional
+    public void deleteFeedingList(Pet pet, LocalDate recordedAt){
+        List<Feeding> feedingList = feedingRepository.findAllByPetAndRecordedAt(pet, recordedAt);
+
+        if(feedingList.isEmpty()) return;
+
+        feedingList.forEach(feeding -> {
+            feeding.setDeletedAt(OffsetDateTime.now());
+            feedingRepository.save(feeding);
+        });
+    }
+
 }
 

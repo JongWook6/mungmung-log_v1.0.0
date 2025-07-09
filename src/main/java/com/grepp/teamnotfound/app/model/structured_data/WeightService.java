@@ -39,4 +39,14 @@ public class WeightService {
                 .weight(weight.getWeight())
                 .build();
     }
+
+    // 몸무게 정보 삭제
+    @Transactional
+    public void deleteWeight(Pet pet, LocalDate recordedAt){
+        Weight weight = weightRepository.findByPetAndRecordedAt(pet, recordedAt)
+                .orElseThrow(() -> new StructuredDataException(SleepingErrorCode.SLEEPING_NOT_FOUND));
+        weight.setDeletedAt(OffsetDateTime.now());
+        weightRepository.save(weight);
+    }
+
 }

@@ -207,6 +207,31 @@ public class LifeRecordApiController {
 
         return ResponseEntity.ok().build();
     }
+    // 생활기록 삭제
+    @PatchMapping("{date}/{petId}/delete")
+    public ResponseEntity<String> deleteLifeRecord(
+            @PathVariable Long petId,
+            @PathVariable LocalDate date
+    ){
+        Pet pet = petService.getPet(petId);
+        // 관찰노드 삭제
+        noteService.deleteNote(pet, date);
+
+        // 수면 삭제
+        sleepingService.deleteSleeping(pet, date);
+
+        // 몸무게 삭제
+        weightService.deleteWeight(pet, date);
+
+        // 산책 삭제
+        walkingService.deleteWalkingList(pet, date);
+
+        // 식사 삭제
+        feedingService.deleteFeedingList(pet, date);
+
+        return ResponseEntity.ok("삭제 성공");
+    }
+
     // 생활기록 데이터 조회 및 합치기
     private LifeRecordData findLifeRecord(Long petId, LocalDate date){
         Pet pet = petService.getPet(petId);

@@ -45,4 +45,14 @@ public class NoteService {
                 .content(note.getContent())
                 .build();
     }
+
+    // 생활기록 정보 삭제
+    @Transactional
+    public void deleteNote(Pet pet, LocalDate recordedAt) {
+        Note note = noteRepository.findByPetAndRecordedAt(pet, recordedAt)
+                .orElseThrow(() -> new StructuredDataException(NoteErrorCode.NOTE_NOT_FOUND));
+        note.setCreatedAt(OffsetDateTime.now());
+        noteRepository.save(note);
+    }
+
 }
