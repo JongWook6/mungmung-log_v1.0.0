@@ -3,12 +3,9 @@ package com.grepp.teamnotfound.app.controller.api.schedule;
 import com.grepp.teamnotfound.app.controller.api.schedule.payload.ScheduleCreateRequest;
 import com.grepp.teamnotfound.app.controller.api.schedule.payload.ScheduleEditRequest;
 import com.grepp.teamnotfound.app.model.schedule.ScheduleService;
-import com.grepp.teamnotfound.app.model.schedule.dto.ScheduleCreateRequestDto;
 import com.grepp.teamnotfound.app.model.schedule.dto.ScheduleDto;
-import com.grepp.teamnotfound.app.model.schedule.dto.ScheduleEditRequestDto;
 import com.grepp.teamnotfound.app.model.schedule.entity.Schedule;
 import lombok.AllArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +22,6 @@ import java.util.Map;
 public class ScheduleApiController {
 
     private ScheduleService scheduleService;
-    ModelMapper modelMapper = new ModelMapper();
 
     // 일정 조회 시 한달치의 일정 넘기기
     @GetMapping("/{petId}/calendar")
@@ -54,8 +50,7 @@ public class ScheduleApiController {
             @PathVariable Long petId,
             @RequestBody ScheduleCreateRequest request
     ){
-        ScheduleCreateRequestDto requestDto = modelMapper.map(request, ScheduleCreateRequestDto.class);;
-        scheduleService.createSchedule(requestDto);
+        scheduleService.createSchedule(request);
 
         return ResponseEntity.ok(HttpStatus.CREATED);
     }
@@ -65,8 +60,7 @@ public class ScheduleApiController {
             @PathVariable Long petId,
             @RequestBody ScheduleEditRequest request
     ){
-        ScheduleEditRequestDto requestDto = modelMapper.map(request, ScheduleEditRequestDto.class);;
-        scheduleService.editSchedule(requestDto);
+        scheduleService.editSchedule(request);
 
         return ResponseEntity.ok(HttpStatus.ACCEPTED);
     }

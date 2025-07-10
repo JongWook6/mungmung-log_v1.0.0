@@ -44,10 +44,4 @@ public class AuthExceptionFilter extends OncePerRequestFilter {
                     new AuthException(AuthErrorCode.UNAUTHENTICATED));
         }
     }
-
-    // swagger 프리플라이트 방지
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        return "OPTIONS".equalsIgnoreCase(request.getMethod());
-    }
 }
