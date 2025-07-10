@@ -43,7 +43,7 @@ public class Pet extends BaseEntity {
     )
     private Long petId;
 
-    @Column(nullable = false, length = 50)
+    @Column(nullable = true, length = 50)
     private String registNumber;
 
     @Column(nullable = false)
@@ -81,5 +81,4 @@ public class Pet extends BaseEntity {
 
     @OneToOne(mappedBy = "pet", fetch = FetchType.LAZY)
     private PetImg petImg;
-
 }

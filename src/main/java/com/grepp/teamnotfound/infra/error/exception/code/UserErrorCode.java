@@ -14,6 +14,8 @@ public enum UserErrorCode implements BaseErrorCode{
     USER_NICKNAME_ALREADY_EXISTS(HttpStatus.CONFLICT.value(),"USER_004", "이미 존재하는 닉네임입니다."),
     USER_ACCOUNT_LOCKED(HttpStatus.FORBIDDEN.value(), "USER_005", "접근이 불가능한 계정입니다."),
     EMAIL_VERIFICATION_FAILED(HttpStatus.BAD_REQUEST.value(), "USER_006", "이메일 인증에 실패하였습니다."),
+    EMAIL_ALREADY_VERIFIED(HttpStatus.BAD_REQUEST.value(), "USER_009", "이메일 인증이 이미 완료된 사용자입니다."),
+    EMAIL_VERIFICATION_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR.value(), "USER_008", "이메일 전송에 실패했습니다."),
     USER_ACCESS_DENIED(HttpStatus.FORBIDDEN.value(), "USER_007", "해당 사용자 정보에 대한 접근 권한이 없습니다.");
 
     private final int status;

@@ -1,6 +1,5 @@
 package com.grepp.teamnotfound.app.model.pet;
 
-import com.grepp.teamnotfound.infra.error.exception.PetException;
 import com.grepp.teamnotfound.app.controller.api.mypage.payload.PetCreateRequest;
 import com.grepp.teamnotfound.app.controller.api.mypage.payload.PetEditRequest;
 import com.grepp.teamnotfound.app.model.pet.dto.PetDto;
@@ -38,12 +37,6 @@ public class PetService {
     private final VaccinationService vaccinationService;
 
     ModelMapper modelMapper = new ModelMapper();
-  
-    @Transactional
-    public Pet getPet(Long petId){
-        return petRepository.findById(petId)
-                .orElseThrow(() -> new PetException(PetErrorCode.PET_NOT_FOUND));
-    }
 
     public List<PetDto> findAll() {
         List<Pet> pets = petRepository.findAll();
@@ -127,5 +120,4 @@ public class PetService {
         Period period = Period.between(birthday, LocalDate.now());
         return period.getYears() * 12 + period.getMonths();
     }
-
 }

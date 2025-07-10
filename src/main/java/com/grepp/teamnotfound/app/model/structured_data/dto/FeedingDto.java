@@ -1,29 +1,32 @@
 package com.grepp.teamnotfound.app.model.structured_data.dto;
 
-import com.grepp.teamnotfound.app.model.pet.entity.Pet;
-import com.grepp.teamnotfound.app.model.structured_data.FeedUnit;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
-@Builder
+@Getter
+@Setter
 public class FeedingDto {
 
     private Long feedingId;
 
+    @NotNull
     private Double amount;
 
+    @NotNull
     private OffsetDateTime mealTime;
 
-    private FeedUnit unit;
+    @NotNull
+    @Size(max = 20)
+    private String unit;
 
+    @NotNull
     private LocalDate recordedAt;
 
-    private Pet pet;
-
-    private OffsetDateTime createdAt = OffsetDateTime.now();
+    @NotNull
+    private Long pet;
 
 }
