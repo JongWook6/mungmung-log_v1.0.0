@@ -13,16 +13,12 @@ import lombok.Data;
 public class FeedingDto {
 
     private Long feedingId;
+    private Long petId;
 
     private Double amount;
-
     private OffsetDateTime mealTime;
-
     private FeedUnit unit;
-
     private LocalDate recordedAt;
-
-    private Long petId;
 
     private OffsetDateTime createdAt = OffsetDateTime.now();
 

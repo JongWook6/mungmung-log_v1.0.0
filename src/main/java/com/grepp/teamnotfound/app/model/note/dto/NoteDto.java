@@ -12,14 +12,10 @@ import lombok.Data;
 public class NoteDto {
 
     private Long noteId;
-
-    @NotNull
-    private String content;
-
-    private LocalDate recordedAt;
-
-    @NotNull
     private Long petId;
+
+    private String content;
+    private LocalDate recordedAt;
 
     private OffsetDateTime createdAt = OffsetDateTime.now();
 }

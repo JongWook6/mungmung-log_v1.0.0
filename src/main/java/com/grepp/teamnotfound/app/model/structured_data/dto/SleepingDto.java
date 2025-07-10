@@ -12,15 +12,10 @@ import lombok.Data;
 public class SleepingDto {
 
     private Long sleepingId;
-
-    @NotNull
-    private Integer sleepingTime;
-
-    @NotNull
-    private LocalDate recordedAt;
-
-    @NotNull
     private Long petId;
+
+    private Integer sleepingTime;
+    private LocalDate recordedAt;
 
     private OffsetDateTime createdAt = OffsetDateTime.now();
 

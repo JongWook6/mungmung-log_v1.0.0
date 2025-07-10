@@ -12,15 +12,10 @@ import lombok.Data;
 public class WeightDto {
 
     private Long weightId;
-
-    @NotNull
-    private Double weight;
-
-    @NotNull
-    private LocalDate recordedAt;
-
-    @NotNull
     private Long petId;
+
+    private Double weight;
+    private LocalDate recordedAt;
 
     private OffsetDateTime createdAt = OffsetDateTime.now();
 
