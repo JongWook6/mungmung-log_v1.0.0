@@ -1,6 +1,7 @@
 package com.grepp.teamnotfound.app.controller.api.article;
 
 import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleDetailResponse;
+import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleListRequest;
 import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleListResponse;
 import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleRequest;
 import com.grepp.teamnotfound.app.controller.api.article.payload.LikeResponse;
@@ -9,15 +10,21 @@ import com.grepp.teamnotfound.app.model.board.ArticleService;
 import com.grepp.teamnotfound.app.model.board.code.BoardType;
 import com.grepp.teamnotfound.app.model.board.code.SearchType;
 import com.grepp.teamnotfound.app.model.board.code.SortType;
+import com.grepp.teamnotfound.app.model.board.dto.ArticleDto;
 import com.grepp.teamnotfound.app.model.board.dto.ArticleListDto;
+import com.grepp.teamnotfound.infra.error.exception.BusinessException;
+import com.grepp.teamnotfound.infra.error.exception.code.BoardErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -40,13 +47,13 @@ public class ArticleApiController {
     @GetMapping("/v1")
     @Operation(summary = "특정 게시판의 게시글 리스트 조회")
     public ResponseEntity<ArticleListResponse> getAllArticles(
-        @RequestParam int page,
-        @RequestParam int size,
-        @RequestParam BoardType boardType,
-        @RequestParam SortType sortType,
-        @RequestParam(required = false) SearchType searchType,
-        @RequestParam(required = false) String keyword
+        @ModelAttribute ArticleListRequest request,
+        BindingResult bindingResult
     ) {
+        if (bindingResult.hasErrors()) {
+            throw new BusinessException(BoardErrorCode.BOARD_INVALID_PAGE);
+        }
+
         ArticleListResponse response = new ArticleListResponse();
 
         for (int i = 1; i <= 5; i++) {
@@ -64,8 +71,37 @@ public class ArticleApiController {
 
         Pagination pagination = new Pagination();
         pagination.setTotal(45); // 전체 게시글 수
-        pagination.setPage(page); // 요청 페이지
-        pagination.setSize(size); // 요청 게시글 수
+        pagination.setPage(request.getPage()); // 요청 페이지
+        pagination.setSize(request.getSize()); // 요청 게시글 수
+        pagination.setTotalPages((int) Math.ceil((double) pagination.getTotal() / pagination.getSize()));
+
+        response.setPagination(pagination);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/v2")
+    @Operation(summary = "특정 게시판의 게시글 리스트 조회")
+    public ResponseEntity<ArticleListResponse> getAllArticlesV2(
+        @ModelAttribute ArticleListRequest request,
+        BindingResult bindingResult
+    ) {
+        if (bindingResult.hasErrors()) {
+            throw new BusinessException(BoardErrorCode.BOARD_INVALID_PAGE);
+        }
+
+        PageRequest pageable = PageRequest.of(request.getPage() - 1, request.getSize());
+        Page<ArticleListDto> page = articleService.findPaged(pageable);
+
+        if (request.getPage() != 1 && page.getContent().isEmpty()) {
+            throw new BusinessException(BoardErrorCode.BOARD_INVALID_PAGE);
+        }
+
+        ArticleListResponse response = new ArticleListResponse();
+
+        Pagination pagination = new Pagination();
+        pagination.setTotal(45); // 전체 게시글 수
+        pagination.setPage(request.getPage()); // 요청 페이지
+        pagination.setSize(request.getSize()); // 요청 게시글 수
         pagination.setTotalPages((int) Math.ceil((double) pagination.getTotal() / pagination.getSize()));
 
         response.setPagination(pagination);
