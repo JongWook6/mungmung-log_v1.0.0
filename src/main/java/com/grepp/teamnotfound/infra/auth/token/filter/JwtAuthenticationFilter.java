@@ -1,7 +1,7 @@
 package com.grepp.teamnotfound.infra.auth.token.filter;
 
-import com.grepp.teamnotfound.app.model.auth.token.dto.AccessTokenDto;
 import com.grepp.teamnotfound.app.model.auth.token.RefreshTokenService;
+import com.grepp.teamnotfound.app.model.auth.token.dto.AccessTokenDto;
 import com.grepp.teamnotfound.app.model.auth.token.entity.RefreshToken;
 import com.grepp.teamnotfound.app.model.auth.token.entity.UserBlackList;
 import com.grepp.teamnotfound.app.model.auth.token.repository.UserBlackListRepository;
@@ -10,6 +10,7 @@ import com.grepp.teamnotfound.infra.auth.token.TokenCookieFactory;
 import com.grepp.teamnotfound.infra.auth.token.code.TokenType;
 import com.grepp.teamnotfound.infra.error.exception.CommonException;
 import com.grepp.teamnotfound.infra.error.exception.code.AuthErrorCode;
+import com.grepp.teamnotfound.infra.util.requestmatcher.RequestMatcherHolder;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
@@ -22,13 +23,9 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -39,25 +36,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final RefreshTokenService refreshTokenService;
     private final UserBlackListRepository userBlackListRepository;
 
-    private final AntPathMatcher pathMatcher = new AntPathMatcher();
+    private final RequestMatcherHolder requestMatcherHolder;
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        List<String> excludePath = new ArrayList<>();
-        excludePath.addAll(List.of("/error", "/favicon.ico", "/img","/download"));
-
-        excludePath.addAll(List.of("/api/auth/v1/register", "/api/auth/v1/login", "/api/auth/v1/test"));
-        excludePath.addAll(List.of("/api/auth/v1/admin/register", "/api/auth/v1/admin/login"));
-        excludePath.addAll(List.of("/swagger-ui","/swagger-ui/**","/swagger-ui.html",
-                "/v3/api-docs", "/v3/api-docs/swagger-config","/v3/api-docs/**"));
-        String path = request.getRequestURI();
 
         // OPTIONS(프리플라이트) 요청은 필터를 타지 않도록 처리
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             return true;
         }
 
-        return excludePath.stream().anyMatch(path::startsWith);
+        return requestMatcherHolder.getRequestMatchersByMinRole(null).matches(request);
     }
 
     @Override

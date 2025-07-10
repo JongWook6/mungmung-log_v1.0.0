@@ -1,4 +1,4 @@
-package com.grepp.teamnotfound.app.controller.api;
+package com.grepp.teamnotfound.app.controller.api.auth;
 
 import com.grepp.teamnotfound.app.model.auth.AuthService;
 import com.grepp.teamnotfound.app.model.auth.payload.LoginRequest;
@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
-public class UserController {
+public class AuthController {
 
     private final AuthService authService;
     private final UserService userService;
