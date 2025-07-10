@@ -1,31 +1,27 @@
 package com.grepp.teamnotfound.app.model.structured_data.dto;
 
-import jakarta.validation.constraints.NotNull;
+import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Builder;
+import lombok.Data;
 
-
-@Getter
-@Setter
+@Data
+@Builder
 public class WalkingDto {
 
     private Long walkingId;
 
-    @NotNull
     private OffsetDateTime startedAt;
 
-    @NotNull
     private OffsetDateTime endedAt;
 
-    @NotNull
     private Integer pace;
 
-    @NotNull
     private LocalDate recordedAt;
 
-    @NotNull
-    private Long pet;
+    private Pet pet;
+
+    private OffsetDateTime createdAt = OffsetDateTime.now();
 
 }
