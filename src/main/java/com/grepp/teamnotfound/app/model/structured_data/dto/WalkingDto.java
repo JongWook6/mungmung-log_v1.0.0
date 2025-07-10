@@ -20,7 +20,7 @@ public class WalkingDto {
 
     private LocalDate recordedAt;
 
-    private Long petId;
+    private Pet pet;
 
     private OffsetDateTime createdAt = OffsetDateTime.now();
 

@@ -13,12 +13,13 @@ public class NoteDto {
 
     private Long noteId;
 
+    @NotNull
     private String content;
 
     private LocalDate recordedAt;
 
-    private Long petId;
+    @NotNull
+    private Pet pet;
 
     private OffsetDateTime createdAt = OffsetDateTime.now();
-
 }
