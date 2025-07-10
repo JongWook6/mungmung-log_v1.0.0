@@ -21,9 +21,10 @@ public class SwaggerConfig {
                         .title("API 문서")
                         .description("API 명세입니다. 에러 코드는 [링크]를 참조해 주세요.")
                         .version("v1.0.0"))
-                .servers(List.of(
-                        new Server().url("https://mungnote-172598302113.asia-northeast3.run.app")
-                ))
+                // todo 배포할 때만 허용...
+//                .servers(List.of(
+//                        new Server().url("https://mungnote-172598302113.asia-northeast3.run.app")
+//                ))
                 .components(
                         new Components()
                                 .addSecuritySchemes("bearerAuth"
