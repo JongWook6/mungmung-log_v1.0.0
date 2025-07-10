@@ -20,7 +20,7 @@ public class SleepingDto {
     private LocalDate recordedAt;
 
     @NotNull
-    private Pet pet;
+    private Long petId;
 
     private OffsetDateTime createdAt = OffsetDateTime.now();
 
