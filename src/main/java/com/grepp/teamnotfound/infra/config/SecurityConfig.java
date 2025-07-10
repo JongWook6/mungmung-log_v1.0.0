@@ -3,6 +3,7 @@ package com.grepp.teamnotfound.infra.config;
 import com.grepp.teamnotfound.infra.auth.token.filter.AuthExceptionFilter;
 import com.grepp.teamnotfound.infra.auth.token.filter.JwtAuthenticationFilter;
 import com.grepp.teamnotfound.infra.auth.token.filter.LogoutFilter;
+import com.grepp.teamnotfound.infra.util.requestmatcher.RequestMatcherHolder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +16,7 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -34,9 +36,13 @@ public class SecurityConfig {
     private final AuthExceptionFilter authExceptionFilter;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final LogoutFilter logoutFilter;
+    private final RequestMatcherHolder requestMatcherHolder;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
+        RequestMatcher permitAllMatcher = requestMatcherHolder.getRequestMatchersByMinRole(null);
+        RequestMatcher adminMatcher = requestMatcherHolder.getRequestMatchersByMinRole("ADMIN");
 
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -50,15 +56,18 @@ public class SecurityConfig {
 //                )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(
-                        (requests) -> requests
-                                .requestMatchers(GET, "/", "/error", "/favicon.ico").permitAll()
-                                .requestMatchers(POST, "/api/auth/v1/register/**","/api/auth/v1/login",
-                                        "/api/auth/v1/admin/register", "/api/auth/v1/admin/login").permitAll()
+                        authorize -> authorize
+
+                                .requestMatchers(permitAllMatcher).permitAll()
+                                .requestMatchers(adminMatcher).hasRole("ADMIN")
+
+                                //.requestMatchers(GET, "/", "/error", "/favicon.ico").permitAll()
+                                //.requestMatchers(POST, "/api/auth/v1/register/**","/api/auth/v1/login",
+                                //        "/api/auth/v1/admin/register", "/api/auth/v1/admin/login").permitAll()
 //                                .requestMatchers(POST, "/api/v1/auth/logout").permitAll()
-                                .requestMatchers(GET, "/**").permitAll()
 
-
-                                .requestMatchers(GET, "/swagger-ui", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
+                                //.requestMatchers(GET, "/**").permitAll()
+                                //.requestMatchers(GET, "/swagger-ui", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                                 .anyRequest().authenticated()
                 )
 

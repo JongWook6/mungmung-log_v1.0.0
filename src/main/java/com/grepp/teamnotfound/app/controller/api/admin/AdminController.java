@@ -1,4 +1,4 @@
-package com.grepp.teamnotfound.app.controller.api;
+package com.grepp.teamnotfound.app.controller.api.admin;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
