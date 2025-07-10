@@ -47,7 +47,9 @@ public class WeightService {
     public void updateWeight(WeightData weightData){
         Weight weight = weightRepository.findByWeightId(weightData.getWeightId())
                 .orElseThrow(() -> new StructuredDataException(WeightErrorCode.WEIGHT_NOT_FOUND));
-
+        weight.setWeight(weightData.getWeight());
+        weight.setUpdatedAt(OffsetDateTime.now());
+        weightRepository.save(weight);
     }
 
     // 몸무게 정보 삭제
