@@ -1,5 +1,7 @@
 package com.grepp.teamnotfound.app.model.user;
 
+
+import lombok.extern.slf4j.Slf4j;
 import com.grepp.teamnotfound.app.model.auth.code.Role;
 import com.grepp.teamnotfound.app.model.auth.mail.MailService;
 import com.grepp.teamnotfound.app.model.user.dto.RegisterRequestDto;
@@ -16,12 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Service
-@Slf4j
 @RequiredArgsConstructor
 public class UserService {
 
