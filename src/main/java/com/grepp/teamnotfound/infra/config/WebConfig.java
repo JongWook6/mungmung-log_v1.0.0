@@ -10,7 +10,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry){
         registry.addMapping("/**")
-                .allowedOrigins("https://mungnote-172598302113.asia-northeast3.run.app") // Swagger-UI 주소
+                .allowedOrigins("http://localhost:3000", "https://mungnote-172598302113.asia-northeast3.run.app") // Swagger-UI 주소
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true)
