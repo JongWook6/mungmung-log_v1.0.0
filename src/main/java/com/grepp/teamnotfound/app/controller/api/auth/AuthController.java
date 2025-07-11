@@ -16,6 +16,7 @@ import com.grepp.teamnotfound.infra.auth.token.TokenCookieFactory;
 import com.grepp.teamnotfound.infra.auth.token.code.GrantType;
 import com.grepp.teamnotfound.infra.auth.token.code.TokenType;
 import com.grepp.teamnotfound.infra.response.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
@@ -32,30 +33,35 @@ public class AuthController {
     private final UserService userService;
     private final MailService mailService;
 
+    @Operation(summary = "이메일 중복 확인")
     @GetMapping("v1/check-email")
     public ResponseEntity<ApiResponse<?>> checkEmail(@RequestParam("email") String email) {
         userService.validateEmailDuplication(email);
         return ResponseEntity.ok(ApiResponse.success("사용 가능한 이메일입니다."));
     }
 
+    @Operation(summary = "이메일 인증코드 발송 요청")
     @PostMapping("v1/email-verifications")
     public ResponseEntity<ApiResponse<?>> emailVerification(@RequestBody EmailVerificationRequest request) {
         userService.sendEmail(request.getEmail());
         return ResponseEntity.ok(ApiResponse.success("인증 코드가 발송되었습니다."));
     }
 
+    @Operation(summary = "이메일 인증코드 검증")
     @PostMapping("v1/email-verifications/verify")
     public ResponseEntity<ApiResponse<?>> emailVerify(@RequestBody EmailVerifyRequest request) {
         mailService.verifyEmailCode(request.getEmail(), request.getVerificationCode());
         return ResponseEntity.ok(ApiResponse.success("인증코드가 올바르게 인증되었습니다"));
     }
 
+    @Operation(summary = "닉네임 중복 확인")
     @GetMapping("v1/check-nickname")
     public ResponseEntity<ApiResponse<?>> checkNickname(@RequestParam("nickname") String nickname) {
         userService.validateNicknameDuplication(nickname);
         return ResponseEntity.ok(ApiResponse.success("사용 가능한 닉네임입니다."));
     }
 
+    @Operation(summary = "최종 회원가입")
     @PostMapping("v1/register")
     public ResponseEntity<ApiResponse<?>> register(@RequestBody RegisterRequest request) {
 
@@ -88,7 +94,7 @@ public class AuthController {
     }
 
 
-
+    @Operation(summary = "회원 로그인")
     @PostMapping("v1/login")
     public ResponseEntity<ApiResponse<TokenResponse>> login(@RequestBody LoginRequest request, HttpServletResponse response) {
 
@@ -116,7 +122,7 @@ public class AuthController {
     }
 
 
-
+    @Operation(summary = "관리자 로그인")
     @PostMapping("v1/admin/login")
     @PreAuthorize("permitAll()")
     public ResponseEntity<ApiResponse<TokenResponse>> adminLogin(@RequestBody LoginRequest request, HttpServletResponse response) {
