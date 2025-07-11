@@ -6,11 +6,12 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 
 public interface WalkingRepository extends JpaRepository<Walking, Long> {
 
-    List<Walking> findAllByPetAndRecordedAt(Pet pet, LocalDate recordedAt);
+    @Query("SELECT w FROM Walking w WHERE w.pet = :pet AND w.recordedAt = :recordedAt AND w.deletedAt IS NULL")
+    List<Walking> findWalkingList(Pet pet, LocalDate recordedAt);
 
-    Optional<Walking> findByWalkingId(Long walkingId);
 }

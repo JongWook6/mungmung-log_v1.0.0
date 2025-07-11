@@ -35,7 +35,7 @@ public class WalkingService {
     // 산책 정보 리스트 조회
     @Transactional(readOnly = true)
     public List<WalkingData> getWalkingList(Pet pet, LocalDate recordedAt){
-        List<Walking> walkingList = walkingRepository.findAllByPetAndRecordedAt(pet, recordedAt);
+        List<Walking> walkingList = walkingRepository.findWalkingList(pet, recordedAt);
 
         if(walkingList.isEmpty()) return List.of();
 
@@ -61,7 +61,7 @@ public class WalkingService {
     // 산책 정보 삭제
     @Transactional
     public void deleteWalkingList(Pet pet, LocalDate recordedAt){
-        List<Walking> walkingList = walkingRepository.findAllByPetAndRecordedAt(pet, recordedAt);
+        List<Walking> walkingList = walkingRepository.findWalkingList(pet, recordedAt);
 
         if (walkingList.isEmpty()) return;
 

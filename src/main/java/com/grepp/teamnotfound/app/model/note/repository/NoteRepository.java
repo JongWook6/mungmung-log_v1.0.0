@@ -12,12 +12,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface NoteRepository extends JpaRepository<Note, Long> {
 
-    Note findFirstByPet(Pet pet);
-
     @Query("SELECT CASE WHEN COUNT(n) > 0 THEN TRUE ELSE FALSE END " +
             "FROM Note n WHERE n.pet.petId = :petId AND n.recordedAt = :date")
     boolean existsByPetIdAndRecordedAt(@Param("petId") Long petId, @Param("date") LocalDate date);
 
-    Optional<Note> findByPetAndRecordedAt(Pet pet, LocalDate recordedAt);
+    @Query("SELECT n FROM Note n WHERE n.pet = :pet AND n.recordedAt = :recordedAt AND n.deletedAt IS NULL")
+    Optional<Note> findNote(Pet pet, LocalDate recordedAt);
 
 }

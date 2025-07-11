@@ -37,7 +37,7 @@ public class NoteService {
     // 관찰노트 정보 조회
     @Transactional(readOnly = true)
     public NoteData getNote(Pet pet, LocalDate recordedAt){
-        Note note = noteRepository.findByPetAndRecordedAt(pet, recordedAt)
+        Note note = noteRepository.findNote(pet, recordedAt)
                 .orElseThrow(() -> new StructuredDataException(NoteErrorCode.NOTE_NOT_FOUND));
 
         return NoteData.builder()
@@ -57,7 +57,7 @@ public class NoteService {
     // 생활기록 정보 삭제
     @Transactional
     public void deleteNote(Pet pet, LocalDate recordedAt) {
-        Note note = noteRepository.findByPetAndRecordedAt(pet, recordedAt)
+        Note note = noteRepository.findNote(pet, recordedAt)
                 .orElseThrow(() -> new StructuredDataException(NoteErrorCode.NOTE_NOT_FOUND));
         note.setDeletedAt(OffsetDateTime.now());
         noteRepository.save(note);

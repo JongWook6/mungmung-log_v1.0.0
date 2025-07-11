@@ -6,11 +6,13 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 
 public interface FeedingRepository extends JpaRepository<Feeding, Long> {
 
-    List<Feeding> findAllByPetAndRecordedAt(Pet pet, LocalDate recordedAt);
+    @Query("SELECT f FROM Feeding f WHERE f.pet = :pet AND f.recordedAt = :recordedAt AND f.deletedAt IS NULL")
+    List<Feeding> findFeedingList(Pet pet, LocalDate recordedAt);
 
     Optional<Feeding> findByFeedingId(Long feedingId);
 }

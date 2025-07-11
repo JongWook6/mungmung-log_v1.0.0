@@ -31,7 +31,7 @@ public class SleepingService {
     // 수면 정보 조회
     @Transactional(readOnly = true)
     public SleepingData getSleeping(Pet pet, LocalDate recordedAt){
-        Sleeping sleeping = sleepingRepository.findByPetAndRecordedAt(pet, recordedAt)
+        Sleeping sleeping = sleepingRepository.findSleeping(pet, recordedAt)
                 .orElseThrow(() -> new StructuredDataException(SleepingErrorCode.SLEEPING_NOT_FOUND));
 
         return SleepingData.builder()
@@ -50,7 +50,7 @@ public class SleepingService {
 
     // 수면 정보 삭제
     public void deleteSleeping(Pet pet, LocalDate recordedAt) {
-        Sleeping sleeping = sleepingRepository.findByPetAndRecordedAt(pet, recordedAt)
+        Sleeping sleeping = sleepingRepository.findSleeping(pet, recordedAt)
                 .orElseThrow(() -> new StructuredDataException(SleepingErrorCode.SLEEPING_NOT_FOUND));
         sleeping.setDeletedAt(OffsetDateTime.now());
         sleepingRepository.save(sleeping);

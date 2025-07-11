@@ -35,7 +35,7 @@ public class FeedingService {
     // 식사 정보 조회
     @Transactional(readOnly = true)
     public List<FeedingData> getFeedingList(Pet pet, LocalDate recordedAt){
-        List<Feeding> feedingList = feedingRepository.findAllByPetAndRecordedAt(pet, recordedAt);
+        List<Feeding> feedingList = feedingRepository.findFeedingList(pet, recordedAt);
 
         if(feedingList.isEmpty()) return List.of();
 
@@ -61,7 +61,7 @@ public class FeedingService {
     // 식사 정보 삭제
     @Transactional
     public void deleteFeedingList(Pet pet, LocalDate recordedAt){
-        List<Feeding> feedingList = feedingRepository.findAllByPetAndRecordedAt(pet, recordedAt);
+        List<Feeding> feedingList = feedingRepository.findFeedingList(pet, recordedAt);
 
         if(feedingList.isEmpty()) return;
 
