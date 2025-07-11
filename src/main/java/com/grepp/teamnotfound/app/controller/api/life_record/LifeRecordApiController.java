@@ -7,6 +7,8 @@ import com.grepp.teamnotfound.app.controller.api.life_record.payload.NoteData;
 import com.grepp.teamnotfound.app.controller.api.life_record.payload.SleepingData;
 import com.grepp.teamnotfound.app.controller.api.life_record.payload.WalkingData;
 import com.grepp.teamnotfound.app.controller.api.life_record.payload.WeightData;
+import com.grepp.teamnotfound.app.model.life_record.LifeRecordService;
+import com.grepp.teamnotfound.app.model.life_record.dto.LifeRecordDto;
 import com.grepp.teamnotfound.app.model.note.NoteService;
 import com.grepp.teamnotfound.app.model.note.dto.NoteDto;
 import com.grepp.teamnotfound.app.model.pet.PetService;
@@ -44,6 +46,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class LifeRecordApiController {
 
     private final PetService petService;
+    private final LifeRecordService lifeRecordService;
     private final SleepingService sleepingService;
     private final WeightService weightService;
     private final NoteService noteService;
@@ -130,55 +133,16 @@ public class LifeRecordApiController {
 
     // 생활기록 등록
     @PostMapping
-    public ResponseEntity<Map<String, LifeRecordData>> registLifeRecord(
+    public ResponseEntity<String> registLifeRecord(
             @RequestBody LifeRecordData data
     ){
         Pet pet = petService.getPet(data.getPetId());
 
-        // 관찰노트 등록
-        NoteDto noteDto = NoteDto.builder()
-                .content(data.getNote().getContent())
-                .recordedAt(data.getRecordAt())
-                .pet(pet).build();
-        noteService.createNote(noteDto);
+        LifeRecordDto dto = new LifeRecordDto();
+        dto = dto.toDto(data, pet);
+        lifeRecordService.createLifeRecord(dto);
 
-        // 수면 등록
-        SleepingDto sleepingDto = SleepingDto.builder()
-                .sleepingTime(data.getSleepTime().getSleepTime())
-                .recordedAt(data.getRecordAt())
-                .pet(pet).build();
-        sleepingService.createSleeping(sleepingDto);
-
-        // 몸무게 등록
-        WeightDto weightDto = WeightDto.builder()
-                .weight(data.getWeight().getWeight())
-                .recordedAt(data.getRecordAt())
-                .pet(pet).build();
-        weightService.createWeight(weightDto);
-
-        // 산책 등록
-        data.getWalkingList().forEach(walking -> {
-            WalkingDto walkingDto = WalkingDto.builder()
-                    .startedAt(walking.getStartedAt())
-                    .endedAt(walking.getEndedAt())
-                    .pace(walking.getPace())
-                    .recordedAt(walking.getRecordedAt())
-                    .pet(pet).build();
-            walkingService.createWalking(walkingDto);
-        });
-
-        // 식사 등록
-        data.getFeedingList().forEach(feeding -> {
-            FeedingDto feedingDto = FeedingDto.builder()
-                    .mealTime(feeding.getMealtime())
-                    .amount(feeding.getAmount())
-                    .unit(feeding.getUnit())
-                    .recordedAt(feeding.getRecordedAt())
-                    .pet(pet).build();
-            feedingService.createFeeding(feedingDto);
-        });
-
-        return ResponseEntity.ok(Map.of("data", data));
+        return ResponseEntity.ok("등록 성공");
     }
 
     // 생활기록 수정

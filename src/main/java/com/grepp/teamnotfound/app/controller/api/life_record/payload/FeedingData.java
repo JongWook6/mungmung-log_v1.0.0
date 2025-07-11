@@ -17,6 +17,5 @@ public class FeedingData {
     private Double amount;
     private OffsetDateTime mealtime;
     private FeedUnit unit;
-    private LocalDate recordedAt;
 
 }

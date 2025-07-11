@@ -16,6 +16,5 @@ public class WalkingData {
     private OffsetDateTime startedAt;
     private OffsetDateTime endedAt;
     private Integer pace;
-    private LocalDate recordedAt;
 
 }

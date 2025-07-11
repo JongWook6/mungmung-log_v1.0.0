@@ -25,9 +25,11 @@ public class FeedingService {
 
     // 식사 정보 등록
     @Transactional
-    public void createFeeding(FeedingDto feedingDto){
-        Feeding feeding = modelMapper.map(feedingDto, Feeding.class);
-        feedingRepository.save(feeding);
+    public void createFeeding(List<FeedingDto> feedingDtoList){
+        for(FeedingDto feedingDto : feedingDtoList){
+            Feeding feeding = modelMapper.map(feedingDto, Feeding.class);
+            feedingRepository.save(feeding);
+        }
     }
 
     // 식사 정보 조회

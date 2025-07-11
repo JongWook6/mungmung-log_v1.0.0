@@ -1,7 +1,6 @@
 package com.grepp.teamnotfound.app.model.note.dto;
 
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
-import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import lombok.Builder;
@@ -12,7 +11,7 @@ import lombok.Data;
 public class NoteDto {
 
     private Long noteId;
-    private Long petId;
+    private Pet pet;
 
     private String content;
     private LocalDate recordedAt;

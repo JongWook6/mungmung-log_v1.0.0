@@ -25,9 +25,11 @@ public class WalkingService {
 
     // 산책 정보 생성
     @Transactional
-    public void createWalking(WalkingDto walkingDto){
-        Walking walking = modelMapper.map(walkingDto, Walking.class);
-        walkingRepository.save(walking);
+    public void createWalking(List<WalkingDto> walkingDtoList){
+        for(WalkingDto walkingDto : walkingDtoList){
+            Walking walking = modelMapper.map(walkingDto, Walking.class);
+            walkingRepository.save(walking);
+        }
     }
 
     // 산책 정보 리스트 조회
