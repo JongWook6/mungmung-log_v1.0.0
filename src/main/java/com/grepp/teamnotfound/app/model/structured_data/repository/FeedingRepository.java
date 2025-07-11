@@ -12,11 +12,11 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface FeedingRepository extends JpaRepository<Feeding, Long> {
 
-    @Query("SELECT f FROM Feeding f WHERE f.pet = :pet AND f.recordedAt = :recordedAt AND f.deletedAt IS NULL")
-    List<Feeding> findFeedingList(Pet pet, LocalDate recordedAt);
+    @Query("SELECT f FROM Feeding f WHERE f.pet.petId = :petId AND f.recordedAt = :recordedAt AND f.deletedAt IS NULL")
+    List<Feeding> findFeedingList(Long petId, LocalDate recordedAt);
 
     @Modifying(clearAutomatically=true, flushAutomatically=true)
-    @Query("UPDATE Feeding f SET f.deletedAt = CURRENT_TIMESTAMP WHERE f.pet = :pet AND f.recordedAt = :recordedAt AND f.deletedAt IS NULL")
-    void delete(Pet pet, LocalDate recordedAt);
+    @Query("UPDATE Feeding f SET f.deletedAt = CURRENT_TIMESTAMP WHERE f.pet.petId = :petId AND f.recordedAt = :recordedAt AND f.deletedAt IS NULL")
+    void delete(Long petId, LocalDate recordedAt);
 
 }

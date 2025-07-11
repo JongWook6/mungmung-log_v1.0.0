@@ -90,7 +90,7 @@ public class LifeRecordApiController {
         @RequestParam LocalDate date
     ){
         Pet pet = petService.getPet(petId);
-        LifeRecordData lifeRecord = lifeRecordService.getLifeRecord(pet, date);
+        LifeRecordData lifeRecord = lifeRecordService.getLifeRecord(petId, date);
 
         return ResponseEntity.ok(Map.of("data", lifeRecord));
     }
@@ -104,8 +104,7 @@ public class LifeRecordApiController {
     ){
         // 기존 데이터가 있으면 기존 데이터 반환
         if(noteService.existsLifeRecord(petId, date)){
-            Pet pet = petService.getPet(petId);
-            LifeRecordData lifeRecord = lifeRecordService.getLifeRecord(pet, date);
+            LifeRecordData lifeRecord = lifeRecordService.getLifeRecord(petId, date);
 
             return ResponseEntity.ok(Map.of("data", lifeRecord));
         }
@@ -118,10 +117,8 @@ public class LifeRecordApiController {
     public ResponseEntity<String> registLifeRecord(
             @RequestBody LifeRecordData data
     ){
-        Pet pet = petService.getPet(data.getPetId());
-
         LifeRecordDto dto = new LifeRecordDto();
-        dto = dto.toDto(data, pet);
+        dto = dto.toDto(data);
         lifeRecordService.createLifeRecord(dto);
 
         return ResponseEntity.ok("등록 성공");
@@ -132,11 +129,9 @@ public class LifeRecordApiController {
     public ResponseEntity<Map<String, LifeRecordData>> modifyLifeRecord(
             @RequestBody LifeRecordData data
     ){
-        Pet pet = petService.getPet(data.getPetId());
-
         LifeRecordDto dto = new LifeRecordDto();
-        dto = dto.toDto(data, pet);
-        lifeRecordService.updateLifeRecord(pet, dto);
+        dto = dto.toDto(data);
+        lifeRecordService.updateLifeRecord(data.getPetId(), dto);
 
         return ResponseEntity.ok(Map.of("data", data));
     }
@@ -146,8 +141,7 @@ public class LifeRecordApiController {
             @PathVariable Long petId,
             @RequestParam LocalDate date
     ){
-        Pet pet = petService.getPet(petId);
-        lifeRecordService.deleteLifeRecord(pet, date);
+        lifeRecordService.deleteLifeRecord(petId, date);
 
         return ResponseEntity.ok("삭제 성공");
     }

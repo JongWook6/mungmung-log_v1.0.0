@@ -1,6 +1,5 @@
 package com.grepp.teamnotfound.app.model.structured_data;
 
-import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.structured_data.dto.SleepingDto;
 import com.grepp.teamnotfound.app.model.structured_data.entity.Sleeping;
 import com.grepp.teamnotfound.app.model.structured_data.repository.SleepingRepository;
@@ -29,8 +28,8 @@ public class SleepingService {
 
     // 수면 정보 조회
     @Transactional(readOnly = true)
-    public Integer getSleeping(Pet pet, LocalDate recordedAt){
-        Sleeping sleeping = sleepingRepository.findSleeping(pet, recordedAt)
+    public Integer getSleeping(Long petId, LocalDate recordedAt){
+        Sleeping sleeping = sleepingRepository.findSleeping(petId, recordedAt)
                 .orElseThrow(() -> new StructuredDataException(SleepingErrorCode.SLEEPING_NOT_FOUND));
 
         return sleeping.getSleepingTime() == null ? 0 : sleeping.getSleepingTime();
@@ -45,8 +44,8 @@ public class SleepingService {
     }
 
     // 수면 정보 삭제
-    public void deleteSleeping(Pet pet, LocalDate recordedAt) {
-        sleepingRepository.delete(pet, recordedAt);
+    public void deleteSleeping(Long petId, LocalDate recordedAt) {
+        sleepingRepository.delete(petId, recordedAt);
     }
 
 }

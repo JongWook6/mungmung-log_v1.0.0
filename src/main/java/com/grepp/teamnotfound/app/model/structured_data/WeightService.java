@@ -1,6 +1,5 @@
 package com.grepp.teamnotfound.app.model.structured_data;
 
-import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.structured_data.dto.WeightDto;
 import com.grepp.teamnotfound.app.model.structured_data.entity.Weight;
 import com.grepp.teamnotfound.app.model.structured_data.repository.WeightRepository;
@@ -29,8 +28,8 @@ public class WeightService {
 
     // 몸무게 정보 조회
     @Transactional(readOnly = true)
-    public Double getWeight(Pet pet, LocalDate recordedAt){
-        Weight weight = weightRepository.findWeight(pet, recordedAt)
+    public Double getWeight(Long petId, LocalDate recordedAt){
+        Weight weight = weightRepository.findWeight(petId, recordedAt)
                 .orElseThrow(() -> new StructuredDataException(WeightErrorCode.WEIGHT_NOT_FOUND));
 
         return weight.getWeight() == null ? 0.0 : weight.getWeight();
@@ -46,8 +45,8 @@ public class WeightService {
 
     // 몸무게 정보 삭제
     @Transactional
-    public void deleteWeight(Pet pet, LocalDate recordedAt){
-        weightRepository.delete(pet, recordedAt);
+    public void deleteWeight(Long petId, LocalDate recordedAt){
+        weightRepository.delete(petId, recordedAt);
     }
 
 }

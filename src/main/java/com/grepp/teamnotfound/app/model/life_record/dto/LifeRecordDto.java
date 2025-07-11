@@ -2,13 +2,11 @@ package com.grepp.teamnotfound.app.model.life_record.dto;
 
 import com.grepp.teamnotfound.app.controller.api.life_record.payload.LifeRecordData;
 import com.grepp.teamnotfound.app.model.note.dto.NoteDto;
-import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.structured_data.dto.FeedingDto;
 import com.grepp.teamnotfound.app.model.structured_data.dto.SleepingDto;
 import com.grepp.teamnotfound.app.model.structured_data.dto.WalkingDto;
 import com.grepp.teamnotfound.app.model.structured_data.dto.WeightDto;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.util.List;
 import lombok.Data;
 
@@ -25,7 +23,7 @@ public class LifeRecordDto {
     private List<WalkingDto> walkingList;
     private List<FeedingDto> feedingList;
 
-    public LifeRecordDto toDto(LifeRecordData data, Pet pet){
+    public LifeRecordDto toDto(LifeRecordData data){
         LifeRecordDto dto = new LifeRecordDto();
         dto.setPetId(data.getPetId());
         dto.setRecordAt(data.getRecordAt());

@@ -3,7 +3,6 @@ package com.grepp.teamnotfound.app.model.note;
 import com.grepp.teamnotfound.app.model.note.dto.NoteDto;
 import com.grepp.teamnotfound.app.model.note.entity.Note;
 import com.grepp.teamnotfound.app.model.note.repository.NoteRepository;
-import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.infra.error.exception.StructuredDataException;
 import com.grepp.teamnotfound.infra.error.exception.code.NoteErrorCode;
 import java.time.LocalDate;
@@ -35,8 +34,8 @@ public class NoteService {
 
     // 관찰노트 정보 조회
     @Transactional(readOnly = true)
-    public String getNote(Pet pet, LocalDate recordedAt){
-        Note note = noteRepository.findNote(pet, recordedAt)
+    public String getNote(Long petId, LocalDate recordedAt){
+        Note note = noteRepository.findNote(petId, recordedAt)
                 .orElseThrow(() -> new StructuredDataException(NoteErrorCode.NOTE_NOT_FOUND));
 
         return note.getContent() == null ? "" : note.getContent();
@@ -52,8 +51,8 @@ public class NoteService {
 
     // 생활기록 정보 삭제
     @Transactional
-    public void deleteNote(Pet pet, LocalDate recordedAt) {
-        noteRepository.delete(pet, recordedAt);
+    public void deleteNote(Long petId, LocalDate recordedAt) {
+        noteRepository.delete(petId, recordedAt);
     }
 
 }

@@ -12,11 +12,11 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface WalkingRepository extends JpaRepository<Walking, Long> {
 
-    @Query("SELECT w FROM Walking w WHERE w.pet = :pet AND w.recordedAt = :recordedAt AND w.deletedAt IS NULL")
-    List<Walking> findWalkingList(Pet pet, LocalDate recordedAt);
+    @Query("SELECT w FROM Walking w WHERE w.pet.petId = :petId AND w.recordedAt = :recordedAt AND w.deletedAt IS NULL")
+    List<Walking> findWalkingList(Long petId, LocalDate recordedAt);
 
     @Modifying(clearAutomatically=true, flushAutomatically=true)
-    @Query("UPDATE Walking w SET w.deletedAt = CURRENT_TIMESTAMP WHERE w.pet = :pet AND w.recordedAt = :recordedAt AND w.deletedAt IS NULL")
-    void delete(Pet pet, LocalDate recordedAt);
+    @Query("UPDATE Walking w SET w.deletedAt = CURRENT_TIMESTAMP WHERE w.pet.petId = :petId AND w.recordedAt = :recordedAt AND w.deletedAt IS NULL")
+    void delete(Long petId, LocalDate recordedAt);
 
 }

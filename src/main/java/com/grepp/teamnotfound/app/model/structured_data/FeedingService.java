@@ -1,7 +1,6 @@
 package com.grepp.teamnotfound.app.model.structured_data;
 
 import com.grepp.teamnotfound.app.controller.api.life_record.payload.FeedingData;
-import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.structured_data.dto.FeedingDto;
 import com.grepp.teamnotfound.app.model.structured_data.entity.Feeding;
 import com.grepp.teamnotfound.app.model.structured_data.repository.FeedingRepository;
@@ -32,8 +31,8 @@ public class FeedingService {
 
     // 식사 정보 조회
     @Transactional(readOnly = true)
-    public List<FeedingData> getFeedingList(Pet pet, LocalDate recordedAt){
-        List<Feeding> feedingList = feedingRepository.findFeedingList(pet, recordedAt);
+    public List<FeedingData> getFeedingList(Long petId, LocalDate recordedAt){
+        List<Feeding> feedingList = feedingRepository.findFeedingList(petId, recordedAt);
 
         if(feedingList.isEmpty()) return List.of();
 
@@ -57,8 +56,8 @@ public class FeedingService {
 
     // 식사 정보 삭제
     @Transactional
-    public void deleteFeedingList(Pet pet, LocalDate recordedAt){
-        feedingRepository.delete(pet, recordedAt);
+    public void deleteFeedingList(Long petId, LocalDate recordedAt){
+        feedingRepository.delete(petId, recordedAt);
     }
 
 }
