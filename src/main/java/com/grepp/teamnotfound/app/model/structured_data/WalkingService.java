@@ -61,14 +61,7 @@ public class WalkingService {
     // 산책 정보 삭제
     @Transactional
     public void deleteWalkingList(Pet pet, LocalDate recordedAt){
-        List<Walking> walkingList = walkingRepository.findWalkingList(pet, recordedAt);
-
-        if (walkingList.isEmpty()) return;
-
-        walkingList.forEach(walking -> {
-            walking.setDeletedAt(OffsetDateTime.now());
-            walkingRepository.save(walking);
-        });
+        walkingRepository.delete(pet, recordedAt);
     }
 
 }

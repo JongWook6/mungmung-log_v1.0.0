@@ -5,6 +5,7 @@ import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import java.time.LocalDate;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -18,5 +19,9 @@ public interface NoteRepository extends JpaRepository<Note, Long> {
 
     @Query("SELECT n FROM Note n WHERE n.pet = :pet AND n.recordedAt = :recordedAt AND n.deletedAt IS NULL")
     Optional<Note> findNote(Pet pet, LocalDate recordedAt);
+
+    @Modifying(clearAutomatically=true, flushAutomatically=true)
+    @Query("UPDATE Note n SET n.deletedAt = CURRENT_TIMESTAMP WHERE n.pet = :pet AND n.recordedAt = :recordedAt AND n.deletedAt IS NULL")
+    void delete(Pet pet, LocalDate recordedAt);
 
 }

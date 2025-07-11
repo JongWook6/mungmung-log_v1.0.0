@@ -53,10 +53,7 @@ public class WeightService {
     // 몸무게 정보 삭제
     @Transactional
     public void deleteWeight(Pet pet, LocalDate recordedAt){
-        Weight weight = weightRepository.findWeight(pet, recordedAt)
-                .orElseThrow(() -> new StructuredDataException(WeightErrorCode.WEIGHT_NOT_FOUND));
-        weight.setDeletedAt(OffsetDateTime.now());
-        weightRepository.save(weight);
+        weightRepository.delete(pet, recordedAt);
     }
 
 }
