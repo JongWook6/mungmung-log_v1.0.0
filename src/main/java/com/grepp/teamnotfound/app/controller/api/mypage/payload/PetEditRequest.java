@@ -6,6 +6,8 @@ import com.grepp.teamnotfound.app.model.pet.dto.PetImgDto;
 import com.grepp.teamnotfound.app.model.vaccination.code.VaccineType;
 import java.time.LocalDate;
 import java.util.List;
+
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
@@ -24,6 +26,7 @@ public class PetEditRequest {
     private List<Vaccinated> vaccinations;
 
     @Data
+    @AllArgsConstructor
     public static class Vaccinated implements VaccinatedItem{
         private Long vaccineId;
         private LocalDate vaccineAt;
