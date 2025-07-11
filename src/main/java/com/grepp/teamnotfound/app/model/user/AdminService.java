@@ -1,7 +1,7 @@
 package com.grepp.teamnotfound.app.model.user;
 
 import com.grepp.teamnotfound.app.model.auth.code.Role;
-import com.grepp.teamnotfound.app.model.user.dto.RegisterRequestDto;
+import com.grepp.teamnotfound.app.controller.api.auth.payload.RegisterRequest;
 import com.grepp.teamnotfound.app.model.user.entity.User;
 import com.grepp.teamnotfound.app.model.user.repository.UserRepository;
 import com.grepp.teamnotfound.infra.error.exception.BusinessException;
@@ -21,7 +21,7 @@ public class AdminService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public Long registerAdmin(RegisterRequestDto requestDto) {
+    public Long registerAdmin(RegisterRequest requestDto) {
         // 이메일 중복 확인
         if (userRepository.findByEmail(requestDto.getEmail()).isPresent()) {
             throw new BusinessException(UserErrorCode.USER_EMAIL_ALREADY_EXISTS);

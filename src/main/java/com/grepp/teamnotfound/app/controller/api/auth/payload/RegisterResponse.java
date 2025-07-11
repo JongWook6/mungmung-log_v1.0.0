@@ -1,11 +1,11 @@
-package com.grepp.teamnotfound.app.model.user.dto;
+package com.grepp.teamnotfound.app.controller.api.auth.payload;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public class RegisterResponseDto {
+public class RegisterResponse {
 
     private final Long userId;
 

@@ -1,14 +1,17 @@
 package com.grepp.teamnotfound.app.controller.api.auth;
 
+import com.grepp.teamnotfound.app.controller.api.auth.payload.EmailVerificationRequest;
+import com.grepp.teamnotfound.app.controller.api.auth.payload.RegisterRequest;
+import com.grepp.teamnotfound.app.controller.api.auth.payload.RegisterResponse;
 import com.grepp.teamnotfound.app.model.auth.AuthService;
+import com.grepp.teamnotfound.app.model.auth.mail.MailService;
 import com.grepp.teamnotfound.app.model.auth.payload.LoginRequest;
 import com.grepp.teamnotfound.app.model.auth.payload.TokenResponse;
 import com.grepp.teamnotfound.app.model.auth.token.dto.TokenDto;
 import com.grepp.teamnotfound.app.model.user.AdminService;
 import com.grepp.teamnotfound.app.model.user.UserService;
-import com.grepp.teamnotfound.app.model.user.dto.RegisterRequestDto;
-import com.grepp.teamnotfound.app.model.user.dto.RegisterResponseDto;
-import com.grepp.teamnotfound.app.model.user.dto.VerifyEmailRequestDto;
+import com.grepp.teamnotfound.app.model.user.dto.RegisterCommand;
+import com.grepp.teamnotfound.app.controller.api.auth.payload.EmailVerifyRequest;
 import com.grepp.teamnotfound.infra.auth.token.TokenCookieFactory;
 import com.grepp.teamnotfound.infra.auth.token.code.GrantType;
 import com.grepp.teamnotfound.infra.auth.token.code.TokenType;
@@ -28,29 +31,46 @@ public class AuthController {
     private final AuthService authService;
     private final UserService userService;
     private final AdminService adminService;
+    private final MailService mailService;
 
-    @GetMapping("v1/test")
-    public ResponseEntity<String> test(){
-        return ResponseEntity.ok("모두에게 열린 api로 인증하지 않은 사용자도 접근 가능");
+    @GetMapping("v1/check-email")
+    public ResponseEntity<ApiResponse<?>> checkEmail(@RequestParam("email") String email) {
+        userService.validateEmailDuplication(email);
+        return ResponseEntity.ok(ApiResponse.success("사용 가능한 이메일입니다."));
     }
 
-    // 이메일 발송 완료 시점까지 작동
+    @PostMapping("v1/email-verifications")
+    public ResponseEntity<ApiResponse<?>> emailVerification(@RequestBody EmailVerificationRequest request) {
+        userService.sendEmail(request.getEmail());
+        return ResponseEntity.ok(ApiResponse.success("인증 코드가 발송되었습니다."));
+    }
+
+    @PostMapping("v1/email-verifications/verify")
+    public ResponseEntity<ApiResponse<?>> emailVerify(@RequestBody EmailVerifyRequest request) {
+        mailService.verifyEmailCode(request.getEmail(), request.getVerificationCode());
+        return ResponseEntity.ok(ApiResponse.success("인증코드가 올바르게 인증되었습니다"));
+    }
+
+    @GetMapping("v1/check-nickname")
+    public ResponseEntity<ApiResponse<?>> checkNickname(@RequestParam("nickname") String nickname) {
+        userService.validateNicknameDuplicaiton(nickname);
+        return ResponseEntity.ok(ApiResponse.success("사용 가능한 닉네임입니다."));
+    }
+
     @PostMapping("v1/register")
-    public ResponseEntity<ApiResponse<?>> register(@RequestBody RegisterRequestDto requestDto) {
-        userService.requestRegisterVerification(requestDto);
+    public ResponseEntity<ApiResponse<?>> register(@RequestBody RegisterRequest request) {
 
-        return ResponseEntity.ok(ApiResponse.success("회원가입 인증 메일이 발송되었습니다. 이메일을 확인해주세요."));
+        RegisterCommand command = RegisterCommand.builder()
+                .email(request.getEmail())
+                .nickname(request.getNickname())
+                .password(request.getPassword())
+                .build();
+        Long userId = userService.registerUser(request);
+        RegisterResponse response = new RegisterResponse(userId);
+
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    // 입력 인증코드 유효성 검증 및 가입 완료
-    @PostMapping("v1/register/verify-email")
-    public ResponseEntity<ApiResponse<RegisterResponseDto>> verifyEmail(@RequestBody VerifyEmailRequestDto requestDto){
-        Long userId = userService.completeRegistration(requestDto.getEmail(), requestDto.getVerificationCode());
-
-        RegisterResponseDto responseDto = new RegisterResponseDto(userId);
-
-        return ResponseEntity.ok(ApiResponse.success(responseDto));
-    }
 
 
     @PostMapping("v1/login")
@@ -77,9 +97,9 @@ public class AuthController {
 
     @PostMapping("v1/admin/register")
     @PreAuthorize("permitAll()")
-    public ResponseEntity<ApiResponse<RegisterResponseDto>> registerAdmin(@RequestBody RegisterRequestDto requestDto) {
+    public ResponseEntity<ApiResponse<RegisterResponse>> registerAdmin(@RequestBody RegisterRequest requestDto) {
         Long userId = adminService.registerAdmin(requestDto);
-        RegisterResponseDto responseDto = new RegisterResponseDto(userId);
+        RegisterResponse responseDto = new RegisterResponse(userId);
         return ResponseEntity.ok(ApiResponse.success(responseDto));
     }
 
