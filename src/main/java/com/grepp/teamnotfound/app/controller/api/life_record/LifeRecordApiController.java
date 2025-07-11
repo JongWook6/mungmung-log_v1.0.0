@@ -108,10 +108,10 @@ public class LifeRecordApiController {
         @PathVariable Long petId,
         @PathVariable LocalDate date
     ){
-        // 상세정보 조회 Service
-         LifeRecordData lifeRecord = findLifeRecord(petId, date);
+        Pet pet = petService.getPet(petId);
+        LifeRecordData lifeRecord = lifeRecordService.getLifeRecord(pet, date);
 
-         return ResponseEntity.ok(Map.of("data", lifeRecord));
+        return ResponseEntity.ok(Map.of("data", lifeRecord));
     }
 
 
@@ -123,7 +123,8 @@ public class LifeRecordApiController {
     ){
         // 기존 데이터가 있으면 기존 데이터 반환
         if(noteService.existsLifeRecord(petId, date)){
-            LifeRecordData lifeRecord = findLifeRecord(petId, date);
+            Pet pet = petService.getPet(petId);
+            LifeRecordData lifeRecord = lifeRecordService.getLifeRecord(pet, date);
 
             return ResponseEntity.ok(Map.of("data", lifeRecord));
         }
@@ -194,34 +195,4 @@ public class LifeRecordApiController {
         return ResponseEntity.ok("삭제 성공");
     }
 
-    // 생활기록 데이터 조회 및 합치기
-    private LifeRecordData findLifeRecord(Long petId, LocalDate date){
-        Pet pet = petService.getPet(petId);
-        // 관찰노드 조회
-        NoteData note = noteService.getNote(pet, date);
-
-        // 수면 조회
-        SleepingData sleeping = sleepingService.getSleeping(pet, date);
-
-        // 몸무게 조회
-        WeightData weight = weightService.getWeight(pet, date);
-
-        // 산책 조회
-        List<WalkingData> walkingList = walkingService.getWalkingList(pet, date);
-
-        // 식사 조회
-        List<FeedingData> feedingList = feedingService.getFeedingList(pet, date);
-
-        // 전체 데이터 합치기
-        LifeRecordData lifeRecord = new LifeRecordData();
-        lifeRecord.setPetId(petId);
-        lifeRecord.setRecordAt(date);
-        lifeRecord.setNote(note);
-        lifeRecord.setSleepTime(sleeping);
-        lifeRecord.setWeight(weight);
-        lifeRecord.setWalkingList(walkingList);
-        lifeRecord.setFeedingList(feedingList);
-
-        return lifeRecord;
-    }
 }

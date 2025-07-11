@@ -41,8 +41,23 @@ public class LifeRecordService {
 
     // 생활기록 조회
     @Transactional(readOnly = true)
-    public void getLifeRecord(){
+    public LifeRecordData getLifeRecord(Pet pet, LocalDate recordedAt){
+        NoteData note = noteService.getNote(pet, recordedAt);
+        SleepingData sleeping = sleepingService.getSleeping(pet, recordedAt);
+        WeightData weight = weightService.getWeight(pet, recordedAt);
+        List<WalkingData> walkingList = walkingService.getWalkingList(pet, recordedAt);
+        List<FeedingData> feedingList = feedingService.getFeedingList(pet, recordedAt);
 
+        LifeRecordData lifeRecord = new LifeRecordData();
+        lifeRecord.setPetId(pet.getPetId());
+        lifeRecord.setRecordAt(recordedAt);
+        lifeRecord.setNote(note);
+        lifeRecord.setSleepTime(sleeping);
+        lifeRecord.setWeight(weight);
+        lifeRecord.setWalkingList(walkingList);
+        lifeRecord.setFeedingList(feedingList);
+
+        return lifeRecord;
     }
 
     // 생활기록 수정
