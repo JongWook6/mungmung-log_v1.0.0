@@ -33,8 +33,10 @@ public class ReplyApiController {
         for (int i = 1; i <= 3; i++) {
             ReplyListDto dto = ReplyListDto.builder()
                 .replyId(Integer.toUnsignedLong(i))
+                .articleId((long) 1000 + i)
                 .nickname("유저 " + i)
                 .content(i + "번째 댓글입니다.")
+                .isReported(i % 2 == 0)
                 .date(OffsetDateTime.now())
                 .build();
 

@@ -8,8 +8,10 @@ import lombok.Data;
 @Builder
 public class ReplyListDto {
 
+    private Long articleId;
     private Long replyId;
     private String nickname;
     private String content;
+    private Boolean isReported;
     private OffsetDateTime date;
 }

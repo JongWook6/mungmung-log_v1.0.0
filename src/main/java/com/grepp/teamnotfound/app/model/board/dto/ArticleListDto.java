@@ -11,6 +11,7 @@ public class ArticleListDto {
     private Long articleId;
     private String title;
     private String nickname;
+    private Integer likes;
     private Integer replies;
     private Integer views;
     private OffsetDateTime date;

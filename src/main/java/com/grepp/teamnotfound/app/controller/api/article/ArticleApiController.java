@@ -8,7 +8,9 @@ import com.grepp.teamnotfound.app.controller.api.article.payload.LikeResponse;
 import com.grepp.teamnotfound.app.controller.api.article.payload.PageInfo;
 import com.grepp.teamnotfound.app.model.board.ArticleService;
 import com.grepp.teamnotfound.app.model.board.dto.ArticleListDto;
+import com.grepp.teamnotfound.infra.error.exception.AuthException;
 import com.grepp.teamnotfound.infra.error.exception.BusinessException;
+import com.grepp.teamnotfound.infra.error.exception.code.AuthErrorCode;
 import com.grepp.teamnotfound.infra.error.exception.code.BoardErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
 import java.time.OffsetDateTime;
@@ -19,6 +21,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,23 +48,41 @@ public class ArticleApiController {
         @ModelAttribute ArticleListRequest request,
         BindingResult bindingResult
     ) {
-        if (bindingResult.hasErrors()) {
+        // TODO BindingResult 로 세밀한 예외처리로 디벨롭
+        if (request.getPage() < 1) {
             throw new BusinessException(BoardErrorCode.BOARD_INVALID_PAGE);
         }
 
         ArticleListResponse response = new ArticleListResponse();
 
-        for (int i = 1; i <= 5; i++) {
-            ArticleListDto dto = ArticleListDto.builder()
-                .articleId(Integer.toUnsignedLong(i))
-                .title("마음이의 산책 일상 " + i)
-                .nickname("사용자 " + i)
-                .replies(i)
-                .views(i)
-                .date(OffsetDateTime.now())
-                .build();
+        if (request.getPage() == 1) {
+            for (int i = 1; i <= 10; i++) {
+                ArticleListDto dto = ArticleListDto.builder()
+                    .articleId(Integer.toUnsignedLong(i))
+                    .title("마음이의 산책 일상 " + i)
+                    .nickname("사용자 " + i)
+                    .likes(i)
+                    .replies(i)
+                    .views(i)
+                    .date(OffsetDateTime.now())
+                    .build();
 
-            response.getData().add(dto);
+                response.getData().add(dto);
+            }
+        } else {
+            for (int i = 1; i <= 9; i++) {
+                ArticleListDto dto = ArticleListDto.builder()
+                    .articleId(Integer.toUnsignedLong(i))
+                    .title("마음이의 산책 일상 " + i)
+                    .nickname("사용자 " + i)
+                    .likes(i)
+                    .replies(i)
+                    .views(i)
+                    .date(OffsetDateTime.now())
+                    .build();
+
+                response.getData().add(dto);
+            }
         }
 
         PageInfo pageInfo = PageInfo.builder()
@@ -87,15 +109,29 @@ public class ArticleApiController {
             throw new BusinessException(BoardErrorCode.BOARD_INVALID_PAGE);
         }
 
-        PageRequest pageable = PageRequest.of(request.getPage() - 1, request.getSize());
-        Page<ArticleListDto> page = articleService.findPaged(pageable);
+        PageRequest pageable = PageRequest.of(
+            request.getPage() - 1,
+            request.getSize(),
+            request.getSortType().toSort()
+        );
 
-        if (request.getPage() != 1 && page.getContent().isEmpty()) {
-            throw new BusinessException(BoardErrorCode.BOARD_INVALID_PAGE);
-        }
+        Page<ArticleListDto> page = articleService.searchArticles(
+            request.getBoardType(),
+            request.getSearchType(),
+            request.getKeyword(),
+            pageable
+        );
 
-        ArticleListResponse response = new ArticleListResponse();
-        return ResponseEntity.ok(response);
+        PageInfo pageInfo = PageInfo.builder()
+            .page(page.getNumber() + 1)
+            .size(page.getSize())
+            .totalPages(page.getTotalPages())
+            .totalElements((int) page.getTotalElements())
+            .hasNext(page.hasNext())
+            .hasPrevious(page.hasPrevious())
+            .build();
+
+        return ResponseEntity.ok(new ArticleListResponse(page.getContent(), pageInfo));
     }
 
     @PostMapping(value = "/v1", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -112,17 +148,21 @@ public class ArticleApiController {
     public ResponseEntity<?> getArticle(
         @PathVariable Long articleId
     ) {
-        ArticleDetailResponse response = new ArticleDetailResponse();
-        response.setArticleId(articleId);
-        response.setNickname("사용자 1");
-        response.setProfileImgPath("/upload/profileImg");
-        response.setDate(OffsetDateTime.now());
-        response.setTitle("요즘 밥을 잘 안먹는데 왜 그럴까요?");
-        response.setContent("우리집 댕댕이가 날씨 때문인지 최근 며칠 간 밥을 잘 안먹어서 고민입니다");
-        response.setReplies(10);
-        response.setLikes(15);
-        response.setViews(20);
-        response.setArticleImgPathList(List.of("/upload/img1", "/upload/img2", "/upload/img3"));
+        ArticleDetailResponse response = ArticleDetailResponse.builder()
+            .articleId(articleId)
+            .nickname("유저닉네임")
+            .profileImgPath("/upload/profileImg")
+            .date(OffsetDateTime.now())
+            .title("요즘 뽀삐가 밥을 잘 안먹는데 왜 그럴까요?")
+            .content("우리집 댕댕이가 날씨 때문인지 최근 며칠 간 밥을 잘 안먹어서 고민입니다")
+            .replies(10)
+            .likes(15)
+            .views(20)
+            .isReported(false)
+            .isLiked(true)
+            .articleImgPathList(List.of("/upload/img1", "/upload/img2", "/upload/img3"))
+            .build();
+
         return ResponseEntity.ok(Map.of("data", response));
     }
 
@@ -147,22 +187,44 @@ public class ArticleApiController {
     @PostMapping("/v1/{articleId}/like")
     @Operation(summary = "게시글 좋아요 요청")
     public ResponseEntity<?> likeArticle(
-        @PathVariable Long articleId
+        @PathVariable Long articleId,
+        @AuthenticationPrincipal UserDetails userDetails
     ) {
-        LikeResponse response = new LikeResponse();
-        response.setLike(15);
-        response.setIsLiked(true);
+        if (userDetails == null) {
+            throw new AuthException(AuthErrorCode.UNAUTHENTICATED);
+        }
+        // 사용자 이메일로 요청 회원 특정
+        String userEmail = userDetails.getUsername();
+
+        LikeResponse response = LikeResponse.builder()
+            .articleId(13L)
+            .userEmail("user111@email.com")
+            .like(15)
+            .isLiked(true)
+            .build();
+
         return ResponseEntity.ok(Map.of("data", response));
     }
 
     @DeleteMapping("/v1/{articleId}/like")
     @Operation(summary = "게시글 좋아요 취소")
     public ResponseEntity<?> undoLikeArticle(
-        @PathVariable Long articleId
+        @PathVariable Long articleId,
+        @AuthenticationPrincipal UserDetails userDetails
     ) {
-        LikeResponse response = new LikeResponse();
-        response.setLike(14);
-        response.setIsLiked(false);
+        if (userDetails == null) {
+            throw new AuthException(AuthErrorCode.UNAUTHENTICATED);
+        }
+        // 사용자 이메일로 요청 회원 특정
+        String username = userDetails.getUsername();
+
+        LikeResponse response = LikeResponse.builder()
+            .articleId(13L)
+            .userEmail("user111@email.com")
+            .like(14)
+            .isLiked(false)
+            .build();
+
         return ResponseEntity.ok(Map.of("data", response));
     }
 
