@@ -1,17 +1,17 @@
 package com.grepp.teamnotfound.app.controller.api.auth;
 
 import com.grepp.teamnotfound.app.controller.api.auth.payload.EmailVerificationRequest;
+import com.grepp.teamnotfound.app.controller.api.auth.payload.EmailVerifyRequest;
 import com.grepp.teamnotfound.app.controller.api.auth.payload.RegisterRequest;
 import com.grepp.teamnotfound.app.controller.api.auth.payload.RegisterResponse;
 import com.grepp.teamnotfound.app.model.auth.AuthService;
-import com.grepp.teamnotfound.app.model.auth.mail.MailService;
-import com.grepp.teamnotfound.app.model.auth.payload.LoginRequest;
-import com.grepp.teamnotfound.app.model.auth.payload.TokenResponse;
+import com.grepp.teamnotfound.app.model.auth.payload.LoginCommand;
+import com.grepp.teamnotfound.infra.util.mail.MailService;
+import com.grepp.teamnotfound.app.controller.api.auth.payload.LoginRequest;
+import com.grepp.teamnotfound.app.controller.api.auth.payload.TokenResponse;
 import com.grepp.teamnotfound.app.model.auth.token.dto.TokenDto;
-import com.grepp.teamnotfound.app.model.user.AdminService;
 import com.grepp.teamnotfound.app.model.user.UserService;
 import com.grepp.teamnotfound.app.model.user.dto.RegisterCommand;
-import com.grepp.teamnotfound.app.controller.api.auth.payload.EmailVerifyRequest;
 import com.grepp.teamnotfound.infra.auth.token.TokenCookieFactory;
 import com.grepp.teamnotfound.infra.auth.token.code.GrantType;
 import com.grepp.teamnotfound.infra.auth.token.code.TokenType;
@@ -30,7 +30,6 @@ public class AuthController {
 
     private final AuthService authService;
     private final UserService userService;
-    private final AdminService adminService;
     private final MailService mailService;
 
     @GetMapping("v1/check-email")
@@ -65,9 +64,24 @@ public class AuthController {
                 .nickname(request.getNickname())
                 .password(request.getPassword())
                 .build();
-        Long userId = userService.registerUser(request);
+        Long userId = userService.registerUser(command);
         RegisterResponse response = new RegisterResponse(userId);
 
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+
+    @PostMapping("v1/admin/register")
+    @PreAuthorize("permitAll()")
+    public ResponseEntity<ApiResponse<?>> registerAdmin(@RequestBody RegisterRequest request) {
+
+        RegisterCommand command = RegisterCommand.builder()
+                .email(request.getEmail())
+                .nickname(request.getNickname())
+                .password(request.getPassword())
+                .build();
+        Long userId = userService.registerAdmin(command);
+        RegisterResponse response = new RegisterResponse(userId);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
@@ -76,7 +90,12 @@ public class AuthController {
     @PostMapping("v1/login")
     public ResponseEntity<ApiResponse<TokenResponse>> login(@RequestBody LoginRequest request, HttpServletResponse response) {
 
-        TokenDto dto = authService.login(request);
+        LoginCommand command = LoginCommand.builder()
+                .email(request.getEmail())
+                .password(request.getPassword())
+                .build();
+
+        TokenDto dto = authService.login(command);
         ResponseCookie accessTokenCookie = TokenCookieFactory.create(TokenType.ACCESS_TOKEN.name(),
                 dto.getAccessToken(), dto.getAtExpiresIn());
         ResponseCookie refreshTokenCookie = TokenCookieFactory.create(TokenType.REFRESH_TOKEN.name(),
@@ -95,20 +114,17 @@ public class AuthController {
     }
 
 
-    @PostMapping("v1/admin/register")
-    @PreAuthorize("permitAll()")
-    public ResponseEntity<ApiResponse<RegisterResponse>> registerAdmin(@RequestBody RegisterRequest requestDto) {
-        Long userId = adminService.registerAdmin(requestDto);
-        RegisterResponse responseDto = new RegisterResponse(userId);
-        return ResponseEntity.ok(ApiResponse.success(responseDto));
-    }
-
 
     @PostMapping("v1/admin/login")
     @PreAuthorize("permitAll()")
     public ResponseEntity<ApiResponse<TokenResponse>> adminLogin(@RequestBody LoginRequest request, HttpServletResponse response) {
 
-        TokenDto dto = authService.login(request);
+        LoginCommand command = LoginCommand.builder()
+                .email(request.getEmail())
+                .password(request.getPassword())
+                .build();
+
+        TokenDto dto = authService.login(command);
         ResponseCookie accessTokenCookie = TokenCookieFactory.create(TokenType.ACCESS_TOKEN.name(),
                 dto.getAccessToken(), dto.getAtExpiresIn());
         ResponseCookie refreshTokenCookie = TokenCookieFactory.create(TokenType.REFRESH_TOKEN.name(),

@@ -1,9 +1,8 @@
-package com.grepp.teamnotfound.app.model.auth.mail;
+package com.grepp.teamnotfound.infra.util.mail;
 
 import com.grepp.teamnotfound.infra.error.exception.AuthException;
 import com.grepp.teamnotfound.infra.error.exception.CommonException;
 import com.grepp.teamnotfound.infra.error.exception.code.UserErrorCode;
-import com.grepp.teamnotfound.infra.util.mail.VerifyCodeGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;

@@ -1,8 +1,8 @@
 package com.grepp.teamnotfound.app.model.user;
 
-import com.grepp.teamnotfound.app.controller.api.auth.payload.RegisterRequest;
 import com.grepp.teamnotfound.app.model.auth.code.Role;
-import com.grepp.teamnotfound.app.model.auth.mail.MailService;
+import com.grepp.teamnotfound.infra.util.mail.MailService;
+import com.grepp.teamnotfound.app.model.user.dto.RegisterCommand;
 import com.grepp.teamnotfound.app.model.user.dto.UserDto;
 import com.grepp.teamnotfound.app.model.user.dto.UserImgDto;
 import com.grepp.teamnotfound.app.model.user.entity.User;
@@ -48,7 +48,22 @@ public class UserService {
         return userDto;
     }
 
-    public Long registerUser(RegisterRequest request) {
+    public Long registerAdmin(RegisterCommand request) {
+        User user = User.builder()
+                .email(request.getEmail())
+                .name(request.getName())
+                .nickname(request.getNickname())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .role(Role.ROLE_ADMIN)
+                .provider("local")
+                .build();
+
+        userRepository.save(user);
+        return user.getUserId();
+    }
+
+
+    public Long registerUser(RegisterCommand request) {
         User user = User.builder()
                 .email(request.getEmail())
                 .name(request.getName())

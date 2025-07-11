@@ -1,12 +1,11 @@
 package com.grepp.teamnotfound.app.model.user.dto;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 @Getter
 @Builder
-@RequiredArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 public class RegisterCommand {
 
     private String email;

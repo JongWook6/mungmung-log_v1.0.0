@@ -4,9 +4,6 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Getter
-@RequiredArgsConstructor
-public class RegisterResponse {
-
-    private final Long userId;
+public record RegisterResponse(Long userId) {
 
 }
