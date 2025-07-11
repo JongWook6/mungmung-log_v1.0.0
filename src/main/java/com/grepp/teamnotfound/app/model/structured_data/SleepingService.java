@@ -42,10 +42,8 @@ public class SleepingService {
 
     // 수면 정보 수정
     @Transactional
-    public void updateSleeping(SleepingData sleepingData){
-        Sleeping sleeping = sleepingRepository.findBySleepingId(sleepingData.getSleepingId())
-                .orElseThrow(() -> new StructuredDataException(SleepingErrorCode.SLEEPING_NOT_FOUND));
-        sleeping.setSleepingTime(sleepingData.getSleepTime());
+    public void updateSleeping(SleepingDto sleepingDto){
+        Sleeping sleeping = modelMapper.map(sleepingDto, Sleeping.class);
         sleeping.setUpdatedAt(OffsetDateTime.now());
         sleepingRepository.save(sleeping);
     }

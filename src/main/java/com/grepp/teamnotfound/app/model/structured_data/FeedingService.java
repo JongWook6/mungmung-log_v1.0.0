@@ -50,13 +50,9 @@ public class FeedingService {
 
     // 식사 정보 수정
     @Transactional
-    public void updateFeedingList(List<FeedingData> feedingDataList){
-        for(FeedingData feedingData:feedingDataList){
-            Feeding feeding = feedingRepository.findByFeedingId(feedingData.getFeedingId())
-                    .orElseThrow(() -> new StructuredDataException(FeedingErrorCode.Feeding_NOT_FOUND));
-            feeding.setAmount(feedingData.getAmount());
-            feeding.setMealTime(feedingData.getMealtime());
-            feeding.setUnit(feedingData.getUnit());
+    public void updateFeedingList(List<FeedingDto> feedingDtoList){
+        for(FeedingDto feedingDto : feedingDtoList){
+            Feeding feeding = modelMapper.map(feedingDto, Feeding.class);
             feeding.setUpdatedAt(OffsetDateTime.now());
             feedingRepository.save(feeding);
         }

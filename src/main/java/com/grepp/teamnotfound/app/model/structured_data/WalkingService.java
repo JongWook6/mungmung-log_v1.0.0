@@ -50,14 +50,9 @@ public class WalkingService {
 
     // 산책 정보 수정
     @Transactional
-    public void updateWalkingList(List<WalkingData> walkingDataList){
-        for(WalkingData walkingData : walkingDataList){
-            Walking walking = walkingRepository.findByWalkingId(walkingData.getWalkingId())
-                    .orElseThrow(() -> new StructuredDataException(WalkingErrorCode.WALKING_NOT_FOUND));
-            
-            walking.setStartedAt(walkingData.getStartedAt());
-            walking.setEndedAt(walkingData.getEndedAt());
-            walking.setPace(walkingData.getPace());
+    public void updateWalkingList(List<WalkingDto> walkingDtoList){
+        for(WalkingDto walkingDto : walkingDtoList){
+            Walking walking = modelMapper.map(walkingDto, Walking.class);
             walking.setUpdatedAt(OffsetDateTime.now());
             walkingRepository.save(walking);
         }

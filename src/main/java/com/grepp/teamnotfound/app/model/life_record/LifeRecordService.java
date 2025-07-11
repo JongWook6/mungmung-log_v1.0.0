@@ -62,8 +62,15 @@ public class LifeRecordService {
 
     // 생활기록 수정
     @Transactional
-    public void updateLifeRecord(){
-
+    public void updateLifeRecord(Pet pet, LifeRecordDto dto){
+        // 기존 데이터 삭제
+        deleteLifeRecord(pet, dto.getRecordAt());
+        // 생활 기록 수정
+        noteService.updateNote(dto.getNote());
+        sleepingService.updateSleeping(dto.getSleepTime());
+        weightService.updateWeight(dto.getWeight());
+        walkingService.updateWalkingList(dto.getWalkingList());
+        feedingService.updateFeedingList(dto.getFeedingList());
     }
 
     // 생활기록 삭제

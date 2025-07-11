@@ -48,10 +48,8 @@ public class NoteService {
 
     // 생활기록 정보 수정
     @Transactional
-    public void updateNote(NoteData noteData){
-        Note note = noteRepository.findById(noteData.getNoteId())
-                .orElseThrow(() -> new StructuredDataException(NoteErrorCode.NOTE_NOT_FOUND));
-        note.setContent(noteData.getContent());
+    public void updateNote(NoteDto noteDto){
+        Note note = modelMapper.map(noteDto, Note.class);
         note.setUpdatedAt(OffsetDateTime.now());
         noteRepository.save(note);
     }

@@ -44,10 +44,8 @@ public class WeightService {
 
     // 몸무게 정보 수정
     @Transactional
-    public void updateWeight(WeightData weightData){
-        Weight weight = weightRepository.findByWeightId(weightData.getWeightId())
-                .orElseThrow(() -> new StructuredDataException(WeightErrorCode.WEIGHT_NOT_FOUND));
-        weight.setWeight(weightData.getWeight());
+    public void updateWeight(WeightDto weightDto){
+        Weight weight = modelMapper.map(weightDto, Weight.class);
         weight.setUpdatedAt(OffsetDateTime.now());
         weightRepository.save(weight);
     }
