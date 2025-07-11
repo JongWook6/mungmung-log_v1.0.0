@@ -12,7 +12,6 @@ import lombok.Getter;
 @Builder
 public class WalkingData {
 
-    private Long walkingId;
     private OffsetDateTime startedAt;
     private OffsetDateTime endedAt;
     private Integer pace;

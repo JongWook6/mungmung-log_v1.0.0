@@ -41,7 +41,6 @@ public class WalkingService {
 
         return walkingList.stream().map(walking ->
             WalkingData.builder()
-                .walkingId(walking.getWalkingId())
                 .startedAt(walking.getStartedAt())
                 .endedAt(walking.getEndedAt())
                 .pace(walking.getPace())

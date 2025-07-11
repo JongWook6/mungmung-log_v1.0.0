@@ -32,14 +32,11 @@ public class WeightService {
 
     // 몸무게 정보 조회
     @Transactional(readOnly = true)
-    public WeightData getWeight(Pet pet, LocalDate recordedAt){
+    public Double getWeight(Pet pet, LocalDate recordedAt){
         Weight weight = weightRepository.findWeight(pet, recordedAt)
                 .orElseThrow(() -> new StructuredDataException(WeightErrorCode.WEIGHT_NOT_FOUND));
 
-        return WeightData.builder()
-                .weightId(weight.getWeightId())
-                .weight(weight.getWeight())
-                .build();
+        return weight.getWeight() == null ? 0.0 : weight.getWeight();
     }
 
     // 몸무게 정보 수정

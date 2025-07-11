@@ -30,14 +30,11 @@ public class SleepingService {
 
     // 수면 정보 조회
     @Transactional(readOnly = true)
-    public SleepingData getSleeping(Pet pet, LocalDate recordedAt){
+    public Integer getSleeping(Pet pet, LocalDate recordedAt){
         Sleeping sleeping = sleepingRepository.findSleeping(pet, recordedAt)
                 .orElseThrow(() -> new StructuredDataException(SleepingErrorCode.SLEEPING_NOT_FOUND));
 
-        return SleepingData.builder()
-                .sleepingId(sleeping.getSleepingId())
-                .sleepTime(sleeping.getSleepingTime())
-                .build();
+        return sleeping.getSleepingTime() == null ? 0 : sleeping.getSleepingTime();
     }
 
     // 수면 정보 수정

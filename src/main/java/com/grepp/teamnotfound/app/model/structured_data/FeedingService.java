@@ -41,7 +41,6 @@ public class FeedingService {
 
         return feedingList.stream().map(feeding ->
             FeedingData.builder()
-                .feedingId(feeding.getFeedingId())
                 .amount(feeding.getAmount())
                 .mealtime(feeding.getMealTime())
                 .unit(feeding.getUnit())

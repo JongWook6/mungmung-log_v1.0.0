@@ -36,14 +36,11 @@ public class NoteService {
 
     // 관찰노트 정보 조회
     @Transactional(readOnly = true)
-    public NoteData getNote(Pet pet, LocalDate recordedAt){
+    public String getNote(Pet pet, LocalDate recordedAt){
         Note note = noteRepository.findNote(pet, recordedAt)
                 .orElseThrow(() -> new StructuredDataException(NoteErrorCode.NOTE_NOT_FOUND));
 
-        return NoteData.builder()
-                .noteId(note.getNoteId())
-                .content(note.getContent())
-                .build();
+        return note.getContent() == null ? "" : note.getContent();
     }
 
     // 생활기록 정보 수정

@@ -30,15 +30,15 @@ public class LifeRecordDto {
         dto.setPetId(data.getPetId());
         dto.setRecordAt(data.getRecordAt());
         dto.setNote(NoteDto.builder()
-                .content(data.getNote().getContent())
+                .content(data.getContent())
                 .recordedAt(data.getRecordAt())
                 .pet(pet).build());
         dto.setSleepTime(SleepingDto.builder()
-                .sleepingTime(data.getSleepTime().getSleepTime())
+                .sleepingTime(data.getSleepTime())
                 .recordedAt(data.getRecordAt())
                 .pet(pet).build());
         dto.setWeight(WeightDto.builder()
-                .weight(data.getWeight().getWeight())
+                .weight(data.getWeight())
                 .recordedAt(data.getRecordAt())
                 .pet(pet).build());
         dto.setWalkingList(data.getWalkingList().stream().map(walking -> WalkingDto.builder()

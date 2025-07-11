@@ -13,7 +13,6 @@ import lombok.Getter;
 @Builder
 public class FeedingData {
 
-    private Long feedingId;
     private Double amount;
     private OffsetDateTime mealtime;
     private FeedUnit unit;
