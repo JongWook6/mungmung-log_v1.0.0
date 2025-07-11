@@ -46,12 +46,6 @@ public class MailService {
             message.setText(text);
             mailSender.send(message);
 
-            stringRedisTemplate.opsForValue().set(
-                    "email: verifying " + toEmail,
-                    verifyCode,
-                    Duration.ofSeconds(expirationSeconds)
-            );
-
         } catch (MailException e) {
             stringRedisTemplate.delete("email: verifying " + toEmail);
             // MailException은 복구 안 되는 오류니, 그냥 Runtime으로 둠

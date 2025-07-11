@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
@@ -48,6 +49,7 @@ public class UserService {
         return userDto;
     }
 
+    @Transactional
     public Long registerAdmin(RegisterCommand request) {
 
         validateEmailDuplication(request.getEmail());
@@ -67,6 +69,7 @@ public class UserService {
     }
 
 
+    @Transactional
     public Long registerUser(RegisterCommand request) {
 
         validateEmailDuplication(request.getEmail());
