@@ -1,9 +1,12 @@
 package com.grepp.teamnotfound.app.controller.api.auth.payload;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 @Getter
-public record RegisterResponse(Long userId) {
+@AllArgsConstructor
+public class RegisterResponse {
+
+    private Long userId;
 
 }

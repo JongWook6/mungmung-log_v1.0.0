@@ -61,6 +61,7 @@ public class AuthController {
 
         RegisterCommand command = RegisterCommand.builder()
                 .email(request.getEmail())
+                .name(request.getName())
                 .nickname(request.getNickname())
                 .password(request.getPassword())
                 .build();
@@ -77,6 +78,7 @@ public class AuthController {
 
         RegisterCommand command = RegisterCommand.builder()
                 .email(request.getEmail())
+                .name(request.getName())
                 .nickname(request.getNickname())
                 .password(request.getPassword())
                 .build();
