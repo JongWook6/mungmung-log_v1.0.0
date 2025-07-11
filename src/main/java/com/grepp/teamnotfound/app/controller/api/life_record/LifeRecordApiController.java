@@ -31,10 +31,12 @@ import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -42,19 +44,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(value = "api/v1/life-record")
+@RequestMapping(value = "api/life-record")
 public class LifeRecordApiController {
 
     private final PetService petService;
     private final LifeRecordService lifeRecordService;
-    private final SleepingService sleepingService;
-    private final WeightService weightService;
     private final NoteService noteService;
-    private final WalkingService walkingService;
-    private final FeedingService feedingService;
 
     // 보호자의 반려견 생활기록 리스트 조회
-    @GetMapping("/{userId}")
+    @GetMapping("/v1/users/{userId}")
     public ResponseEntity<Map<String, List<LifeRecordListResponse>>> getLifeRecordList(
             @PathVariable Long userId,
             @RequestParam(required = false) Long petId,
@@ -83,7 +81,7 @@ public class LifeRecordApiController {
     }
 
     // 보호자의 반려견 목록 조회 (특정 반려견 생활기록만 보기 위하여 필요)
-    @GetMapping("/{userId}/pet-list")
+    @GetMapping("/v1/users/{userId}/pet-list")
     public ResponseEntity<Map<String, List<Map<Long, String>>>> getPetList(
             @PathVariable Long userId
     ){
@@ -103,10 +101,10 @@ public class LifeRecordApiController {
     }
 
     // 생활기록 상세정보 조회
-    @GetMapping("/{petId}/{date}")
+    @GetMapping("/v1/pets/{petId}")
     public ResponseEntity<Map<String, LifeRecordData>> getLifeRecordDetail(
         @PathVariable Long petId,
-        @PathVariable LocalDate date
+        @RequestParam LocalDate date
     ){
         Pet pet = petService.getPet(petId);
         LifeRecordData lifeRecord = lifeRecordService.getLifeRecord(pet, date);
@@ -116,10 +114,10 @@ public class LifeRecordApiController {
 
 
     // 날짜, 애완동물 기준으로 기존 생활기록 데이터 있는지 체크
-    @GetMapping("/{petId}/{date}/check")
+    @GetMapping("/v1/pets/{petId}/check")
     public ResponseEntity<Map<String, LifeRecordData>> checkLifeRecord(
             @PathVariable Long petId,
-            @PathVariable LocalDate date
+            @RequestParam LocalDate date
     ){
         // 기존 데이터가 있으면 기존 데이터 반환
         if(noteService.existsLifeRecord(petId, date)){
@@ -147,7 +145,7 @@ public class LifeRecordApiController {
     }
 
     // 생활기록 수정
-    @PatchMapping
+    @PutMapping
     public ResponseEntity<Map<String, LifeRecordData>> modifyLifeRecord(
             @RequestBody LifeRecordData data
     ){
@@ -171,10 +169,10 @@ public class LifeRecordApiController {
         return ResponseEntity.ok(Map.of("data", data));
     }
     // 생활기록 삭제
-    @PatchMapping("{date}/{petId}/delete")
+    @DeleteMapping("/v1/pets/{petId}/delete")
     public ResponseEntity<String> deleteLifeRecord(
             @PathVariable Long petId,
-            @PathVariable LocalDate date
+            @RequestParam LocalDate date
     ){
         Pet pet = petService.getPet(petId);
         lifeRecordService.deleteLifeRecord(pet, date);
