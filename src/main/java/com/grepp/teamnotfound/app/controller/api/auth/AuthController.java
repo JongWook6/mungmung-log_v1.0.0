@@ -52,7 +52,7 @@ public class AuthController {
 
     @GetMapping("v1/check-nickname")
     public ResponseEntity<ApiResponse<?>> checkNickname(@RequestParam("nickname") String nickname) {
-        userService.validateNicknameDuplicaiton(nickname);
+        userService.validateNicknameDuplication(nickname);
         return ResponseEntity.ok(ApiResponse.success("사용 가능한 닉네임입니다."));
     }
 

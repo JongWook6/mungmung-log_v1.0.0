@@ -49,6 +49,10 @@ public class UserService {
     }
 
     public Long registerAdmin(RegisterCommand request) {
+
+        validateEmailDuplication(request.getEmail());
+        validateNicknameDuplication(request.getNickname());
+
         User user = User.builder()
                 .email(request.getEmail())
                 .name(request.getName())
@@ -64,6 +68,10 @@ public class UserService {
 
 
     public Long registerUser(RegisterCommand request) {
+
+        validateEmailDuplication(request.getEmail());
+        validateNicknameDuplication(request.getNickname());
+
         User user = User.builder()
                 .email(request.getEmail())
                 .name(request.getName())
@@ -87,7 +95,7 @@ public class UserService {
         });
     }
 
-    public void validateNicknameDuplicaiton(String nickname) {
+    public void validateNicknameDuplication(String nickname) {
         userRepository.findByNickname(nickname).ifPresent(user -> {
             throw new BusinessException(UserErrorCode.USER_NICKNAME_ALREADY_EXISTS);
         });
