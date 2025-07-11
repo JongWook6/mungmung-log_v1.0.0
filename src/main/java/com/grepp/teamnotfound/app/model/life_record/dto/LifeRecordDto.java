@@ -32,28 +32,28 @@ public class LifeRecordDto {
         dto.setNote(NoteDto.builder()
                 .content(data.getContent())
                 .recordedAt(data.getRecordAt())
-                .pet(pet).build());
+                .petId(data.getPetId()).build());
         dto.setSleepTime(SleepingDto.builder()
                 .sleepingTime(data.getSleepTime())
                 .recordedAt(data.getRecordAt())
-                .pet(pet).build());
+                .petId(data.getPetId()).build());
         dto.setWeight(WeightDto.builder()
                 .weight(data.getWeight())
                 .recordedAt(data.getRecordAt())
-                .pet(pet).build());
+                .petId(data.getPetId()).build());
         dto.setWalkingList(data.getWalkingList().stream().map(walking -> WalkingDto.builder()
-                .startedAt(walking.getStartedAt())
-                .endedAt(walking.getEndedAt())
+                .startTime(walking.getStartTime())
+                .endTime(walking.getEndTime())
                 .pace(walking.getPace())
                 .recordedAt(data.getRecordAt())
-                .pet(pet)
+                .petId(data.getPetId())
                 .build()).toList());
         dto.setFeedingList(data.getFeedingList().stream().map(feeding -> FeedingDto.builder()
                 .mealTime(feeding.getMealtime())
                 .amount(feeding.getAmount())
                 .unit(feeding.getUnit())
                 .recordedAt(data.getRecordAt())
-                .pet(pet)
+                .petId(data.getPetId())
                 .build()).toList());
 
         return dto;

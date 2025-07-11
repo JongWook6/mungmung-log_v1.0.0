@@ -11,10 +11,10 @@ import lombok.Data;
 public class WalkingDto {
 
     private Long walkingId;
-    private Pet pet;
+    private Long petId;
 
-    private OffsetDateTime startedAt;
-    private OffsetDateTime endedAt;
+    private OffsetDateTime startTime;
+    private OffsetDateTime endTime;
     private Integer pace;
     private LocalDate recordedAt;
 

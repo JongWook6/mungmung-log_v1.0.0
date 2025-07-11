@@ -11,7 +11,7 @@ import lombok.Data;
 public class NoteDto {
 
     private Long noteId;
-    private Pet pet;
+    private Long petId;
 
     private String content;
     private LocalDate recordedAt;

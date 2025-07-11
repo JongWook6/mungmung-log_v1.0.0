@@ -11,7 +11,7 @@ import lombok.Data;
 public class SleepingDto {
 
     private Long sleepingId;
-    private Pet pet;
+    private Long petId;
 
     private Integer sleepingTime;
     private LocalDate recordedAt;

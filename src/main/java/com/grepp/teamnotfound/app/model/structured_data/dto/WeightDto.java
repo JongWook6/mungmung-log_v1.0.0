@@ -11,7 +11,7 @@ import lombok.Data;
 public class WeightDto {
 
     private Long weightId;
-    private Pet pet;
+    private Long petId;
 
     private Double weight;
     private LocalDate recordedAt;

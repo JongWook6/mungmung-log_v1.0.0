@@ -12,7 +12,7 @@ import lombok.Data;
 public class FeedingDto {
 
     private Long feedingId;
-    private Pet pet;
+    private Long petId;
 
     private Double amount;
     private OffsetDateTime mealTime;
