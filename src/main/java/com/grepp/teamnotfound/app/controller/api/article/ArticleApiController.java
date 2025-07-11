@@ -5,18 +5,13 @@ import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleListRequ
 import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleListResponse;
 import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleRequest;
 import com.grepp.teamnotfound.app.controller.api.article.payload.LikeResponse;
-import com.grepp.teamnotfound.app.controller.api.article.payload.Pagination;
+import com.grepp.teamnotfound.app.controller.api.article.payload.PageInfo;
 import com.grepp.teamnotfound.app.model.board.ArticleService;
-import com.grepp.teamnotfound.app.model.board.code.BoardType;
-import com.grepp.teamnotfound.app.model.board.code.SearchType;
-import com.grepp.teamnotfound.app.model.board.code.SortType;
-import com.grepp.teamnotfound.app.model.board.dto.ArticleDto;
 import com.grepp.teamnotfound.app.model.board.dto.ArticleListDto;
 import com.grepp.teamnotfound.infra.error.exception.BusinessException;
 import com.grepp.teamnotfound.infra.error.exception.code.BoardErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
 import java.time.OffsetDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +27,6 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -69,13 +63,16 @@ public class ArticleApiController {
             response.getData().add(dto);
         }
 
-        Pagination pagination = new Pagination();
-        pagination.setTotal(45); // 전체 게시글 수
-        pagination.setPage(request.getPage()); // 요청 페이지
-        pagination.setSize(request.getSize()); // 요청 게시글 수
-        pagination.setTotalPages((int) Math.ceil((double) pagination.getTotal() / pagination.getSize()));
+        PageInfo pageInfo = PageInfo.builder()
+            .page(request.getPage())
+            .size(request.getSize())
+            .totalPages(5)
+            .totalElements(48)
+            .hasNext(true)
+            .hasPrevious(false)
+            .build();
 
-        response.setPagination(pagination);
+        response.setPageInfo(pageInfo);
         return ResponseEntity.ok(response);
     }
 
@@ -85,6 +82,7 @@ public class ArticleApiController {
         @ModelAttribute ArticleListRequest request,
         BindingResult bindingResult
     ) {
+        // TODO 실제 로직으로 구현 예정
         if (bindingResult.hasErrors()) {
             throw new BusinessException(BoardErrorCode.BOARD_INVALID_PAGE);
         }
@@ -97,14 +95,6 @@ public class ArticleApiController {
         }
 
         ArticleListResponse response = new ArticleListResponse();
-
-        Pagination pagination = new Pagination();
-        pagination.setTotal(45); // 전체 게시글 수
-        pagination.setPage(request.getPage()); // 요청 페이지
-        pagination.setSize(request.getSize()); // 요청 게시글 수
-        pagination.setTotalPages((int) Math.ceil((double) pagination.getTotal() / pagination.getSize()));
-
-        response.setPagination(pagination);
         return ResponseEntity.ok(response);
     }
 
@@ -113,7 +103,6 @@ public class ArticleApiController {
     public ResponseEntity<?> createArticle(
         @RequestPart("request") ArticleRequest request,
         @RequestPart(value = "images", required = false) List<MultipartFile> images
-        // octet-stream 말고 다른 형식으로 변환
     ) {
         return ResponseEntity.ok(Map.of("data", Map.of("articleId", 1, "msg", "게시글이 정상적으로 등록되었습니다.")));
     }
