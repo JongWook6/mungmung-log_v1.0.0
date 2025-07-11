@@ -4,6 +4,8 @@ import com.grepp.teamnotfound.infra.code.ImgType;
 import com.grepp.teamnotfound.infra.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -40,6 +42,7 @@ public class PetImg extends BaseEntity {
     private String savePath;
 
     @Column(nullable = false, length = 20)
+    @Enumerated(EnumType.STRING) // 이 부분 추가
     private ImgType type;
 
     @Column(nullable = false)
