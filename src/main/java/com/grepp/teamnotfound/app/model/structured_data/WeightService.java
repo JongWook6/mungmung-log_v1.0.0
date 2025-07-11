@@ -1,13 +1,10 @@
 package com.grepp.teamnotfound.app.model.structured_data;
 
-import com.grepp.teamnotfound.app.controller.api.life_record.payload.WeightData;
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.structured_data.dto.WeightDto;
 import com.grepp.teamnotfound.app.model.structured_data.entity.Weight;
 import com.grepp.teamnotfound.app.model.structured_data.repository.WeightRepository;
 import com.grepp.teamnotfound.infra.error.exception.StructuredDataException;
-import com.grepp.teamnotfound.infra.error.exception.code.NoteErrorCode;
-import com.grepp.teamnotfound.infra.error.exception.code.SleepingErrorCode;
 import com.grepp.teamnotfound.infra.error.exception.code.WeightErrorCode;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;

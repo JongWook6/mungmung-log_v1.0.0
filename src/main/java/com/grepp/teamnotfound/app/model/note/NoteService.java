@@ -1,6 +1,5 @@
 package com.grepp.teamnotfound.app.model.note;
 
-import com.grepp.teamnotfound.app.controller.api.life_record.payload.NoteData;
 import com.grepp.teamnotfound.app.model.note.dto.NoteDto;
 import com.grepp.teamnotfound.app.model.note.entity.Note;
 import com.grepp.teamnotfound.app.model.note.repository.NoteRepository;

@@ -2,10 +2,7 @@ package com.grepp.teamnotfound.app.model.life_record;
 
 import com.grepp.teamnotfound.app.controller.api.life_record.payload.FeedingData;
 import com.grepp.teamnotfound.app.controller.api.life_record.payload.LifeRecordData;
-import com.grepp.teamnotfound.app.controller.api.life_record.payload.NoteData;
-import com.grepp.teamnotfound.app.controller.api.life_record.payload.SleepingData;
 import com.grepp.teamnotfound.app.controller.api.life_record.payload.WalkingData;
-import com.grepp.teamnotfound.app.controller.api.life_record.payload.WeightData;
 import com.grepp.teamnotfound.app.model.life_record.dto.LifeRecordDto;
 import com.grepp.teamnotfound.app.model.note.NoteService;
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;

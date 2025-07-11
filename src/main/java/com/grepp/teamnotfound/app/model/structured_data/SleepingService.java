@@ -1,6 +1,5 @@
 package com.grepp.teamnotfound.app.model.structured_data;
 
-import com.grepp.teamnotfound.app.controller.api.life_record.payload.SleepingData;
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.structured_data.dto.SleepingDto;
 import com.grepp.teamnotfound.app.model.structured_data.entity.Sleeping;

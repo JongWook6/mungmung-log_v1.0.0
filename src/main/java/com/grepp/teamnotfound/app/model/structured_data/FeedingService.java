@@ -5,8 +5,6 @@ import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.structured_data.dto.FeedingDto;
 import com.grepp.teamnotfound.app.model.structured_data.entity.Feeding;
 import com.grepp.teamnotfound.app.model.structured_data.repository.FeedingRepository;
-import com.grepp.teamnotfound.infra.error.exception.StructuredDataException;
-import com.grepp.teamnotfound.infra.error.exception.code.FeedingErrorCode;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
