@@ -177,20 +177,7 @@ public class LifeRecordApiController {
             @PathVariable LocalDate date
     ){
         Pet pet = petService.getPet(petId);
-        // 관찰노드 삭제
-        noteService.deleteNote(pet, date);
-
-        // 수면 삭제
-        sleepingService.deleteSleeping(pet, date);
-
-        // 몸무게 삭제
-        weightService.deleteWeight(pet, date);
-
-        // 산책 삭제
-        walkingService.deleteWalkingList(pet, date);
-
-        // 식사 삭제
-        feedingService.deleteFeedingList(pet, date);
+        lifeRecordService.deleteLifeRecord(pet, date);
 
         return ResponseEntity.ok("삭제 성공");
     }

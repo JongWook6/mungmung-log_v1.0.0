@@ -68,8 +68,12 @@ public class LifeRecordService {
 
     // 생활기록 삭제
     @Transactional
-    public void deleteLifeRecord(){
-
+    public void deleteLifeRecord(Pet pet, LocalDate date){
+        noteService.deleteNote(pet, date);
+        sleepingService.deleteSleeping(pet, date);
+        weightService.deleteWeight(pet, date);
+        walkingService.deleteWalkingList(pet, date);
+        feedingService.deleteFeedingList(pet, date);
     }
 
 }

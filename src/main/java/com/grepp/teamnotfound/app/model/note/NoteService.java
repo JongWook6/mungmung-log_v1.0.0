@@ -61,7 +61,7 @@ public class NoteService {
     public void deleteNote(Pet pet, LocalDate recordedAt) {
         Note note = noteRepository.findByPetAndRecordedAt(pet, recordedAt)
                 .orElseThrow(() -> new StructuredDataException(NoteErrorCode.NOTE_NOT_FOUND));
-        note.setCreatedAt(OffsetDateTime.now());
+        note.setDeletedAt(OffsetDateTime.now());
         noteRepository.save(note);
     }
 
