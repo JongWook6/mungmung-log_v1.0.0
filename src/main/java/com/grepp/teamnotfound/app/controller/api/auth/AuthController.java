@@ -35,30 +35,30 @@ public class AuthController {
 
     @Operation(summary = "이메일 중복 확인")
     @GetMapping("v1/check-email")
-    public ResponseEntity<ApiResponse<?>> checkEmail(@RequestParam("email") String email) {
+    public ResponseEntity<?> checkEmail(@RequestParam("email") String email) {
         userService.validateEmailDuplication(email);
-        return ResponseEntity.ok(ApiResponse.success("사용 가능한 이메일입니다."));
+        return ResponseEntity.ok("사용 가능한 이메일입니다.");
     }
 
     @Operation(summary = "이메일 인증코드 발송 요청")
     @PostMapping("v1/email-verifications")
-    public ResponseEntity<ApiResponse<?>> emailVerification(@RequestBody EmailVerificationRequest request) {
+    public ResponseEntity<?> emailVerification(@RequestBody EmailVerificationRequest request) {
         userService.sendEmail(request.getEmail());
-        return ResponseEntity.ok(ApiResponse.success("인증 코드가 발송되었습니다."));
+        return ResponseEntity.ok("인증 코드가 발송되었습니다.");
     }
 
     @Operation(summary = "이메일 인증코드 검증")
     @PostMapping("v1/email-verifications/verify")
-    public ResponseEntity<ApiResponse<?>> emailVerify(@RequestBody EmailVerifyRequest request) {
+    public ResponseEntity<?> emailVerify(@RequestBody EmailVerifyRequest request) {
         mailService.verifyEmailCode(request.getEmail(), request.getVerificationCode());
-        return ResponseEntity.ok(ApiResponse.success("인증코드가 올바르게 인증되었습니다"));
+        return ResponseEntity.ok("인증코드가 올바르게 인증되었습니다");
     }
 
     @Operation(summary = "닉네임 중복 확인")
     @GetMapping("v1/check-nickname")
-    public ResponseEntity<ApiResponse<?>> checkNickname(@RequestParam("nickname") String nickname) {
+    public ResponseEntity<?> checkNickname(@RequestParam("nickname") String nickname) {
         userService.validateNicknameDuplication(nickname);
-        return ResponseEntity.ok(ApiResponse.success("사용 가능한 닉네임입니다."));
+        return ResponseEntity.ok("사용 가능한 닉네임입니다.");
     }
 
     @Operation(summary = "최종 회원가입")
