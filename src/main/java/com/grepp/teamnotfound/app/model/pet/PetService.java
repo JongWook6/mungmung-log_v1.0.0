@@ -75,6 +75,10 @@ public class PetService {
         User user = userRepository.findById(request.getUserId())
             .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
 
+        if (request.getMetday().isBefore(request.getBirthday())) {
+            throw new BusinessException(PetErrorCode.PET_INVALID_DATES);
+        }
+
         Pet pet = new Pet();
 
         modelMapper.getConfiguration().setPropertyCondition(ctx -> !ctx.getMapping().getLastDestinationProperty().getName().equals("petId"));
@@ -91,6 +95,10 @@ public class PetService {
     public Long update(Long petId, PetWriteRequest request) {
         Pet pet = petRepository.findById(petId)
             .orElseThrow(() -> new BusinessException(PetErrorCode.PET_NOT_FOUND));
+
+        if (request.getMetday().isBefore(request.getBirthday())) {
+            throw new BusinessException(PetErrorCode.PET_INVALID_DATES);
+        }
 
         modelMapper.map(request, pet);
         pet.setAge(calculateAge(request.getBirthday()));
