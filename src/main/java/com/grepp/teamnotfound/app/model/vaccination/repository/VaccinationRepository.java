@@ -21,11 +21,11 @@ public interface VaccinationRepository extends JpaRepository<Vaccination, Long> 
 
     List<Vaccination> findAllByPetEquals(Pet pet);
 
-    @Modifying
+    @Modifying(clearAutomatically=true, flushAutomatically=true)
     @Query("UPDATE Vaccination v SET v.deletedAt = :deletedAt WHERE v.pet.petId = :petId")
     void softDeleteAll(@Param("petId") Long petId, @Param("deletedAt") OffsetDateTime deletedAt);
 
-    @Modifying
+    @Modifying(clearAutomatically=true, flushAutomatically=true)
     @Query("UPDATE Vaccination v SET v.deletedAt = :deletedAt WHERE v.vaccinationId = :vaccinationId")
     void softDeleteOne(@Param("vaccinationId") Long vaccinationId, @Param("deletedAt") OffsetDateTime deletedAt);
 
