@@ -1,6 +1,7 @@
 package com.grepp.teamnotfound.app.model.pet;
 
 import com.grepp.teamnotfound.app.controller.api.mypage.payload.PetWriteRequest;
+import com.grepp.teamnotfound.app.controller.api.profile.payload.ProfilePetResponse;
 import com.grepp.teamnotfound.app.model.pet.dto.PetDto;
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.pet.repository.PetRepository;
@@ -16,6 +17,7 @@ import com.grepp.teamnotfound.util.NotFoundException;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.Period;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -52,12 +54,24 @@ public class PetService {
             .collect(Collectors.toList());
     }
 
-    public List<PetDto> findByUserId(Long userId) {
+    public List<ProfilePetResponse> findByUserId(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(NotFoundException::new);
         List<Pet> pets = petRepository.findAllByUser(user);
 
         return pets.stream()
-            .map(PetDto::fromEntity)
+            .map(pet -> {
+                ProfilePetResponse dto = modelMapper.map(pet, ProfilePetResponse.class);
+
+                dto.setAge(calculateAge(pet.getBirthday()));
+
+                if (pet.getMetday() != null) {
+                    dto.setDays((int) ChronoUnit.DAYS.between(pet.getMetday(), LocalDate.now()) + 1);
+                } else {
+                    dto.setDays(null);
+                }
+
+                return dto;
+            })
             .collect(Collectors.toList());
     }
 
