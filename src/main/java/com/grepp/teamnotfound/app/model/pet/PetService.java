@@ -7,7 +7,6 @@ import com.grepp.teamnotfound.app.model.pet.repository.PetRepository;
 import com.grepp.teamnotfound.app.model.user.entity.User;
 import com.grepp.teamnotfound.app.model.user.repository.UserRepository;
 import com.grepp.teamnotfound.app.model.vaccination.VaccinationService;
-import com.grepp.teamnotfound.app.model.vaccination.dto.VaccinationDto;
 import com.grepp.teamnotfound.app.model.vaccination.repository.VaccinationRepository;
 import com.grepp.teamnotfound.infra.error.exception.BusinessException;
 import com.grepp.teamnotfound.infra.error.exception.PetException;
@@ -85,8 +84,6 @@ public class PetService {
 
         petRepository.save(pet);
 
-        vaccinationService.savePetVaccinations(pet, request.getVaccinations());
-
         return pet.getPetId();
     }
 
@@ -106,6 +103,9 @@ public class PetService {
 
     @Transactional
     public void delete(Long petId) {
+        petRepository.findById(petId)
+            .orElseThrow(() -> new BusinessException(PetErrorCode.PET_NOT_FOUND));
+
         petRepository.softDelete(petId, OffsetDateTime.now());
         vaccinationService.softDelete(petId);
     }
