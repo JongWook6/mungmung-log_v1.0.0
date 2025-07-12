@@ -4,12 +4,11 @@ import lombok.*;
 
 @Getter
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class RegisterCommand {
 
-    private String email;
-    private String name;
-    private String nickname;
-    private String password;
+    private final String email;
+    private final String name;
+    private final String nickname;
+    private final String password;
 }
