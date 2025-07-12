@@ -1,7 +1,6 @@
 package com.grepp.teamnotfound.app.model.pet;
 
-import com.grepp.teamnotfound.app.controller.api.mypage.payload.PetCreateRequest;
-import com.grepp.teamnotfound.app.controller.api.mypage.payload.PetEditRequest;
+import com.grepp.teamnotfound.app.controller.api.mypage.payload.PetWriteRequest;
 import com.grepp.teamnotfound.app.model.pet.dto.PetDto;
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.pet.repository.PetRepository;
@@ -73,11 +72,14 @@ public class PetService {
     }
 
     @Transactional
-    public Long create(PetCreateRequest request) {
-        User user = userRepository.findById(request.getUser())
+    public Long create(PetWriteRequest request) {
+        User user = userRepository.findById(request.getUserId())
             .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
 
-        Pet pet = modelMapper.map(request, Pet.class);
+        Pet pet = new Pet();
+
+        modelMapper.getConfiguration().setPropertyCondition(ctx -> !ctx.getMapping().getLastDestinationProperty().getName().equals("petId"));
+        modelMapper.map(request, pet);
         pet.setAge(calculateAge(request.getBirthday()));
         pet.setUser(user);
 
@@ -89,7 +91,7 @@ public class PetService {
     }
 
     @Transactional
-    public Long update(Long petId, PetEditRequest request) {
+    public Long update(Long petId, PetWriteRequest request) {
         Pet pet = petRepository.findById(petId)
             .orElseThrow(() -> new BusinessException(PetErrorCode.PET_NOT_FOUND));
 
