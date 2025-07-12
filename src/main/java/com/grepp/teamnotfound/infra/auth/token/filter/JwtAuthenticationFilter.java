@@ -128,8 +128,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     // accessToken 재발급 시, refreshToken 재발급 로직
-    private RefreshToken renewingRefreshToken(String id, String newTokenId) {
-        return refreshTokenService.renewingToken(id, newTokenId);
+    private RefreshToken renewingRefreshToken(String oldTokenId, String newTokenId) {
+        return refreshTokenService.renewingToken(oldTokenId, newTokenId);
     }
 
     // 응답에 쿠키로 토큰 전달

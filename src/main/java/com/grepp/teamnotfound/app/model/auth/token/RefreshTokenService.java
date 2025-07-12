@@ -30,13 +30,13 @@ public class RefreshTokenService {
     }
 
     // 신규 refreshToken 발급 로직
-    public RefreshToken renewingToken(String id, String newTokenId) {
-        RefreshToken refreshToken = findByAccessTokenId(id);
+    public RefreshToken renewingToken(String oldTokenId, String newTokenId) {
+        RefreshToken refreshToken = findByAccessTokenId(oldTokenId);
 
         if(refreshToken == null) return null;
 
         // 지연시간 동안 사용할 ttl 10초 짜리
-        RefreshToken gracePeriodToken = new RefreshToken(id);
+        RefreshToken gracePeriodToken = new RefreshToken(oldTokenId);
         gracePeriodToken.setToken(refreshToken.getToken());
 
         // 기존 refresh token 변경
@@ -44,7 +44,7 @@ public class RefreshTokenService {
         refreshToken.setAtId(newTokenId);
 
         redisTemplate.opsForValue().set(newTokenId, refreshToken, Duration.ofSeconds(refreshToken.getTtl()));
-        redisTemplate.opsForValue().set(id, gracePeriodToken, Duration.ofSeconds(1000));
+        redisTemplate.opsForValue().set(oldTokenId, gracePeriodToken, Duration.ofSeconds(1000));
         return refreshToken;
     }
 
