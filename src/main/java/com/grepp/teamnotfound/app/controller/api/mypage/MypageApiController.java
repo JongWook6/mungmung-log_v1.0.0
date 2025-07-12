@@ -57,6 +57,33 @@ public class MypageApiController {
     ) {
         petService.delete(petId);
         return ResponseEntity.ok(petId);
+    /**
+     * 펫의 백신 관련 API
+     **/
+
+    @PostMapping("/v1/pets/{petId}/vaccination")
+    public ResponseEntity<?> createVaccination(
+        @PathVariable(name = "petId") Long petId,
+        @RequestBody @Valid List<VaccineWriteRequest> requests
+    ) {
+        vaccinationService.savePetVaccinations(petId, requests);
+        return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/v1/pets/{petId}/vaccination")
+    public ResponseEntity<List<VaccinationDto>> getVaccination(
+        @PathVariable(name = "petId") Long petId
+    ) {
+        List<VaccinationDto> response = vaccinationService.findPetVaccination(petId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/v1/pets/{petId}/vaccination")
+    public ResponseEntity<?> updateVaccination(
+        @PathVariable(name = "petId") Long petId,
+        @RequestBody @Valid List<VaccineWriteRequest> requests
+    ) {
+        vaccinationService.savePetVaccinations(petId, requests);
+        return ResponseEntity.ok().build();
+    }
 }

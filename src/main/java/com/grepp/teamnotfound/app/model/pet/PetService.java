@@ -19,6 +19,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.Period;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -49,13 +50,8 @@ public class PetService {
         List<Pet> pets = petRepository.findAll();
 
         return pets.stream()
-            .map(pet -> {
-                List<VaccinationDto> vaccinations = vaccinationRepository.findAllByPetEquals(pet).stream()
-                    .map(VaccinationDto::fromEntity)
-                    .toList();
-                return PetDto.fromEntity(pet, vaccinations);
-            })
-            .toList();
+            .map(PetDto::fromEntity)
+            .collect(Collectors.toList());
     }
 
     public List<PetDto> findByUserId(Long userId) {
@@ -63,23 +59,16 @@ public class PetService {
         List<Pet> pets = petRepository.findAllByUser(user);
 
         return pets.stream()
-            .map(pet -> {
-                List<VaccinationDto> vaccinations = vaccinationRepository.findAllByPetEquals(pet).stream()
-                    .map(VaccinationDto::fromEntity)
-                    .toList();
-                return PetDto.fromEntity(pet, vaccinations);
-            })
-            .toList();
+            .map(PetDto::fromEntity)
+            .collect(Collectors.toList());
     }
 
     public PetDto findOne(Long petId) {
+        petRepository.findById(petId)
+            .orElseThrow(() -> new BusinessException(PetErrorCode.PET_NOT_FOUND));
+
         return petRepository.findById(petId)
-                .map(pet -> {
-                    List<VaccinationDto> vaccinations = vaccinationRepository.findAllByPetEquals(pet).stream()
-                        .map(VaccinationDto::fromEntity)
-                        .toList();
-                    return PetDto.fromEntity(pet, vaccinations);
-                })
+                .map(PetDto::fromEntity)
                 .orElseThrow(NotFoundException::new);
     }
 
@@ -108,8 +97,7 @@ public class PetService {
         pet.setAge(calculateAge(request.getBirthday()));
         pet.setUpdatedAt(OffsetDateTime.now());
 
-        vaccinationService.softDelete(petId);
-        vaccinationService.savePetVaccinations(pet, request.getVaccinations());
+        petRepository.save(pet);
 
         return pet.getPetId();
     }
