@@ -1,5 +1,6 @@
 package com.grepp.teamnotfound.app.model.auth;
 
+import com.grepp.teamnotfound.app.model.auth.domain.Principal;
 import com.grepp.teamnotfound.app.model.auth.payload.LoginCommand;
 import com.grepp.teamnotfound.app.model.auth.token.RefreshTokenService;
 import com.grepp.teamnotfound.app.model.auth.token.dto.AccessTokenDto;
@@ -7,6 +8,8 @@ import com.grepp.teamnotfound.app.model.auth.token.dto.TokenDto;
 import com.grepp.teamnotfound.app.model.auth.token.entity.RefreshToken;
 import com.grepp.teamnotfound.app.model.auth.token.entity.UserBlackList;
 import com.grepp.teamnotfound.app.model.auth.token.repository.UserBlackListRepository;
+import com.grepp.teamnotfound.app.model.user.UserService;
+import com.grepp.teamnotfound.app.model.user.entity.User;
 import com.grepp.teamnotfound.infra.auth.token.JwtProvider;
 import com.grepp.teamnotfound.infra.auth.token.code.GrantType;
 import com.grepp.teamnotfound.infra.error.exception.AuthException;
@@ -24,30 +27,35 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AuthService {
 
+    private final UserService userService;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final JwtProvider jwtProvider;
     private final RefreshTokenService refreshTokenService;
     private final UserBlackListRepository userBlackListRepository;
 
 
-    // TODO 인증 기준 email -> userId ref 수정의 시작점
     public TokenDto login(LoginCommand request) {
+        User user = userService.findByEmail(request.getEmail());
+
         UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(request.getEmail(),
+                new UsernamePasswordAuthenticationToken(
+                        user.getEmail(),
                         request.getPassword());
 
         Authentication authentication = authenticationManagerBuilder.getObject()
                 .authenticate(authenticationToken);
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        return processTokenLogin(authentication.getName());
+        // Object gerPrincipal 이므로 Principal로 캐스팅
+        return processTokenLogin(((Principal) authentication.getPrincipal()).getUserId());
     }
 
-    private TokenDto processTokenLogin(String email) {
+    private TokenDto processTokenLogin(Long userId) {
 
-        userBlackListRepository.deleteById(email);
+        // TODO UserBlackList id 값 email > userId
+//        userBlackListRepository.deleteById(userId);
 
-        AccessTokenDto accessToken = jwtProvider.generateAccessToken(email);
+        AccessTokenDto accessToken = jwtProvider.generateAccessToken(userId);
         RefreshToken refreshToken = refreshTokenService.saveWithAtId(accessToken.getId());
 
         return TokenDto.builder()
@@ -62,6 +70,7 @@ public class AuthService {
     @Transactional
     public void logout(String accessToken) {
         Claims claims = jwtProvider.parseClaims(accessToken);
+        // TODO blackList
         String userEmail = claims.getSubject();
         String accessTokenId = claims.getId();
 

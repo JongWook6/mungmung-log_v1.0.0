@@ -2,8 +2,11 @@ package com.grepp.teamnotfound.infra.auth.token;
 
 import com.grepp.teamnotfound.app.model.auth.domain.Principal;
 import com.grepp.teamnotfound.app.model.auth.token.dto.AccessTokenDto;
-import com.grepp.teamnotfound.app.model.auth.UserDetailsServiceImpl;
+import com.grepp.teamnotfound.app.model.user.entity.User;
+import com.grepp.teamnotfound.app.model.user.repository.UserRepository;
 import com.grepp.teamnotfound.infra.auth.token.code.TokenType;
+import com.grepp.teamnotfound.infra.error.exception.BusinessException;
+import com.grepp.teamnotfound.infra.error.exception.code.UserErrorCode;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecurityException;
@@ -15,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -38,7 +41,7 @@ public class JwtProvider {
     @Value("${jwt.refresh-expiration}")
     private long rtExpiration;
 
-    private final UserDetailsServiceImpl userDetailsService;
+    private final UserRepository userRepository;
     private SecretKey key;
 
 
@@ -52,16 +55,17 @@ public class JwtProvider {
 
     // 0. jwtAuthenticationFilter에서 authentication(인증객체)로 accessToken 제작하는 로직
     public AccessTokenDto generateAccessToken(Authentication authentication){
-        return generateAccessToken(authentication.getName());
+        Principal principal = (Principal) authentication.getPrincipal();
+        return generateAccessToken(principal.getUserId());
     }
 
     // 1. accessToken 생성
-    public AccessTokenDto generateAccessToken(String username){
+    public AccessTokenDto generateAccessToken(Long userId){
         String id = UUID.randomUUID().toString();
         long now = new Date().getTime();
         Date atExpiresIn = new Date(now + atExpiration);
         String accessToken = Jwts.builder()
-                .subject(username)
+                .subject(userId.toString())
                 .id(id)
                 .expiration(atExpiresIn)
                 .signWith(getKey())
@@ -99,10 +103,20 @@ public class JwtProvider {
     // 5. Authentication 제작
     public Authentication generateAuthentication(String accessToken) {
         Claims claims = parseClaims(accessToken);
+        // string으로 저장되어 있는 Subject(String userId) Long으로 캐스팅
+        Long userId = Long.parseLong(claims.getSubject());
 
-        List<? extends GrantedAuthority> authorities = userDetailsService.findAuthorities(claims.getSubject());
+        // UserService에서 갖고올 시, 순환참조 발생
+        User user = userRepository.findByUserId(userId);
+        if (user == null) {
+            throw new BusinessException(UserErrorCode.USER_NOT_FOUND);
+        }
 
-        Principal principal = new Principal(claims.getSubject(), "", authorities);
+        // findByUserId 중복 조회로 findAuthorities 메서드 삭제
+        List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority(user.getRole().name()));
+
+        Principal principal = new Principal(userId, user.getEmail(), "", authorities);
         return new UsernamePasswordAuthenticationToken(principal, "", authorities);
     }
 

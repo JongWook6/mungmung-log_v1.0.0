@@ -1,15 +1,16 @@
 package com.grepp.teamnotfound.app.model.user;
 
 import com.grepp.teamnotfound.app.model.auth.code.Role;
-import com.grepp.teamnotfound.infra.util.mail.MailService;
 import com.grepp.teamnotfound.app.model.user.dto.RegisterCommand;
 import com.grepp.teamnotfound.app.model.user.dto.UserDto;
 import com.grepp.teamnotfound.app.model.user.dto.UserImgDto;
 import com.grepp.teamnotfound.app.model.user.entity.User;
 import com.grepp.teamnotfound.app.model.user.entity.UserImg;
 import com.grepp.teamnotfound.app.model.user.repository.UserRepository;
+import com.grepp.teamnotfound.infra.error.exception.AuthException;
 import com.grepp.teamnotfound.infra.error.exception.BusinessException;
 import com.grepp.teamnotfound.infra.error.exception.code.UserErrorCode;
+import com.grepp.teamnotfound.infra.util.mail.MailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -102,5 +103,10 @@ public class UserService {
         userRepository.findByNickname(nickname).ifPresent(user -> {
             throw new BusinessException(UserErrorCode.USER_NICKNAME_ALREADY_EXISTS);
         });
+    }
+
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));
     }
 }
