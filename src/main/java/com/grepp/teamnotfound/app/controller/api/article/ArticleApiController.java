@@ -13,6 +13,7 @@ import com.grepp.teamnotfound.infra.error.exception.BusinessException;
 import com.grepp.teamnotfound.infra.error.exception.code.AuthErrorCode;
 import com.grepp.teamnotfound.infra.error.exception.code.BoardErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.BindingResult;
@@ -101,13 +103,9 @@ public class ArticleApiController {
     @GetMapping("/v2")
     @Operation(summary = "특정 게시판의 게시글 리스트 조회")
     public ResponseEntity<ArticleListResponse> getAllArticlesV2(
-        @ModelAttribute ArticleListRequest request,
-        BindingResult bindingResult
+        @ModelAttribute @Valid ArticleListRequest request
     ) {
-        // TODO 실제 로직으로 구현 예정
-        if (bindingResult.hasErrors()) {
-            throw new BusinessException(BoardErrorCode.BOARD_INVALID_PAGE);
-        }
+        // NOTE 여기서 예외처리를 어떻게 하는 게 좋을까? -> GlobalExceptionHandler 에서 일괄 처리
 
         PageRequest pageable = PageRequest.of(
             request.getPage() - 1,
@@ -136,10 +134,15 @@ public class ArticleApiController {
 
     @PostMapping(value = "/v1", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "새로운 게시글 작성")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> createArticle(
         @RequestPart("request") ArticleRequest request,
-        @RequestPart(value = "images", required = false) List<MultipartFile> images
+        @RequestPart(value = "images", required = false) List<MultipartFile> images,
+        @AuthenticationPrincipal UserDetails userDetails
     ) {
+        String userEmail = userDetails.getUsername();
+        articleService.save(request, images, userEmail);
+
         return ResponseEntity.ok(Map.of("data", Map.of("articleId", 1, "msg", "게시글이 정상적으로 등록되었습니다.")));
     }
 
@@ -186,13 +189,11 @@ public class ArticleApiController {
 
     @PostMapping("/v1/{articleId}/like")
     @Operation(summary = "게시글 좋아요 요청")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> likeArticle(
         @PathVariable Long articleId,
         @AuthenticationPrincipal UserDetails userDetails
     ) {
-        if (userDetails == null) {
-            throw new AuthException(AuthErrorCode.UNAUTHENTICATED);
-        }
         // 사용자 이메일로 요청 회원 특정
         String userEmail = userDetails.getUsername();
 
