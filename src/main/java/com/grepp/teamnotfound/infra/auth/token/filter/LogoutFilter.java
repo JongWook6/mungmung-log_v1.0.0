@@ -36,7 +36,7 @@ public class LogoutFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         String path = request.getRequestURI();
-        if (!path.equals("/api/v1/auth/logout")) {
+        if (!path.equals("/api/auth/v1/logout")) {
             filterChain.doFilter(request, response);
             return;
         }

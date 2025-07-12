@@ -67,8 +67,8 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.UNAUTHORIZED)
                 .body(new ErrorResponse(
                         HttpStatus.UNAUTHORIZED.value(),
-                        "AUTH_001",
-                        "자격 증명에 실패하였습니다.",
+                        "USER_002",
+                        "아이디 또는 비밀번호가 일치하지 않습니다.",
                         LocalDateTime.now()
                 ));
     }

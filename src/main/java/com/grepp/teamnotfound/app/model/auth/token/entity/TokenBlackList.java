@@ -10,19 +10,19 @@ import java.time.OffsetDateTime;
 
 @Getter
 @Setter
-@RedisHash("userBlackList")
-public class UserBlackList {
+@RedisHash("tokenBlackList")
+public class TokenBlackList {
 
     @Id
-    private String email;
+    private String accessToken;
     private OffsetDateTime createdAt = OffsetDateTime.now();
 
     @TimeToLive
     private Long expiration;
 
     // 이메일과 TTL을 받는 생성자
-    public UserBlackList(String email, Long expiration) {
-        this.email = email;
+    public TokenBlackList(String accessToken, Long expiration) {
+        this.accessToken = accessToken;
         this.expiration = expiration;
     }
 

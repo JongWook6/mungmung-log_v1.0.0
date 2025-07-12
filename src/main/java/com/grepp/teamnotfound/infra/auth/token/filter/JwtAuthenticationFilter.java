@@ -3,8 +3,8 @@ package com.grepp.teamnotfound.infra.auth.token.filter;
 import com.grepp.teamnotfound.app.model.auth.token.RefreshTokenService;
 import com.grepp.teamnotfound.app.model.auth.token.dto.AccessTokenDto;
 import com.grepp.teamnotfound.app.model.auth.token.entity.RefreshToken;
-import com.grepp.teamnotfound.app.model.auth.token.entity.UserBlackList;
-import com.grepp.teamnotfound.app.model.auth.token.repository.UserBlackListRepository;
+import com.grepp.teamnotfound.app.model.auth.token.entity.TokenBlackList;
+import com.grepp.teamnotfound.app.model.auth.token.repository.TokenBlackListRepository;
 import com.grepp.teamnotfound.infra.auth.token.JwtProvider;
 import com.grepp.teamnotfound.infra.auth.token.TokenCookieFactory;
 import com.grepp.teamnotfound.infra.auth.token.code.TokenType;
@@ -34,7 +34,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwtProvider;
     private final RefreshTokenService refreshTokenService;
-    private final UserBlackListRepository userBlackListRepository;
+    private final TokenBlackListRepository tokenBlackListRepository;
 
     private final RequestMatcherHolder requestMatcherHolder;
 
@@ -61,7 +61,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 2. parseClaim - // 블랙리스트 filtering
         Claims claims = jwtProvider.parseClaims(accessToken);
-        if(userBlackListRepository.existsById(claims.getSubject())){
+        if(tokenBlackListRepository.existsById(claims.getId())){
             throw new CommonException(AuthErrorCode.INVALID_TOKEN);
         }
 
@@ -109,7 +109,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             // 유효 시간이 있을 때만 blacklist 처리
             if (remainingExpirationSeconds > 0) {
-                userBlackListRepository.save(new UserBlackList(authentication.getName(), remainingExpirationSeconds));
+                tokenBlackListRepository.save(new TokenBlackList(claims.getId(), remainingExpirationSeconds));
                 throw new CommonException(AuthErrorCode.SECURITY_INCIDENT);
             } else {
                 // access 만료 + re 만료 : 아예 자격이 없음

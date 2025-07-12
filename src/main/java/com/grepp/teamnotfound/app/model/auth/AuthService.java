@@ -6,8 +6,8 @@ import com.grepp.teamnotfound.app.model.auth.token.RefreshTokenService;
 import com.grepp.teamnotfound.app.model.auth.token.dto.AccessTokenDto;
 import com.grepp.teamnotfound.app.model.auth.token.dto.TokenDto;
 import com.grepp.teamnotfound.app.model.auth.token.entity.RefreshToken;
-import com.grepp.teamnotfound.app.model.auth.token.entity.UserBlackList;
-import com.grepp.teamnotfound.app.model.auth.token.repository.UserBlackListRepository;
+import com.grepp.teamnotfound.app.model.auth.token.entity.TokenBlackList;
+import com.grepp.teamnotfound.app.model.auth.token.repository.TokenBlackListRepository;
 import com.grepp.teamnotfound.app.model.user.UserService;
 import com.grepp.teamnotfound.app.model.user.entity.User;
 import com.grepp.teamnotfound.infra.auth.token.JwtProvider;
@@ -23,6 +23,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -31,7 +33,7 @@ public class AuthService {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final JwtProvider jwtProvider;
     private final RefreshTokenService refreshTokenService;
-    private final UserBlackListRepository userBlackListRepository;
+    private final TokenBlackListRepository tokenBlackListRepository;
 
 
     public TokenDto login(LoginCommand request) {
@@ -52,8 +54,8 @@ public class AuthService {
 
     private TokenDto processTokenLogin(Long userId) {
 
-        // TODO UserBlackList id 값 email > userId
-//        userBlackListRepository.deleteById(userId);
+        // TODO TokenBlackList id 값 email > userId
+//        tokenBlackListRepository.deleteById(userId);
 
         AccessTokenDto accessToken = jwtProvider.generateAccessToken(userId);
         RefreshToken refreshToken = refreshTokenService.saveWithAtId(accessToken.getId());
@@ -70,12 +72,17 @@ public class AuthService {
     @Transactional
     public void logout(String accessToken) {
         Claims claims = jwtProvider.parseClaims(accessToken);
+
+        if (claims.getExpiration().before(new Date())) {
+            throw new AuthException(AuthErrorCode.TOKEN_EXPIRED);
+        }
+
         // TODO blackList
         String userEmail = claims.getSubject();
         String accessTokenId = claims.getId();
 
         // 0. 블랙리스트 확인
-        if(userBlackListRepository.existsById(userEmail)){
+        if(tokenBlackListRepository.existsById(accessTokenId)){
             throw new AuthException(AuthErrorCode.ALREADY_LOGGED_OUT);
         }
 
@@ -85,7 +92,7 @@ public class AuthService {
         // 2. accessToken 블랙리스트에 추가 (남은 시간 계산)
         long remainingExpirationSeconds = (claims.getExpiration().getTime() - System.currentTimeMillis()) / 1000;
         if (remainingExpirationSeconds > 0) {
-            userBlackListRepository.save(new UserBlackList(userEmail, remainingExpirationSeconds));
+            tokenBlackListRepository.save(new TokenBlackList(accessTokenId, remainingExpirationSeconds));
         }
     }
 
