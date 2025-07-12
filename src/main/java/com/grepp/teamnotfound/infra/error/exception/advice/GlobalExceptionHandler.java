@@ -1,11 +1,14 @@
 package com.grepp.teamnotfound.infra.error.exception.advice;
 
 import com.grepp.teamnotfound.infra.error.exception.CommonException;
+import com.grepp.teamnotfound.infra.error.exception.code.AuthErrorCode;
 import com.grepp.teamnotfound.infra.error.exception.dto.ErrorResponse;
+import com.grepp.teamnotfound.infra.response.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -56,6 +59,18 @@ public class GlobalExceptionHandler {
                         "AUTH_002",
                         "접근 권한이 없습니다.",
                         LocalDateTime.now()));
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ErrorResponse> handleBadCredentials(BadCredentialsException e) {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(new ErrorResponse(
+                        HttpStatus.UNAUTHORIZED.value(),
+                        "AUTH_001",
+                        "자격 증명에 실패하였습니다.",
+                        LocalDateTime.now()
+                ));
     }
 
     // 그 외 모든 Exception catch
