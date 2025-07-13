@@ -54,9 +54,6 @@ public class AuthService {
 
     private TokenDto processTokenLogin(Long userId) {
 
-        // TODO TokenBlackList id 값 email > userId
-//        tokenBlackListRepository.deleteById(userId);
-
         AccessTokenDto accessToken = jwtProvider.generateAccessToken(userId);
         RefreshToken refreshToken = refreshTokenService.saveWithAtId(accessToken.getId());
 
@@ -77,8 +74,6 @@ public class AuthService {
             throw new AuthException(AuthErrorCode.TOKEN_EXPIRED);
         }
 
-        // TODO blackList
-        String userEmail = claims.getSubject();
         String accessTokenId = claims.getId();
 
         // 0. 블랙리스트 확인
