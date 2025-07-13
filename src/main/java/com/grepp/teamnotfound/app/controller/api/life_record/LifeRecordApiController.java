@@ -89,7 +89,6 @@ public class LifeRecordApiController {
         @PathVariable Long petId,
         @RequestParam LocalDate date
     ){
-        Pet pet = petService.getPet(petId);
         LifeRecordData lifeRecord = lifeRecordService.getLifeRecord(petId, date);
 
         return ResponseEntity.ok(Map.of("data", lifeRecord));

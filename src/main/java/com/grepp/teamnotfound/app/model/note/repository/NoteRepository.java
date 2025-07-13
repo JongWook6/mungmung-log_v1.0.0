@@ -24,5 +24,4 @@ public interface NoteRepository extends JpaRepository<Note, Long> {
     @Query("UPDATE Note n SET n.deletedAt = CURRENT_TIMESTAMP WHERE n.pet.petId = :petId AND n.recordedAt = :recordedAt AND n.deletedAt IS NULL")
     void delete(Long petId, LocalDate recordedAt);
 
-    Pet pet(Pet pet);
 }
