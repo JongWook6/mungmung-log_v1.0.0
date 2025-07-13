@@ -14,6 +14,7 @@ import com.grepp.teamnotfound.infra.auth.token.JwtProvider;
 import com.grepp.teamnotfound.infra.auth.token.code.GrantType;
 import com.grepp.teamnotfound.infra.error.exception.AuthException;
 import com.grepp.teamnotfound.infra.error.exception.code.AuthErrorCode;
+import com.grepp.teamnotfound.infra.error.exception.code.UserErrorCode;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -37,7 +38,8 @@ public class AuthService {
 
 
     public TokenDto login(LoginCommand request) {
-        User user = userService.findByEmail(request.getEmail());
+        User user = userService.findByEmail(request.getEmail())
+                .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));
 
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(
