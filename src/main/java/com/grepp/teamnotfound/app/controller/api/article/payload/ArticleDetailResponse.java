@@ -1,12 +1,15 @@
 package com.grepp.teamnotfound.app.controller.api.article.payload;
 
+import com.querydsl.core.annotations.QueryProjection;
 import java.time.OffsetDateTime;
 import java.util.List;
 import lombok.Builder;
 import lombok.Data;
+import lombok.ToString;
 
 @Data
 @Builder
+@ToString
 public class ArticleDetailResponse {
 
     private Long articleId;
@@ -18,7 +21,39 @@ public class ArticleDetailResponse {
     private Integer replies;
     private Integer likes;
     private Integer views;
+    private Boolean isDeleted;
     private Boolean isReported;
     private Boolean isLiked;
     private List<String> articleImgPathList;
+
+    @QueryProjection
+    public ArticleDetailResponse(
+        Long articleId,
+        String nickname,
+        String profileImgPath,
+        OffsetDateTime date,
+        String title,
+        String content,
+        Integer replies,
+        Integer likes,
+        Integer views,
+        Boolean isDeleted,
+        Boolean isReported,
+        Boolean isLiked,
+        List<String> articleImgPathList
+    ) {
+        this.articleId = articleId;
+        this.nickname = nickname;
+        this.profileImgPath = profileImgPath;
+        this.date = date;
+        this.title = title;
+        this.content = content;
+        this.replies = replies;
+        this.likes = likes;
+        this.views = views;
+        this.isDeleted = isDeleted;
+        this.isReported = isReported;
+        this.isLiked = isLiked;
+        this.articleImgPathList = articleImgPathList;
+    }
 }

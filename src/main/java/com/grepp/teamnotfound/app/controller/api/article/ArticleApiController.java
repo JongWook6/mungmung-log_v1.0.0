@@ -12,6 +12,7 @@ import com.grepp.teamnotfound.infra.error.exception.AuthException;
 import com.grepp.teamnotfound.infra.error.exception.BusinessException;
 import com.grepp.teamnotfound.infra.error.exception.code.AuthErrorCode;
 import com.grepp.teamnotfound.infra.error.exception.code.BoardErrorCode;
+import com.grepp.teamnotfound.infra.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import java.time.OffsetDateTime;
@@ -141,42 +142,41 @@ public class ArticleApiController {
         @AuthenticationPrincipal UserDetails userDetails
     ) {
         String userEmail = userDetails.getUsername();
-        articleService.save(request, images, userEmail);
+        Long articleId = articleService.writeArticle(request, images, userEmail);
 
-        return ResponseEntity.ok(Map.of("data", Map.of("articleId", 1, "msg", "게시글이 정상적으로 등록되었습니다.")));
+        return ResponseEntity.ok(ApiResponse.success(Map.of("articleId", articleId)));
     }
 
+    // NOTE 비회원이면 게시글을 조회할 수 없는가?
     @GetMapping("/v1/{articleId}")
     @Operation(summary = "게시글 상세 조회")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getArticle(
-        @PathVariable Long articleId
+        @PathVariable Long articleId,
+        @AuthenticationPrincipal UserDetails userDetails
     ) {
-        ArticleDetailResponse response = ArticleDetailResponse.builder()
-            .articleId(articleId)
-            .nickname("유저닉네임")
-            .profileImgPath("/upload/profileImg")
-            .date(OffsetDateTime.now())
-            .title("요즘 뽀삐가 밥을 잘 안먹는데 왜 그럴까요?")
-            .content("우리집 댕댕이가 날씨 때문인지 최근 며칠 간 밥을 잘 안먹어서 고민입니다")
-            .replies(10)
-            .likes(15)
-            .views(20)
-            .isReported(false)
-            .isLiked(true)
-            .articleImgPathList(List.of("/upload/img1", "/upload/img2", "/upload/img3"))
-            .build();
+        String userEmail = userDetails.getUsername();
+        ArticleDetailResponse response = articleService.findByArticleIdAndEmail(articleId, userEmail);
 
-        return ResponseEntity.ok(Map.of("data", response));
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @PatchMapping( value = "/v1/{articleId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "게시글 수정")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> updateArticle(
         @PathVariable Long articleId,
         @RequestPart("request") ArticleRequest request,
-        @RequestPart(value = "images", required = false) List<MultipartFile> images
+        @RequestPart(value = "images", required = false) List<MultipartFile> images,
+        @AuthenticationPrincipal UserDetails userDetails
     ) {
-        return ResponseEntity.ok(Map.of("data", Map.of("msg", "게시글이 정상적으로 수정되었습니다.")));
+        String userEmail = userDetails.getUsername();
+        // TODO 수정하면 제목, 내용은 그대로 업데이트하고,
+        //  기존 사진은 모두 deleted 처리하면서 새로운 사진을 등록
+        // NOTE 스토리지의 사진은 모두 삭제하는 게 맞을까??
+        articleService.updateArticle(articleId, request, images, userEmail);
+
+        return ResponseEntity.ok(ApiResponse.success("게시글이 정상적으로 수정되었습니다."));
     }
 
     @DeleteMapping("/v1/{articleId}")
