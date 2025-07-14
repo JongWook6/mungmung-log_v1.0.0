@@ -20,7 +20,7 @@ class ArticleRepositoryTest {
     @Test
     @DisplayName("프로필 이미지를 등록한 회원이 작성한 게시글")
     void searchArticleDetailWithProfileImg() {
-        ArticleDetailResponse result = articleRepository.findDetailById(2L, 1L);
+        ArticleDetailResponse result = articleRepository.findDetailById(10008L, 1L);
         System.out.println("result = " + result);
     }
 

@@ -19,8 +19,10 @@ public enum BoardErrorCode implements BaseErrorCode {
     BOARD_INVALID_SEARCH(HttpStatus.BAD_REQUEST.value(), "BOARD_007", "유효하지 않은 검색 방식입니다."),
     BOARD_INVALID_PAGE(HttpStatus.BAD_REQUEST.value(), "BOARD_008", "유효하지 않은 페이지입니다."),
     BOARD_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "BOARD_009", "존재하지 않는 게시판입니다."),
+    BOARD_CONFLICT(HttpStatus.BAD_REQUEST.value(), "BOARD_010", "기존 게시글이 작성된 게시판과 일치하지 않습니다."),
 
-    BOARD_ACCESS_DENIED(HttpStatus.FORBIDDEN.value(), "BOARD_010", "해당 게시글에 대한 접근 권한이 없습니다.");
+    ARTICLE_ACCESS_DENIED(HttpStatus.FORBIDDEN.value(), "BOARD_011", "해당 게시글에 대한 접근 권한이 없습니다."),
+    ARTICLE_FORBIDDEN(HttpStatus.FORBIDDEN.value(), "BOARD_012", "해당 게시글에 대한 수정/삭제 권한이 없습니다.");
 
 
     private final int status;

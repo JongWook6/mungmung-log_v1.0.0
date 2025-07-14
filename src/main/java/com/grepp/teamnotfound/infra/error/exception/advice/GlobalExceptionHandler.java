@@ -53,46 +53,6 @@ public class GlobalExceptionHandler {
                         LocalDateTime.now()));
     }
 
-    @ExceptionHandler(BindException.class)
-    public ResponseEntity<ErrorResponse> handleBindException(BindException ex) {
-        FieldError fieldError = ex.getFieldError();
-
-        if (fieldError != null) {
-            String field = fieldError.getField();
-            Object rejectedValue = fieldError.getRejectedValue();
-            String message;
-
-            if ("boardType".equals(field) || "sortType".equals(field)) {
-                message = String.format(
-                    "파라미터 '%s'의 값 '%s'은(는) 허용되지 않는 값입니다. 올바른 값을 입력해 주세요.",
-                    field,
-                    rejectedValue
-                );
-            } else {
-                message = fieldError.getDefaultMessage(); // 기본 메시지
-            }
-
-            return ResponseEntity.badRequest().body(
-                new ErrorResponse(
-                    HttpStatus.BAD_REQUEST.value(),
-                    "ENUM_TYPE_ERROR",
-                    message,
-                    LocalDateTime.now()
-                )
-            );
-        }
-
-        // 기본 fallback
-        return ResponseEntity.badRequest().body(
-            new ErrorResponse(
-                HttpStatus.BAD_REQUEST.value(),
-                "INVALID_REQUEST",
-                "요청 파라미터가 올바르지 않습니다.",
-                LocalDateTime.now()
-            )
-        );
-    }
-
     @ExceptionHandler({AuthorizationDeniedException.class, AccessDeniedException.class})
     public ResponseEntity<ErrorResponse> handleAuthorizationDeniedException() {
           return ResponseEntity

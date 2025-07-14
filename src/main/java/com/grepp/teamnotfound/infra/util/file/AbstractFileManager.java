@@ -29,7 +29,15 @@ public abstract class AbstractFileManager {
         return fileDtos;
     }
 
+    public void delete(List<FileDto> fileDtos) {
+
+    }
+
     protected void uploadFile(MultipartFile file, FileDto fileDto) throws IOException {
+
+    }
+
+    protected void deleteFile(FileDto fileDto) {
 
     }
 

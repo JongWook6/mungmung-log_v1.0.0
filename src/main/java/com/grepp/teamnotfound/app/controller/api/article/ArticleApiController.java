@@ -107,7 +107,6 @@ public class ArticleApiController {
         @ModelAttribute @Valid ArticleListRequest request
     ) {
         // NOTE 여기서 예외처리를 어떻게 하는 게 좋을까? -> GlobalExceptionHandler 에서 일괄 처리
-
         PageRequest pageable = PageRequest.of(
             request.getPage() - 1,
             request.getSize(),
@@ -135,7 +134,6 @@ public class ArticleApiController {
 
     @PostMapping(value = "/v1", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "새로운 게시글 작성")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> createArticle(
         @RequestPart("request") ArticleRequest request,
         @RequestPart(value = "images", required = false) List<MultipartFile> images,
@@ -150,7 +148,6 @@ public class ArticleApiController {
     // NOTE 비회원이면 게시글을 조회할 수 없는가?
     @GetMapping("/v1/{articleId}")
     @Operation(summary = "게시글 상세 조회")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getArticle(
         @PathVariable Long articleId,
         @AuthenticationPrincipal UserDetails userDetails
@@ -163,7 +160,6 @@ public class ArticleApiController {
 
     @PatchMapping( value = "/v1/{articleId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "게시글 수정")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> updateArticle(
         @PathVariable Long articleId,
         @RequestPart("request") ArticleRequest request,
@@ -171,20 +167,21 @@ public class ArticleApiController {
         @AuthenticationPrincipal UserDetails userDetails
     ) {
         String userEmail = userDetails.getUsername();
-        // TODO 수정하면 제목, 내용은 그대로 업데이트하고,
-        //  기존 사진은 모두 deleted 처리하면서 새로운 사진을 등록
-        // NOTE 스토리지의 사진은 모두 삭제하는 게 맞을까??
         articleService.updateArticle(articleId, request, images, userEmail);
 
-        return ResponseEntity.ok(ApiResponse.success("게시글이 정상적으로 수정되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(Map.of("result", "게시글이 정상적으로 수정되었습니다.")));
     }
 
     @DeleteMapping("/v1/{articleId}")
     @Operation(summary = "게시글 삭제")
     public ResponseEntity<?> deleteArticle(
-        @PathVariable Long articleId
+        @PathVariable Long articleId,
+        @AuthenticationPrincipal UserDetails userDetails
     ) {
-        return ResponseEntity.ok(Map.of("data", Map.of("msg", "게시글이 정상적으로 삭제되었습니다.")));
+        String userEmail = userDetails.getUsername();
+        articleService.deleteArticle(articleId, userEmail);
+
+        return ResponseEntity.ok(ApiResponse.success(Map.of("msg", "게시글이 정상적으로 삭제되었습니다.")));
     }
 
     @PostMapping("/v1/{articleId}/like")
@@ -196,6 +193,7 @@ public class ArticleApiController {
     ) {
         // 사용자 이메일로 요청 회원 특정
         String userEmail = userDetails.getUsername();
+
 
         LikeResponse response = LikeResponse.builder()
             .articleId(13L)
