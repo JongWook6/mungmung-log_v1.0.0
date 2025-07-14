@@ -62,7 +62,7 @@ public class AuthController {
     }
 
     @Operation(summary = "최종 회원가입")
-    @PostMapping("v1/register")
+    @PostMapping("v2/register")
     public ResponseEntity<ApiResponse<?>> register(@RequestBody RegisterRequest request) {
 
         RegisterCommand command = RegisterCommand.builder()
@@ -78,7 +78,7 @@ public class AuthController {
     }
 
 
-    @PostMapping("v1/admin/register")
+    @PostMapping("v2/admin/register")
     @PreAuthorize("permitAll()")
     public ResponseEntity<ApiResponse<?>> registerAdmin(@RequestBody RegisterRequest request) {
 
@@ -96,7 +96,7 @@ public class AuthController {
 
     @Operation(summary = "회원 로그인")
     @PostMapping("v1/login")
-    public ResponseEntity<ApiResponse<TokenResponse>> login(@RequestBody LoginRequest request, HttpServletResponse response) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpServletResponse response) {
 
         LoginCommand command = LoginCommand.builder()
                 .email(request.getEmail())
@@ -111,13 +111,7 @@ public class AuthController {
 
         response.addHeader("Set-Cookie", accessTokenCookie.toString());
         response.addHeader("Set-Cookie", refreshTokenCookie.toString());
-        TokenResponse tokenResponse = TokenResponse.builder()
-                .accessToken(dto.getAccessToken())
-                .expiresIn(dto.getAtExpiresIn())
-                .grantType(GrantType.BEARER)
-                .refreshToken(dto.getRefreshToken())
-                .build();
-        return ResponseEntity.ok(ApiResponse.success(tokenResponse));
+        return ResponseEntity.ok("로그인이 완료되었습니다.");
 
     }
 
@@ -125,7 +119,7 @@ public class AuthController {
     @Operation(summary = "관리자 로그인")
     @PostMapping("v1/admin/login")
     @PreAuthorize("permitAll()")
-    public ResponseEntity<ApiResponse<TokenResponse>> adminLogin(@RequestBody LoginRequest request, HttpServletResponse response) {
+    public ResponseEntity<?> adminLogin(@RequestBody LoginRequest request, HttpServletResponse response) {
 
         LoginCommand command = LoginCommand.builder()
                 .email(request.getEmail())
@@ -140,13 +134,7 @@ public class AuthController {
 
         response.addHeader("Set-Cookie", accessTokenCookie.toString());
         response.addHeader("Set-Cookie", refreshTokenCookie.toString());
-        TokenResponse tokenResponse = TokenResponse.builder()
-                .accessToken(dto.getAccessToken())
-                .expiresIn(dto.getAtExpiresIn())
-                .grantType(GrantType.BEARER)
-                .refreshToken(dto.getRefreshToken())
-                .build();
-        return ResponseEntity.ok(ApiResponse.success(tokenResponse));
+        return ResponseEntity.ok("로그인이 완료되었습니다.");
 
     }
 

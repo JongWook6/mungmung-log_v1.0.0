@@ -6,8 +6,8 @@ import com.grepp.teamnotfound.app.model.user.dto.UserDto;
 import com.grepp.teamnotfound.app.model.user.dto.UserImgDto;
 import com.grepp.teamnotfound.app.model.user.entity.User;
 import com.grepp.teamnotfound.app.model.user.entity.UserImg;
+import com.grepp.teamnotfound.app.model.user.repository.UserImgRepository;
 import com.grepp.teamnotfound.app.model.user.repository.UserRepository;
-import com.grepp.teamnotfound.infra.error.exception.AuthException;
 import com.grepp.teamnotfound.infra.error.exception.BusinessException;
 import com.grepp.teamnotfound.infra.error.exception.code.UserErrorCode;
 import com.grepp.teamnotfound.infra.util.mail.MailService;
@@ -28,19 +28,18 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final MailService mailService;
+    private final UserImgRepository userImgRepository;
 
     ModelMapper modelMapper = new ModelMapper();
 
     public UserDto findByUserId(Long userId) {
-        User user = userRepository.findByUserId(userId);
-
-        if (user == null) {
-            throw new BusinessException(UserErrorCode.USER_NOT_FOUND);
-        }
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
 
         UserDto userDto = modelMapper.map(user, UserDto.class);
 
-        UserImg userImg = user.getUserImg();
+        UserImg userImg = userImgRepository.findByUserImgWithUser(userId);
+
         if (userImg != null) {
             UserImgDto userImgDto = new UserImgDto();
             userImgDto.setUserImgId(userImg.getUserImgId());

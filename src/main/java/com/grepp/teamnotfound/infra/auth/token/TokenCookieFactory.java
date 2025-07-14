@@ -11,17 +11,18 @@ public class TokenCookieFactory {
                 .httpOnly(true)
                 .maxAge(expires)
                 // todo : 배포 후 true 로 변경
-                .secure(false)
+                .secure(true)
+                .sameSite("None")
                 .path("/")
                 .build();
     }
 
-    // TODO : OAuth2
     public static ResponseCookie createExpiredToken(TokenType tokenType) {
         return from(tokenType.name(), "")
                 .httpOnly(true)
                 .maxAge(0)
-                .secure(false)
+                .secure(true)
+                .sameSite("None")
                 .path("/")
                 .build();
     }

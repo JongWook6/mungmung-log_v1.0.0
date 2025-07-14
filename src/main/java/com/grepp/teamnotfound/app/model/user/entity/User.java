@@ -65,7 +65,4 @@ public class User extends BaseEntity {
     @Column(length = 20)
     private String provider;
 
-    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
-    private UserImg userImg;
-
 }
