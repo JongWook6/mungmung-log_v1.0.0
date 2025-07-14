@@ -17,6 +17,7 @@ import com.grepp.teamnotfound.infra.error.exception.code.PetErrorCode;
 import com.grepp.teamnotfound.infra.error.exception.code.VaccinationErrorCode;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,6 +40,15 @@ public class VaccinationService {
     private final PetRepository petRepository;
 
     ModelMapper modelMapper = new ModelMapper();
+
+    private static final EnumMap<VaccineName, Integer> boosterCountMap =
+        new EnumMap<>(Map.of(
+            VaccineName.DHPPL, 5,
+            VaccineName.CORONAVIRUS, 2,
+            VaccineName.KENNEL_COUGH, 2,
+            VaccineName.RABIES, 2,
+            VaccineName.INFLUENZA, 1
+        ));
 
     /**
      * 조회
@@ -102,13 +112,34 @@ public class VaccinationService {
             Vaccine vaccine = vaccineRepository.findByName(dto.getName())
                 .orElseThrow(() -> new BusinessException(VaccinationErrorCode.VACCINE_NOT_FOUND));
 
-            Integer boosterCount = vaccine.getBoosterCount();
+            VaccineName name = dto.getName();
+            VaccineType type = dto.getVaccineType();
+            Integer count = dto.getCount();
+            Integer expectedBooster = boosterCountMap.getOrDefault(name, -1);
 
-            if (
-                (dto.getVaccineType() == VaccineType.FIRST && dto.getCount() != 1) ||
-                    (dto.getVaccineType() == VaccineType.BOOSTER && (dto.getCount() <= 1 || dto.getCount() > boosterCount + 1))
-            ) {
-                throw new BusinessException(VaccinationErrorCode.VACCINATION_COUNT_MISMATCH);
+            switch (type) {
+                case FIRST:
+                    if (count != 1) throw new BusinessException(VaccinationErrorCode.VACCINATION_COUNT_MISMATCH);
+                    break;
+
+                case BOOSTER:
+                    if (name.equals(VaccineName.INFLUENZA)) {
+                        if (count != 1) {
+                            throw new BusinessException(VaccinationErrorCode.VACCINATION_COUNT_MISMATCH);
+                        }
+                    } else {
+                        if (count < 1 || count > expectedBooster) {
+                            throw new BusinessException(VaccinationErrorCode.VACCINATION_COUNT_MISMATCH);
+                        }
+                    }
+                    break;
+
+                case ADDITIONAL:
+                    if (count <= expectedBooster) throw new BusinessException(VaccinationErrorCode.VACCINATION_COUNT_MISMATCH);
+                    break;
+
+                default:
+                    throw new BusinessException(VaccinationErrorCode.VACCINATION_TYPE_NOT_FOUND);
             }
 
             if (dto.getVaccineAt().isAfter(LocalDate.now())) {
