@@ -8,6 +8,7 @@ import com.grepp.teamnotfound.app.controller.api.article.payload.LikeResponse;
 import com.grepp.teamnotfound.app.controller.api.article.payload.PageInfo;
 import com.grepp.teamnotfound.app.model.board.ArticleService;
 import com.grepp.teamnotfound.app.model.board.dto.ArticleListDto;
+import com.grepp.teamnotfound.app.model.user.entity.UserDetailsImpl;
 import com.grepp.teamnotfound.infra.error.exception.AuthException;
 import com.grepp.teamnotfound.infra.error.exception.BusinessException;
 import com.grepp.teamnotfound.infra.error.exception.code.AuthErrorCode;
@@ -137,10 +138,9 @@ public class ArticleApiController {
     public ResponseEntity<?> createArticle(
         @RequestPart("request") ArticleRequest request,
         @RequestPart(value = "images", required = false) List<MultipartFile> images,
-        @AuthenticationPrincipal UserDetails userDetails
+        @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
-        String userEmail = userDetails.getUsername();
-        Long articleId = articleService.writeArticle(request, images, userEmail);
+        Long articleId = articleService.writeArticle(request, images, userDetails.getUserId());
 
         return ResponseEntity.ok(ApiResponse.success(Map.of("articleId", articleId)));
     }
@@ -150,10 +150,9 @@ public class ArticleApiController {
     @Operation(summary = "게시글 상세 조회")
     public ResponseEntity<?> getArticle(
         @PathVariable Long articleId,
-        @AuthenticationPrincipal UserDetails userDetails
+        @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
-        String userEmail = userDetails.getUsername();
-        ArticleDetailResponse response = articleService.findByArticleIdAndEmail(articleId, userEmail);
+        ArticleDetailResponse response = articleService.findByArticleIdAndUserId(articleId, userDetails.getUserId());
 
         return ResponseEntity.ok(ApiResponse.success(response));
     }
@@ -164,10 +163,9 @@ public class ArticleApiController {
         @PathVariable Long articleId,
         @RequestPart("request") ArticleRequest request,
         @RequestPart(value = "images", required = false) List<MultipartFile> images,
-        @AuthenticationPrincipal UserDetails userDetails
+        @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
-        String userEmail = userDetails.getUsername();
-        articleService.updateArticle(articleId, request, images, userEmail);
+        articleService.updateArticle(articleId, request, images, userDetails.getUserId());
 
         return ResponseEntity.ok(ApiResponse.success(Map.of("result", "게시글이 정상적으로 수정되었습니다.")));
     }
@@ -176,10 +174,9 @@ public class ArticleApiController {
     @Operation(summary = "게시글 삭제")
     public ResponseEntity<?> deleteArticle(
         @PathVariable Long articleId,
-        @AuthenticationPrincipal UserDetails userDetails
+        @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
-        String userEmail = userDetails.getUsername();
-        articleService.deleteArticle(articleId, userEmail);
+        articleService.deleteArticle(articleId, userDetails.getUserId());
 
         return ResponseEntity.ok(ApiResponse.success(Map.of("msg", "게시글이 정상적으로 삭제되었습니다.")));
     }

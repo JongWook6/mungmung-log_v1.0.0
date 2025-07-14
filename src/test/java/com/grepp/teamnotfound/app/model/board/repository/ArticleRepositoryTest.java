@@ -36,10 +36,5 @@ class ArticleRepositoryTest {
     void searchArticleDetailDeleted() {
         ArticleDetailResponse result = articleRepository.findDetailById(3L, 1L);
         System.out.println("result = " + result);
-
-        // 나중에 서비스 테스트 코드에 사용
-//        Assertions.assertThatThrownBy(() -> articleRepository.findDetailById(3L, 1L))
-//            .isInstanceOf(BoardException.class)
-//            .hasMessageContaining(BoardErrorCode.ARTICLE_DELETED.getMessage());
     }
 }

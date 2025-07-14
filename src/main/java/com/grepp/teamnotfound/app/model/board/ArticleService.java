@@ -18,7 +18,6 @@ import com.grepp.teamnotfound.infra.code.ImgType;
 import com.grepp.teamnotfound.infra.error.exception.AuthException;
 import com.grepp.teamnotfound.infra.error.exception.BoardException;
 import com.grepp.teamnotfound.infra.error.exception.CommonException;
-import com.grepp.teamnotfound.infra.error.exception.code.AuthErrorCode;
 import com.grepp.teamnotfound.infra.error.exception.code.BoardErrorCode;
 import com.grepp.teamnotfound.infra.error.exception.code.CommonErrorCode;
 import com.grepp.teamnotfound.infra.error.exception.code.UserErrorCode;
@@ -64,9 +63,9 @@ public class ArticleService {
     }
 
     @Transactional
-    public Long writeArticle(ArticleRequest request, List<MultipartFile> images, String userEmail) {
+    public Long writeArticle(ArticleRequest request, List<MultipartFile> images, Long userId) {
         // 토큰 발급 시점과 현재 DB 사이의 무결성 검증
-        User user = userRepository.findByEmail(userEmail)
+        User user = userRepository.findById(userId)
             .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));
 
         Board board = boardRepository.findByName(request.getBoardType().name())
@@ -87,9 +86,9 @@ public class ArticleService {
     }
 
     @Transactional(readOnly = true)
-    public ArticleDetailResponse findByArticleIdAndEmail(Long articleId, String userEmail) {
-        User user = userRepository.findByEmail(userEmail)
-            .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));;
+    public ArticleDetailResponse findByArticleIdAndUserId(Long articleId, Long userId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));
 
         ArticleDetailResponse response = articleRepository.findDetailById(articleId, user.getUserId());
 
@@ -110,9 +109,9 @@ public class ArticleService {
 
     @Transactional
     public void updateArticle(Long articleId, ArticleRequest request, List<MultipartFile> images,
-        String userEmail) {
+        Long userId) {
         // NOTE DB 에 너무 많이 접근하는 건가?
-        User requestUser = userRepository.findByEmail(userEmail)
+        User requestUser = userRepository.findById(userId)
             .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));
 
         // NOTE 게시판 자체를 바꾸는 기능은 제공하지 않으니까 게시판 체크는 안해도 될 것 같은데
@@ -141,9 +140,9 @@ public class ArticleService {
     }
 
     @Transactional
-    public void deleteArticle(Long articleId, String userEmail) {
+    public void deleteArticle(Long articleId, Long userId) {
 
-        User requestUser = userRepository.findByEmail(userEmail)
+        User requestUser = userRepository.findById(userId)
             .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));
 
         Article article = articleRepository.findById(articleId)
@@ -161,7 +160,7 @@ public class ArticleService {
     }
 
     private void uploadAndSaveImgs(List<MultipartFile> images, Article targetArticle) {
-        if (images != null && !images.getFirst().isEmpty() ) {
+        if (images != null || !images.getFirst().isEmpty() ) {
             try {
                 // GCP bucket 에 업로드
                 List<FileDto> imgList = fileManager.upload(images, "article");

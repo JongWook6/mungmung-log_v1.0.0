@@ -7,10 +7,16 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ArticleRequest {
 
     @NotNull(message = "사용자 ID는 필수입니다.")
