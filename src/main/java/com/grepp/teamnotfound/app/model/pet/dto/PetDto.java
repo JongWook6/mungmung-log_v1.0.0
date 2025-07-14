@@ -22,7 +22,6 @@ public class PetDto {
     private LocalDate birthday;
     private LocalDate metday;
     private String name;
-    private Integer age;
     private PetType breed;
     private PetSize size;
     private Double weight;
@@ -38,7 +37,6 @@ public class PetDto {
         dto.setBirthday(pet.getBirthday());
         dto.setMetday(pet.getMetday());
         dto.setName(pet.getName());
-        dto.setAge(pet.getAge());
         dto.setBreed(pet.getBreed());
         dto.setSize(pet.getSize());
         dto.setWeight(pet.getWeight());

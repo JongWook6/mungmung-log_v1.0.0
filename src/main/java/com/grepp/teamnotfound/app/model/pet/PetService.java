@@ -16,7 +16,6 @@ import com.grepp.teamnotfound.infra.error.exception.code.UserErrorCode;
 import com.grepp.teamnotfound.util.NotFoundException;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.time.Period;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -62,8 +61,6 @@ public class PetService {
             .map(pet -> {
                 ProfilePetResponse dto = modelMapper.map(pet, ProfilePetResponse.class);
 
-                dto.setAge(calculateAge(pet.getBirthday()));
-
                 if (pet.getMetday() != null) {
                     dto.setDays((int) ChronoUnit.DAYS.between(pet.getMetday(), LocalDate.now()) + 1);
                 } else {
@@ -97,7 +94,6 @@ public class PetService {
 
         modelMapper.getConfiguration().setPropertyCondition(ctx -> !ctx.getMapping().getLastDestinationProperty().getName().equals("petId"));
         modelMapper.map(request, pet);
-        pet.setAge(calculateAge(request.getBirthday()));
         pet.setUser(user);
 
         petRepository.save(pet);
@@ -115,7 +111,6 @@ public class PetService {
         }
 
         modelMapper.map(request, pet);
-        pet.setAge(calculateAge(request.getBirthday()));
         pet.setUpdatedAt(OffsetDateTime.now());
 
         petRepository.save(pet);
@@ -130,13 +125,5 @@ public class PetService {
 
         petRepository.softDelete(petId, OffsetDateTime.now());
         vaccinationService.softDelete(petId);
-    }
-
-    private Integer calculateAge(LocalDate birthday) {
-        if (birthday == null) {
-            return null;
-        }
-        Period period = Period.between(birthday, LocalDate.now());
-        return period.getYears() * 12 + period.getMonths();
     }
 }
