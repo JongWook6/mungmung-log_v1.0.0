@@ -17,6 +17,6 @@ public interface PetRepository extends JpaRepository<Pet, Long> {
 
     @Modifying(clearAutomatically=true, flushAutomatically=true)
     @Query("UPDATE Pet p SET p.deletedAt = :deletedAt WHERE p.petId = :petId")
-    void softDelete(@Param("petId") Long petId, @Param("deletedAt") OffsetDateTime deletedAt);
+    Integer softDelete(@Param("petId") Long petId, @Param("deletedAt") OffsetDateTime deletedAt);
 
 }

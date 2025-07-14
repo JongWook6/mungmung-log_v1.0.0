@@ -8,7 +8,6 @@ import com.grepp.teamnotfound.app.model.pet.repository.PetRepository;
 import com.grepp.teamnotfound.app.model.user.entity.User;
 import com.grepp.teamnotfound.app.model.user.repository.UserRepository;
 import com.grepp.teamnotfound.app.model.vaccination.VaccinationService;
-import com.grepp.teamnotfound.app.model.vaccination.repository.VaccinationRepository;
 import com.grepp.teamnotfound.infra.error.exception.BusinessException;
 import com.grepp.teamnotfound.infra.error.exception.PetException;
 import com.grepp.teamnotfound.infra.error.exception.code.PetErrorCode;
@@ -33,7 +32,6 @@ public class PetService {
 
     private final PetRepository petRepository;
     private final UserRepository userRepository;
-    private final VaccinationRepository vaccinationRepository;
 
     private final VaccinationService vaccinationService;
 
@@ -73,12 +71,10 @@ public class PetService {
     }
 
     public PetDto findOne(Long petId) {
-        petRepository.findById(petId)
+        Pet pet = petRepository.findById(petId)
             .orElseThrow(() -> new BusinessException(PetErrorCode.PET_NOT_FOUND));
 
-        return petRepository.findById(petId)
-                .map(PetDto::fromEntity)
-                .orElseThrow(NotFoundException::new);
+        return PetDto.fromEntity(pet);
     }
 
     @Transactional
@@ -120,10 +116,11 @@ public class PetService {
 
     @Transactional
     public void delete(Long petId) {
-        petRepository.findById(petId)
-            .orElseThrow(() -> new BusinessException(PetErrorCode.PET_NOT_FOUND));
+        Integer updated = petRepository.softDelete(petId, OffsetDateTime.now());
+        if (updated == 0) {
+            throw new BusinessException(PetErrorCode.PET_NOT_FOUND);
+        }
 
-        petRepository.softDelete(petId, OffsetDateTime.now());
         vaccinationService.softDelete(petId);
     }
 }
