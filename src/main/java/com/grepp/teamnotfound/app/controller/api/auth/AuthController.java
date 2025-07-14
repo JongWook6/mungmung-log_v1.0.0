@@ -1,18 +1,22 @@
 package com.grepp.teamnotfound.app.controller.api.auth;
 
+import com.grepp.teamnotfound.app.controller.api.auth.payload.EmailVerificationRequest;
+import com.grepp.teamnotfound.app.controller.api.auth.payload.EmailVerifyRequest;
+import com.grepp.teamnotfound.app.controller.api.auth.payload.RegisterRequest;
+import com.grepp.teamnotfound.app.controller.api.auth.payload.RegisterResponse;
 import com.grepp.teamnotfound.app.model.auth.AuthService;
-import com.grepp.teamnotfound.app.model.auth.payload.LoginRequest;
-import com.grepp.teamnotfound.app.model.auth.payload.TokenResponse;
+import com.grepp.teamnotfound.app.model.auth.payload.LoginCommand;
+import com.grepp.teamnotfound.infra.util.mail.MailService;
+import com.grepp.teamnotfound.app.controller.api.auth.payload.LoginRequest;
+import com.grepp.teamnotfound.app.controller.api.auth.payload.TokenResponse;
 import com.grepp.teamnotfound.app.model.auth.token.dto.TokenDto;
-import com.grepp.teamnotfound.app.model.user.AdminService;
 import com.grepp.teamnotfound.app.model.user.UserService;
-import com.grepp.teamnotfound.app.model.user.dto.RegisterRequestDto;
-import com.grepp.teamnotfound.app.model.user.dto.RegisterResponseDto;
-import com.grepp.teamnotfound.app.model.user.dto.VerifyEmailRequestDto;
+import com.grepp.teamnotfound.app.model.user.dto.RegisterCommand;
 import com.grepp.teamnotfound.infra.auth.token.TokenCookieFactory;
 import com.grepp.teamnotfound.infra.auth.token.code.GrantType;
 import com.grepp.teamnotfound.infra.auth.token.code.TokenType;
 import com.grepp.teamnotfound.infra.response.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
@@ -27,36 +31,79 @@ public class AuthController {
 
     private final AuthService authService;
     private final UserService userService;
-    private final AdminService adminService;
+    private final MailService mailService;
 
-    @GetMapping("v1/test")
-    public ResponseEntity<String> test(){
-        return ResponseEntity.ok("모두에게 열린 api로 인증하지 않은 사용자도 접근 가능");
+    @Operation(summary = "이메일 중복 확인")
+    @GetMapping("v1/check-email")
+    public ResponseEntity<?> checkEmail(@RequestParam("email") String email) {
+        userService.validateEmailDuplication(email);
+        return ResponseEntity.ok("사용 가능한 이메일입니다.");
     }
 
-    // 이메일 발송 완료 시점까지 작동
-    @PostMapping("v1/register")
-    public ResponseEntity<ApiResponse<?>> register(@RequestBody RegisterRequestDto requestDto) {
-        userService.requestRegisterVerification(requestDto);
-
-        return ResponseEntity.ok(ApiResponse.success("회원가입 인증 메일이 발송되었습니다. 이메일을 확인해주세요."));
+    @Operation(summary = "이메일 인증코드 발송 요청")
+    @PostMapping("v1/email-verifications")
+    public ResponseEntity<?> emailVerification(@RequestBody EmailVerificationRequest request) {
+        userService.sendEmail(request.getEmail());
+        return ResponseEntity.ok("인증 코드가 발송되었습니다.");
     }
 
-    // 입력 인증코드 유효성 검증 및 가입 완료
-    @PostMapping("v1/register/verify-email")
-    public ResponseEntity<ApiResponse<RegisterResponseDto>> verifyEmail(@RequestBody VerifyEmailRequestDto requestDto){
-        Long userId = userService.completeRegistration(requestDto.getEmail(), requestDto.getVerificationCode());
+    @Operation(summary = "이메일 인증코드 검증")
+    @PostMapping("v1/email-verifications/verify")
+    public ResponseEntity<?> emailVerify(@RequestBody EmailVerifyRequest request) {
+        mailService.verifyEmailCode(request.getEmail(), request.getVerificationCode());
+        return ResponseEntity.ok("인증코드가 올바르게 인증되었습니다");
+    }
 
-        RegisterResponseDto responseDto = new RegisterResponseDto(userId);
+    @Operation(summary = "닉네임 중복 확인")
+    @GetMapping("v1/check-nickname")
+    public ResponseEntity<?> checkNickname(@RequestParam("nickname") String nickname) {
+        userService.validateNicknameDuplication(nickname);
+        return ResponseEntity.ok("사용 가능한 닉네임입니다.");
+    }
 
-        return ResponseEntity.ok(ApiResponse.success(responseDto));
+    @Operation(summary = "최종 회원가입")
+    @PostMapping("v2/register")
+    public ResponseEntity<ApiResponse<?>> register(@RequestBody RegisterRequest request) {
+
+        RegisterCommand command = RegisterCommand.builder()
+                .email(request.getEmail())
+                .name(request.getName())
+                .nickname(request.getNickname())
+                .password(request.getPassword())
+                .build();
+        Long userId = userService.registerUser(command);
+        RegisterResponse response = new RegisterResponse(userId);
+
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
 
+    @PostMapping("v2/admin/register")
+    @PreAuthorize("permitAll()")
+    public ResponseEntity<ApiResponse<?>> registerAdmin(@RequestBody RegisterRequest request) {
+
+        RegisterCommand command = RegisterCommand.builder()
+                .email(request.getEmail())
+                .name(request.getName())
+                .nickname(request.getNickname())
+                .password(request.getPassword())
+                .build();
+        Long userId = userService.registerAdmin(command);
+        RegisterResponse response = new RegisterResponse(userId);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+
+    @Operation(summary = "회원 로그인")
     @PostMapping("v1/login")
-    public ResponseEntity<ApiResponse<TokenResponse>> login(@RequestBody LoginRequest request, HttpServletResponse response) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpServletResponse response) {
 
-        TokenDto dto = authService.login(request);
+        LoginCommand command = LoginCommand.builder()
+                .email(request.getEmail())
+                .password(request.getPassword())
+                .build();
+
+        TokenDto dto = authService.login(command);
         ResponseCookie accessTokenCookie = TokenCookieFactory.create(TokenType.ACCESS_TOKEN.name(),
                 dto.getAccessToken(), dto.getAtExpiresIn());
         ResponseCookie refreshTokenCookie = TokenCookieFactory.create(TokenType.REFRESH_TOKEN.name(),
@@ -64,31 +111,22 @@ public class AuthController {
 
         response.addHeader("Set-Cookie", accessTokenCookie.toString());
         response.addHeader("Set-Cookie", refreshTokenCookie.toString());
-        TokenResponse tokenResponse = TokenResponse.builder()
-                .accessToken(dto.getAccessToken())
-                .expiresIn(dto.getAtExpiresIn())
-                .grantType(GrantType.BEARER)
-                .refreshToken(dto.getRefreshToken())
-                .build();
-        return ResponseEntity.ok(ApiResponse.success(tokenResponse));
+        return ResponseEntity.ok("로그인이 완료되었습니다.");
 
     }
 
 
-    @PostMapping("v1/admin/register")
-    @PreAuthorize("permitAll()")
-    public ResponseEntity<ApiResponse<RegisterResponseDto>> registerAdmin(@RequestBody RegisterRequestDto requestDto) {
-        Long userId = adminService.registerAdmin(requestDto);
-        RegisterResponseDto responseDto = new RegisterResponseDto(userId);
-        return ResponseEntity.ok(ApiResponse.success(responseDto));
-    }
-
-
+    @Operation(summary = "관리자 로그인")
     @PostMapping("v1/admin/login")
     @PreAuthorize("permitAll()")
-    public ResponseEntity<ApiResponse<TokenResponse>> adminLogin(@RequestBody LoginRequest request, HttpServletResponse response) {
+    public ResponseEntity<?> adminLogin(@RequestBody LoginRequest request, HttpServletResponse response) {
 
-        TokenDto dto = authService.login(request);
+        LoginCommand command = LoginCommand.builder()
+                .email(request.getEmail())
+                .password(request.getPassword())
+                .build();
+
+        TokenDto dto = authService.login(command);
         ResponseCookie accessTokenCookie = TokenCookieFactory.create(TokenType.ACCESS_TOKEN.name(),
                 dto.getAccessToken(), dto.getAtExpiresIn());
         ResponseCookie refreshTokenCookie = TokenCookieFactory.create(TokenType.REFRESH_TOKEN.name(),
@@ -96,13 +134,7 @@ public class AuthController {
 
         response.addHeader("Set-Cookie", accessTokenCookie.toString());
         response.addHeader("Set-Cookie", refreshTokenCookie.toString());
-        TokenResponse tokenResponse = TokenResponse.builder()
-                .accessToken(dto.getAccessToken())
-                .expiresIn(dto.getAtExpiresIn())
-                .grantType(GrantType.BEARER)
-                .refreshToken(dto.getRefreshToken())
-                .build();
-        return ResponseEntity.ok(ApiResponse.success(tokenResponse));
+        return ResponseEntity.ok("로그인이 완료되었습니다.");
 
     }
 

@@ -62,14 +62,7 @@ public class User extends BaseEntity {
     @Column(nullable = false, length = 200)
     private String password;
 
-    @Column
-    @Setter
-    private Boolean verifiedEmail = false;
-
     @Column(length = 20)
     private String provider;
-
-    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
-    private UserImg userImg;
 
 }

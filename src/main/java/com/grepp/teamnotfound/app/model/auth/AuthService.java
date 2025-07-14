@@ -1,16 +1,20 @@
 package com.grepp.teamnotfound.app.model.auth;
 
-import com.grepp.teamnotfound.app.model.auth.payload.LoginRequest;
+import com.grepp.teamnotfound.app.model.auth.domain.Principal;
+import com.grepp.teamnotfound.app.model.auth.payload.LoginCommand;
 import com.grepp.teamnotfound.app.model.auth.token.RefreshTokenService;
 import com.grepp.teamnotfound.app.model.auth.token.dto.AccessTokenDto;
 import com.grepp.teamnotfound.app.model.auth.token.dto.TokenDto;
 import com.grepp.teamnotfound.app.model.auth.token.entity.RefreshToken;
-import com.grepp.teamnotfound.app.model.auth.token.entity.UserBlackList;
-import com.grepp.teamnotfound.app.model.auth.token.repository.UserBlackListRepository;
+import com.grepp.teamnotfound.app.model.auth.token.entity.TokenBlackList;
+import com.grepp.teamnotfound.app.model.auth.token.repository.TokenBlackListRepository;
+import com.grepp.teamnotfound.app.model.user.UserService;
+import com.grepp.teamnotfound.app.model.user.entity.User;
 import com.grepp.teamnotfound.infra.auth.token.JwtProvider;
 import com.grepp.teamnotfound.infra.auth.token.code.GrantType;
 import com.grepp.teamnotfound.infra.error.exception.AuthException;
 import com.grepp.teamnotfound.infra.error.exception.code.AuthErrorCode;
+import com.grepp.teamnotfound.infra.error.exception.code.UserErrorCode;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,33 +24,39 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
+    private final UserService userService;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final JwtProvider jwtProvider;
     private final RefreshTokenService refreshTokenService;
-    private final UserBlackListRepository userBlackListRepository;
+    private final TokenBlackListRepository tokenBlackListRepository;
 
 
-    public TokenDto login(LoginRequest loginRequest) {
+    public TokenDto login(LoginCommand request) {
+        User user = userService.findByEmail(request.getEmail())
+                .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));
+
         UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(),
-                        loginRequest.getPassword());
+                new UsernamePasswordAuthenticationToken(
+                        user.getEmail(),
+                        request.getPassword());
 
         Authentication authentication = authenticationManagerBuilder.getObject()
                 .authenticate(authenticationToken);
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        return processTokenLogin(authentication.getName());
+        // Object gerPrincipal 이므로 Principal로 캐스팅
+        return processTokenLogin(((Principal) authentication.getPrincipal()).getUserId());
     }
 
-    private TokenDto processTokenLogin(String email) {
+    private TokenDto processTokenLogin(Long userId) {
 
-        userBlackListRepository.deleteById(email);
-
-        AccessTokenDto accessToken = jwtProvider.generateAccessToken(email);
+        AccessTokenDto accessToken = jwtProvider.generateAccessToken(userId);
         RefreshToken refreshToken = refreshTokenService.saveWithAtId(accessToken.getId());
 
         return TokenDto.builder()
@@ -61,11 +71,15 @@ public class AuthService {
     @Transactional
     public void logout(String accessToken) {
         Claims claims = jwtProvider.parseClaims(accessToken);
-        String userEmail = claims.getSubject();
+
+        if (claims.getExpiration().before(new Date())) {
+            throw new AuthException(AuthErrorCode.TOKEN_EXPIRED);
+        }
+
         String accessTokenId = claims.getId();
 
         // 0. 블랙리스트 확인
-        if(userBlackListRepository.existsById(userEmail)){
+        if(tokenBlackListRepository.existsById(accessTokenId)){
             throw new AuthException(AuthErrorCode.ALREADY_LOGGED_OUT);
         }
 
@@ -75,7 +89,7 @@ public class AuthService {
         // 2. accessToken 블랙리스트에 추가 (남은 시간 계산)
         long remainingExpirationSeconds = (claims.getExpiration().getTime() - System.currentTimeMillis()) / 1000;
         if (remainingExpirationSeconds > 0) {
-            userBlackListRepository.save(new UserBlackList(userEmail, remainingExpirationSeconds));
+            tokenBlackListRepository.save(new TokenBlackList(accessTokenId, remainingExpirationSeconds));
         }
     }
 

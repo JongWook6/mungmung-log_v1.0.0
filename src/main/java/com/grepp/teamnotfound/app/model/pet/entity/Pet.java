@@ -55,9 +55,6 @@ public class Pet extends BaseEntity {
     @Column(length = 10)
     private String name;
 
-    @Column(nullable = true)
-    private Integer age;
-
     @Column(nullable = false, length = 50)
     @Enumerated(EnumType.STRING)
     private PetType breed;

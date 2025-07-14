@@ -36,11 +36,11 @@ public class SecurityConfig {
 
     private final AuthExceptionFilter authExceptionFilter;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final LogoutFilter logoutFilter;
+//    private final LogoutFilter logoutFilter;
     private final RequestMatcherHolder requestMatcherHolder;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, LogoutFilter logoutFilter) throws Exception {
 
         RequestMatcher permitAllMatcher = requestMatcherHolder.getRequestMatchersByMinRole(null);
         RequestMatcher adminMatcher = requestMatcherHolder.getRequestMatchersByMinRole("ADMIN");
