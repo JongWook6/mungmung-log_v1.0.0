@@ -10,6 +10,6 @@ public interface UserImgRepository extends JpaRepository<UserImg, Long> {
     @Query("SELECT ui FROM UserImg ui " +
             "JOIN FETCH ui.user " +
             "WHERE ui.user.userId = :userId")
-    UserImg findByUserIdWithUser(@Param("userId") Long userId);
+    UserImg findByUserImgWithUser(@Param("userId") Long userId);
 
 }

@@ -8,7 +8,6 @@ import com.grepp.teamnotfound.app.model.user.entity.User;
 import com.grepp.teamnotfound.app.model.user.entity.UserImg;
 import com.grepp.teamnotfound.app.model.user.repository.UserImgRepository;
 import com.grepp.teamnotfound.app.model.user.repository.UserRepository;
-import com.grepp.teamnotfound.infra.error.exception.AuthException;
 import com.grepp.teamnotfound.infra.error.exception.BusinessException;
 import com.grepp.teamnotfound.infra.error.exception.code.UserErrorCode;
 import com.grepp.teamnotfound.infra.util.mail.MailService;
@@ -39,7 +38,7 @@ public class UserService {
 
         UserDto userDto = modelMapper.map(user, UserDto.class);
 
-        UserImg userImg = userImgRepository.findByUserIdWithUser(userId);
+        UserImg userImg = userImgRepository.findByUserImgWithUser(userId);
 
         if (userImg != null) {
             UserImgDto userImgDto = new UserImgDto();
