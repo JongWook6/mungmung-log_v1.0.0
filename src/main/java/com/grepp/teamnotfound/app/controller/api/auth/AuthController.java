@@ -96,7 +96,7 @@ public class AuthController {
 
     @Operation(summary = "회원 로그인")
     @PostMapping("v1/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpServletResponse response) {
+    public ResponseEntity<ApiResponse<TokenResponse>> login(@RequestBody LoginRequest request, HttpServletResponse response) {
 
         LoginCommand command = LoginCommand.builder()
                 .email(request.getEmail())
@@ -111,7 +111,13 @@ public class AuthController {
 
         response.addHeader("Set-Cookie", accessTokenCookie.toString());
         response.addHeader("Set-Cookie", refreshTokenCookie.toString());
-        return ResponseEntity.ok("로그인이 완료되었습니다.");
+        TokenResponse tokenResponse = TokenResponse.builder()
+                .accessToken(dto.getAccessToken())
+                .expiresIn(dto.getAtExpiresIn())
+                .grantType(GrantType.BEARER)
+                .refreshToken(dto.getRefreshToken())
+                .build();
+        return ResponseEntity.ok(ApiResponse.success(tokenResponse));
 
     }
 
@@ -119,7 +125,7 @@ public class AuthController {
     @Operation(summary = "관리자 로그인")
     @PostMapping("v1/admin/login")
     @PreAuthorize("permitAll()")
-    public ResponseEntity<?> adminLogin(@RequestBody LoginRequest request, HttpServletResponse response) {
+    public ResponseEntity<ApiResponse<TokenResponse>> adminLogin(@RequestBody LoginRequest request, HttpServletResponse response) {
 
         LoginCommand command = LoginCommand.builder()
                 .email(request.getEmail())
@@ -134,7 +140,13 @@ public class AuthController {
 
         response.addHeader("Set-Cookie", accessTokenCookie.toString());
         response.addHeader("Set-Cookie", refreshTokenCookie.toString());
-        return ResponseEntity.ok("로그인이 완료되었습니다.");
+        TokenResponse tokenResponse = TokenResponse.builder()
+                .accessToken(dto.getAccessToken())
+                .expiresIn(dto.getAtExpiresIn())
+                .grantType(GrantType.BEARER)
+                .refreshToken(dto.getRefreshToken())
+                .build();
+        return ResponseEntity.ok(ApiResponse.success(tokenResponse));
 
     }
 
