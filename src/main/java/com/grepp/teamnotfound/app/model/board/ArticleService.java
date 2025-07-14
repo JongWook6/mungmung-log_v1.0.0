@@ -87,10 +87,10 @@ public class ArticleService {
 
     @Transactional(readOnly = true)
     public ArticleDetailResponse findByArticleIdAndUserId(Long articleId, Long userId) {
-        User user = userRepository.findById(userId)
+        User readingUser = userRepository.findById(userId)
             .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));
 
-        ArticleDetailResponse response = articleRepository.findDetailById(articleId, user.getUserId());
+        ArticleDetailResponse response = articleRepository.findDetailById(articleId, readingUser.getUserId());
 
         if (response == null) {
             throw new BoardException(BoardErrorCode.ARTICLE_NOT_FOUND);
@@ -104,19 +104,18 @@ public class ArticleService {
             throw new BoardException(BoardErrorCode.ARTICLE_REPORTED);
         }
 
+        articleRepository.plusViewById(articleId);
+        response.setViews(response.getViews() + 1);
+
         return response;
     }
 
     @Transactional
     public void updateArticle(Long articleId, ArticleRequest request, List<MultipartFile> images,
         Long userId) {
-        // NOTE DB 에 너무 많이 접근하는 건가?
+
         User requestUser = userRepository.findById(userId)
             .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));
-
-        // NOTE 게시판 자체를 바꾸는 기능은 제공하지 않으니까 게시판 체크는 안해도 될 것 같은데
-        Board board = boardRepository.findByName(request.getBoardType().name())
-            .orElseThrow(() -> new BoardException(BoardErrorCode.BOARD_NOT_FOUND));
 
         Article beforeArticle = articleRepository.findById(articleId)
             .orElseThrow(() -> new BoardException(BoardErrorCode.ARTICLE_NOT_FOUND));
@@ -152,7 +151,7 @@ public class ArticleService {
             throw new BoardException(BoardErrorCode.ARTICLE_FORBIDDEN);
         }
 
-        // NOTE 게시글을 삭제하면 사진, 댓글 모두 soft delete?
+        // 게시글을 삭제하면 댓글, 이미지 모두 soft delete
         OffsetDateTime deletedTime = OffsetDateTime.now();
         article.setDeletedAt(deletedTime);
         articleImgRepository.softDeleteByArticleId(articleId, deletedTime);

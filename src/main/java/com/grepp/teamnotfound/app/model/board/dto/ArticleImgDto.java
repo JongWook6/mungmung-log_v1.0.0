@@ -8,8 +8,6 @@ public class ArticleImgDto {
 
     private Long articleImgId;
 
-    private Long articledId;
-
     private String savePath;
 
     private ImgType imgType;

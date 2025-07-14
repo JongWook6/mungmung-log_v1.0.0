@@ -1,6 +1,7 @@
 package com.grepp.teamnotfound.app.model.board.repository;
 
 import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleDetailResponse;
+import com.grepp.teamnotfound.app.model.board.dto.ArticleImgDto;
 import com.grepp.teamnotfound.app.model.board.entity.QArticle;
 import com.grepp.teamnotfound.app.model.board.entity.QArticleImg;
 import com.grepp.teamnotfound.app.model.board.entity.QArticleLike;
@@ -8,6 +9,7 @@ import com.grepp.teamnotfound.app.model.reply.entity.QReply;
 import com.grepp.teamnotfound.app.model.user.entity.QUser;
 import com.grepp.teamnotfound.app.model.user.entity.QUserImg;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
@@ -58,8 +60,6 @@ public class ArticleRepositoryCustomImpl implements ArticleRepositoryCustom{
             .exists();
 
         // 메인 쿼리
-        // NOTE 만약 게시글이 수정된 후 수정일자를 받고 싶다면 로직 수정 필요
-        //      처음 생성될 때 updatedAt 까지 자동으로 기록되는 게 나을 것 같은데
         Tuple result = queryFactory
             .select(
                 article.articleId,
@@ -87,8 +87,15 @@ public class ArticleRepositoryCustomImpl implements ArticleRepositoryCustom{
         if (result == null) return null;
 
         // 이미지 리스트는 별도로 조회
-        List<String> imgPaths = queryFactory
-            .select(articleImg.savePath.append(articleImg.renamedName))
+        List<ArticleImgDto> images = queryFactory
+            .select(
+                Projections.constructor(
+                    ArticleImgDto.class,
+                    articleImg.articleImgId,
+                    articleImg.savePath.append(articleImg.renamedName),
+                    articleImg.type
+                )
+            )
             .from(articleImg)
             .where(
                 articleImg.article.articleId.eq(articleId),
@@ -109,7 +116,7 @@ public class ArticleRepositoryCustomImpl implements ArticleRepositoryCustom{
             result.get(article.deletedAt.isNotNull()),
             result.get(article.reportedAt.isNotNull()),
             result.get(isLiked),
-            imgPaths
+            images
         );
     }
 }

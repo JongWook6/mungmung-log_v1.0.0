@@ -145,7 +145,6 @@ public class ArticleApiController {
         return ResponseEntity.ok(ApiResponse.success(Map.of("articleId", articleId)));
     }
 
-    // NOTE 비회원이면 게시글을 조회할 수 없는가?
     @GetMapping("/v1/{articleId}")
     @Operation(summary = "게시글 상세 조회")
     public ResponseEntity<?> getArticle(

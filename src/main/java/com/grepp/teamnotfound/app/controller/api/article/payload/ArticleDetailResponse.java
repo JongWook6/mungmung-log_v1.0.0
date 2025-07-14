@@ -1,5 +1,6 @@
 package com.grepp.teamnotfound.app.controller.api.article.payload;
 
+import com.grepp.teamnotfound.app.model.board.dto.ArticleImgDto;
 import com.querydsl.core.annotations.QueryProjection;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -24,7 +25,7 @@ public class ArticleDetailResponse {
     private Boolean isDeleted;
     private Boolean isReported;
     private Boolean isLiked;
-    private List<String> articleImgPathList;
+    private List<ArticleImgDto> images;
 
     @QueryProjection
     public ArticleDetailResponse(
@@ -40,7 +41,7 @@ public class ArticleDetailResponse {
         Boolean isDeleted,
         Boolean isReported,
         Boolean isLiked,
-        List<String> articleImgPathList
+        List<ArticleImgDto> images
     ) {
         this.articleId = articleId;
         this.nickname = nickname;
@@ -54,6 +55,6 @@ public class ArticleDetailResponse {
         this.isDeleted = isDeleted;
         this.isReported = isReported;
         this.isLiked = isLiked;
-        this.articleImgPathList = articleImgPathList;
+        this.images = images;
     }
 }
