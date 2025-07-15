@@ -55,4 +55,8 @@ public class NoteService {
         noteRepository.delete(petId, recordedAt);
     }
 
+    @Transactional
+    public Note findNote(Long petId, LocalDate date) {
+        return noteRepository.findNote(petId, date).orElse(new Note());
+    }
 }

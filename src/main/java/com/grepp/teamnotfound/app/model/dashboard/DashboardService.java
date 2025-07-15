@@ -4,6 +4,7 @@ import com.grepp.teamnotfound.app.controller.api.life_record.payload.FeedingData
 import com.grepp.teamnotfound.app.model.dashboard.dto.FeedingDashboardDto;
 import com.grepp.teamnotfound.app.model.note.NoteService;
 import com.grepp.teamnotfound.app.model.note.dto.NoteDto;
+import com.grepp.teamnotfound.app.model.note.entity.Note;
 import com.grepp.teamnotfound.app.model.pet.PetService;
 import com.grepp.teamnotfound.app.model.pet.dto.PetDto;
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
@@ -71,7 +72,11 @@ public class DashboardService {
     }
 
     public NoteDto getNote(Long petId, Long userId, LocalDate date) {
-        return null;
+        Pet pet = petService.getPet(petId);
+        if(pet.getUser().getUserId().equals(userId)) throw new UserException(UserErrorCode.USER_ACCESS_DENIED);
+
+        Note note = noteService.findNote(petId, date);
+        return modelMapper.map(note, NoteDto.class);
     }
 
     public List<WalkingDto> getWalking(Long petId, Long userId, LocalDate date) {

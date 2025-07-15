@@ -1,6 +1,5 @@
 package com.grepp.teamnotfound.app.model.note.dto;
 
-import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import lombok.Builder;
