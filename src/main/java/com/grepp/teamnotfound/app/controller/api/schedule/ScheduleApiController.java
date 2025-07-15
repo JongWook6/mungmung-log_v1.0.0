@@ -35,19 +35,9 @@ public class ScheduleApiController {
             ){
         //todo 요청한 유저가 맞는지 검증로직
 
-        List<Schedule> schedules = scheduleService.getCalendar(userEmail, date);
-        List<ScheduleDto> scheduleDtos = new ArrayList<>();
-        schedules.forEach(schedule ->
-            scheduleDtos.add(ScheduleDto.builder()
-                            .scheduleId(schedule.getScheduleId())
-                            .date(schedule.getScheduleDate())
-                            .name(schedule.getName())
-                            .cycle(schedule.getCycle())
-                            .cycleEnd(schedule.getCycleEnd())
-                            .isDone(schedule.getIsDone()).build())
-        );
-        System.out.println(scheduleDtos);
-        return ResponseEntity.ok(Map.of("data", scheduleDtos));
+        List<ScheduleDto> schedules = scheduleService.getCalendar(userEmail, date);
+
+        return ResponseEntity.ok(Map.of("data", schedules));
     }
 
     @PostMapping("{petId}/calendar")

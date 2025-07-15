@@ -6,6 +6,7 @@ import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.pet.repository.PetRepository;
 import com.grepp.teamnotfound.app.model.schedule.code.ScheduleCycle;
 import com.grepp.teamnotfound.app.model.schedule.dto.ScheduleCreateRequestDto;
+import com.grepp.teamnotfound.app.model.schedule.dto.ScheduleDto;
 import com.grepp.teamnotfound.app.model.schedule.dto.ScheduleEditRequestDto;
 import com.grepp.teamnotfound.app.model.schedule.entity.Schedule;
 import com.grepp.teamnotfound.app.model.schedule.repository.ScheduleRepository;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -35,7 +37,7 @@ public class ScheduleService {
     private final UserRepository userRepository;
 
     // 한달치 일정 조회
-    public List<Schedule> getCalendar(String userEmail, LocalDate date) {
+    public List<ScheduleDto> getCalendar(String userEmail, LocalDate date) {
         // user 검증
         User user = userRepository.findByEmail(userEmail).orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
@@ -43,7 +45,19 @@ public class ScheduleService {
         LocalDate start = ym.atDay(1);
         LocalDate end = ym.atEndOfMonth();
 
-        return scheduleRepository.findByUserAndScheduleDateBetweenAndDeletedAtNull(user, start, end);
+        List<Schedule> schedules = scheduleRepository.findByUserAndScheduleDateBetweenAndDeletedAtNull(user, start, end);
+        List<ScheduleDto> scheduleDtos = new ArrayList<>();
+        schedules.forEach(schedule ->
+                scheduleDtos.add(ScheduleDto.builder()
+                        .scheduleId(schedule.getScheduleId())
+                        .date(schedule.getScheduleDate())
+                        .name(schedule.getName())
+                        .cycle(schedule.getCycle())
+                        .cycleEnd(schedule.getCycleEnd())
+                        .isDone(schedule.getIsDone()).build())
+        );
+
+        return scheduleDtos;
     }
 
     // 일정 등록(생성)
