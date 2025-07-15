@@ -149,12 +149,16 @@ public class ArticleApiController {
 
     @GetMapping("/v1/{articleId}")
     @Operation(summary = "게시글 상세 조회")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getArticle(
         @PathVariable Long articleId,
         @AuthenticationPrincipal Principal principal
     ) {
-        ArticleDetailResponse response = articleService.findByArticleIdAndUserId(articleId, principal.getUserId());
+        Long userId = null;
+        if (principal != null) {
+            userId = principal.getUserId();
+        }
+
+        ArticleDetailResponse response = articleService.findByArticleIdAndUserId(articleId, userId);
 
         return ResponseEntity.ok(ApiResponse.success(response));
     }

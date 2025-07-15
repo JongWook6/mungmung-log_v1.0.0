@@ -19,10 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 @AllArgsConstructor
 public class ArticleRequest {
 
-    @NotNull(message = "사용자 ID는 필수입니다.")
-    @Positive(message = "사용자 ID는 양수여야 합니다.")
-    private Long userId;
-
     @NotBlank(message = "제목을 입력해주세요.")
     @Size(min = 1, max = 30, message = "제목은 1자 이상 30자 이하로 입력해주세요.")
     private String title;

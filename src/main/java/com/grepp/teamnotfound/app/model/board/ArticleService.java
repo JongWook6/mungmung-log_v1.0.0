@@ -2,6 +2,7 @@ package com.grepp.teamnotfound.app.model.board;
 
 import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleDetailResponse;
 import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleRequest;
+import com.grepp.teamnotfound.app.model.auth.domain.Principal;
 import com.grepp.teamnotfound.app.model.board.code.BoardType;
 import com.grepp.teamnotfound.app.model.board.code.SearchType;
 import com.grepp.teamnotfound.app.model.board.dto.ArticleListDto;
@@ -9,6 +10,7 @@ import com.grepp.teamnotfound.app.model.board.entity.Article;
 import com.grepp.teamnotfound.app.model.board.entity.ArticleImg;
 import com.grepp.teamnotfound.app.model.board.entity.Board;
 import com.grepp.teamnotfound.app.model.board.repository.ArticleImgRepository;
+import com.grepp.teamnotfound.app.model.board.repository.ArticleLikeRepository;
 import com.grepp.teamnotfound.app.model.board.repository.ArticleRepository;
 import com.grepp.teamnotfound.app.model.board.repository.BoardRepository;
 import com.grepp.teamnotfound.app.model.reply.repository.ReplyRepository;
@@ -45,6 +47,7 @@ public class ArticleService {
     private final ModelMapper modelMapper;
     private final GoogleStorageManager fileManager;
     private final ArticleImgRepository articleImgRepository;
+    private final ArticleLikeRepository articleLikeRepository;
     private final ReplyRepository replyRepository;
 
     public Page<ArticleListDto> findPaged(PageRequest pageable) {
@@ -88,10 +91,13 @@ public class ArticleService {
     // 읽기 + 쓰기
     @Transactional
     public ArticleDetailResponse findByArticleIdAndUserId(Long articleId, Long userId) {
-        User readingUser = userRepository.findById(userId)
-            .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));
+        // 로그인한 회원일 경우 DB 와 정합성 검증
+        if (userId != null) {
+            userRepository.findById(userId)
+                .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));
+        }
 
-        ArticleDetailResponse response = articleRepository.findDetailById(articleId, readingUser.getUserId());
+        ArticleDetailResponse response = articleRepository.findDetailById(articleId, userId);
 
         if (response == null) {
             throw new BoardException(BoardErrorCode.ARTICLE_NOT_FOUND);
@@ -156,6 +162,7 @@ public class ArticleService {
         OffsetDateTime deletedTime = OffsetDateTime.now();
         article.setDeletedAt(deletedTime);
         articleImgRepository.softDeleteByArticleId(articleId, deletedTime);
+        articleLikeRepository.hardDeleteByArticleId(articleId);
         replyRepository.softDeleteByArticleId(articleId, deletedTime);
     }
 

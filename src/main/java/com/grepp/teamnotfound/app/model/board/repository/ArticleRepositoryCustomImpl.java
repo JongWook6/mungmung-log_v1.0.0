@@ -50,14 +50,19 @@ public class ArticleRepositoryCustomImpl implements ArticleRepositoryCustom{
             .where(articleLike.article.articleId.eq(articleId));
 
         // 서브 쿼리: 로그인 사용자가 좋아요를 눌렀는지 여부
-        BooleanExpression isLiked = JPAExpressions
-            .selectOne()
-            .from(articleLike)
-            .where(
-                articleLike.article.articleId.eq(articleId),
-                articleLike.user.userId.eq(loginUserId)
-            )
-            .exists();
+        BooleanExpression isLiked;
+        if (loginUserId != null) {
+            isLiked = JPAExpressions
+                .selectOne()
+                .from(articleLike)
+                .where(
+                    articleLike.article.articleId.eq(articleId),
+                    articleLike.user.userId.eq(loginUserId)
+                )
+                .exists();
+        } else {
+            isLiked = Expressions.FALSE;
+        }
 
         // 메인 쿼리
         Tuple result = queryFactory
