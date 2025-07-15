@@ -6,6 +6,7 @@ import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleListResp
 import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleRequest;
 import com.grepp.teamnotfound.app.controller.api.article.payload.LikeResponse;
 import com.grepp.teamnotfound.app.controller.api.article.payload.PageInfo;
+import com.grepp.teamnotfound.app.model.auth.domain.Principal;
 import com.grepp.teamnotfound.app.model.board.ArticleService;
 import com.grepp.teamnotfound.app.model.board.dto.ArticleListDto;
 import com.grepp.teamnotfound.app.model.user.entity.UserDetailsImpl;
@@ -135,47 +136,51 @@ public class ArticleApiController {
 
     @PostMapping(value = "/v1", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "새로운 게시글 작성")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> createArticle(
         @RequestPart("request") ArticleRequest request,
         @RequestPart(value = "images", required = false) List<MultipartFile> images,
-        @AuthenticationPrincipal UserDetailsImpl userDetails
+        @AuthenticationPrincipal Principal principal
     ) {
-        Long articleId = articleService.writeArticle(request, images, userDetails.getUserId());
+        Long articleId = articleService.writeArticle(request, images, principal.getUserId());
 
         return ResponseEntity.ok(ApiResponse.success(Map.of("articleId", articleId)));
     }
 
     @GetMapping("/v1/{articleId}")
     @Operation(summary = "게시글 상세 조회")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getArticle(
         @PathVariable Long articleId,
-        @AuthenticationPrincipal UserDetailsImpl userDetails
+        @AuthenticationPrincipal Principal principal
     ) {
-        ArticleDetailResponse response = articleService.findByArticleIdAndUserId(articleId, userDetails.getUserId());
+        ArticleDetailResponse response = articleService.findByArticleIdAndUserId(articleId, principal.getUserId());
 
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @PatchMapping( value = "/v1/{articleId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "게시글 수정")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> updateArticle(
         @PathVariable Long articleId,
         @RequestPart("request") ArticleRequest request,
         @RequestPart(value = "images", required = false) List<MultipartFile> images,
-        @AuthenticationPrincipal UserDetailsImpl userDetails
+        @AuthenticationPrincipal Principal principal
     ) {
-        articleService.updateArticle(articleId, request, images, userDetails.getUserId());
+        articleService.updateArticle(articleId, request, images, principal.getUserId());
 
         return ResponseEntity.ok(ApiResponse.success(Map.of("result", "게시글이 정상적으로 수정되었습니다.")));
     }
 
     @DeleteMapping("/v1/{articleId}")
     @Operation(summary = "게시글 삭제")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> deleteArticle(
         @PathVariable Long articleId,
-        @AuthenticationPrincipal UserDetailsImpl userDetails
+        @AuthenticationPrincipal Principal principal
     ) {
-        articleService.deleteArticle(articleId, userDetails.getUserId());
+        articleService.deleteArticle(articleId, principal.getUserId());
 
         return ResponseEntity.ok(ApiResponse.success(Map.of("msg", "게시글이 정상적으로 삭제되었습니다.")));
     }
@@ -185,11 +190,11 @@ public class ArticleApiController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> likeArticle(
         @PathVariable Long articleId,
-        @AuthenticationPrincipal UserDetails userDetails
+        @AuthenticationPrincipal Principal principal
     ) {
         // 사용자 이메일로 요청 회원 특정
-        String userEmail = userDetails.getUsername();
-
+        String userEmail = principal.getUsername();
+        System.out.println("userEmail: " + userEmail);
 
         LikeResponse response = LikeResponse.builder()
             .articleId(13L)
@@ -203,15 +208,11 @@ public class ArticleApiController {
 
     @DeleteMapping("/v1/{articleId}/like")
     @Operation(summary = "게시글 좋아요 취소")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> undoLikeArticle(
         @PathVariable Long articleId,
-        @AuthenticationPrincipal UserDetails userDetails
+        @AuthenticationPrincipal Principal principal
     ) {
-        if (userDetails == null) {
-            throw new AuthException(AuthErrorCode.UNAUTHENTICATED);
-        }
-        // 사용자 이메일로 요청 회원 특정
-        String username = userDetails.getUsername();
 
         LikeResponse response = LikeResponse.builder()
             .articleId(13L)

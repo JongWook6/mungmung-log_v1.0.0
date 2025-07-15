@@ -85,7 +85,8 @@ public class ArticleService {
         return savedArticle.getArticleId();
     }
 
-    @Transactional(readOnly = true)
+    // 읽기 + 쓰기
+    @Transactional
     public ArticleDetailResponse findByArticleIdAndUserId(Long articleId, Long userId) {
         User readingUser = userRepository.findById(userId)
             .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));

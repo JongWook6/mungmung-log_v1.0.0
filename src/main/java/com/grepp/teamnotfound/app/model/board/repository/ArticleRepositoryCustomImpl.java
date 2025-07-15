@@ -77,8 +77,10 @@ public class ArticleRepositoryCustomImpl implements ArticleRepositoryCustom{
             )
             .from(article)
             .join(article.user, user)
-            .leftJoin(user.userImg, userImg) // userImg 가 없을 수도 있으므로 leftJoin
-            .on(userImg.deletedAt.isNull())
+            .leftJoin(userImg).on( // userImg 가 없을 수도 있으므로 leftJoin
+                userImg.user.userId.eq(user.userId),
+                userImg.deletedAt.isNull()
+            )
             .where(
                 article.articleId.eq(articleId)
             )
