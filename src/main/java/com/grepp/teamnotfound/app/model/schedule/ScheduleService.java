@@ -34,15 +34,15 @@ public class ScheduleService {
     private final UserRepository userRepository;
 
     // 한달치 일정 조회
-    public List<Schedule> getCalendar(Long petId, LocalDate date) {
-        // petId 존재 검증
-        Pet pet = petRepository.findById(petId).orElseThrow(() -> new PetException(PetErrorCode.PET_NOT_FOUND));
+    public List<Schedule> getCalendar(String userEmail, LocalDate date) {
+        // user 검증
+        User user = userRepository.findByEmail(userEmail).orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
         YearMonth ym = YearMonth.from(date);
         LocalDate start = ym.atDay(1);
         LocalDate end = ym.atEndOfMonth();
 
-        return scheduleRepository.findByPetAndScheduleDateBetweenAndDeletedAtNull(pet, start, end);
+        return scheduleRepository.findByUserAndScheduleDateBetweenAndDeletedAtNull(user, start, end);
     }
 
     // 일정 등록(생성)
