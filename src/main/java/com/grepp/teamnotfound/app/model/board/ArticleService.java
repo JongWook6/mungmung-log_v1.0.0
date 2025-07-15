@@ -243,4 +243,20 @@ public class ArticleService {
         Integer totalCount = articleLikeRepository.countByArticle_ArticleId(articleId);
         return new LikeResponse(articleId, totalCount, false);
     }
+
+    @Transactional(readOnly = true)
+    public Integer getReplyCount(Long articleId) {
+        articleRepository.findById(articleId)
+            .orElseThrow(() -> new BoardException(BoardErrorCode.ARTICLE_NOT_FOUND));
+
+        return replyRepository.countByArticle_ArticleId(articleId);
+    }
+
+    @Transactional(readOnly = true)
+    public Integer getLikeCount(Long articleId) {
+        articleRepository.findById(articleId)
+            .orElseThrow(() -> new BoardException(BoardErrorCode.ARTICLE_NOT_FOUND));
+
+        return articleLikeRepository.countByArticle_ArticleId(articleId);
+    }
 }

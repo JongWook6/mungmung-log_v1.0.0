@@ -218,7 +218,8 @@ public class ArticleApiController {
     public ResponseEntity<?> getReplyCount(
         @PathVariable Long articleId
     ) {
-        return ResponseEntity.ok(Map.of("data", Map.of("replies", 15)));
+        Integer replyCount = articleService.getReplyCount(articleId);
+        return ResponseEntity.ok(ApiResponse.success(Map.of("replies", replyCount)));
     }
 
     @GetMapping("/v1/{articleId}/like")
@@ -226,6 +227,7 @@ public class ArticleApiController {
     public ResponseEntity<?> getLikeCount(
         @PathVariable Long articleId
     ) {
-        return ResponseEntity.ok(Map.of("data", Map.of("likes", 20)));
+        Integer likeCount = articleService.getLikeCount(articleId);
+        return ResponseEntity.ok(ApiResponse.success(Map.of("likes", likeCount)));
     }
 }
