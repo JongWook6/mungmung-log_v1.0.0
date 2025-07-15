@@ -15,6 +15,7 @@ import com.grepp.teamnotfound.infra.error.exception.code.UserErrorCode;
 import com.grepp.teamnotfound.util.NotFoundException;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.Period;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -58,12 +59,9 @@ public class PetService {
         return pets.stream()
             .map(pet -> {
                 ProfilePetResponse dto = modelMapper.map(pet, ProfilePetResponse.class);
-
-                if (pet.getMetday() != null) {
-                    dto.setDays((int) ChronoUnit.DAYS.between(pet.getMetday(), LocalDate.now()) + 1);
-                } else {
-                    dto.setDays(null);
-                }
+                dto.setPetId(pet.getPetId());
+                dto.setDays((int) ChronoUnit.DAYS.between(pet.getMetday(), LocalDate.now()) + 1);
+                dto.setAge(calculateAge(pet.getBirthday()));
 
                 return dto;
             })
@@ -122,5 +120,13 @@ public class PetService {
         }
 
         vaccinationService.softDelete(petId);
+    }
+
+    private Integer calculateAge(LocalDate birthday) {
+        if (birthday == null) {
+            return null;
+        }
+        Period period = Period.between(birthday, LocalDate.now());
+        return period.getYears() * 12 + period.getMonths();
     }
 }
