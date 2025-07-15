@@ -2,12 +2,14 @@ package com.grepp.teamnotfound.app.model.board;
 
 import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleDetailResponse;
 import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleRequest;
+import com.grepp.teamnotfound.app.controller.api.article.payload.LikeResponse;
 import com.grepp.teamnotfound.app.model.auth.domain.Principal;
 import com.grepp.teamnotfound.app.model.board.code.BoardType;
 import com.grepp.teamnotfound.app.model.board.code.SearchType;
 import com.grepp.teamnotfound.app.model.board.dto.ArticleListDto;
 import com.grepp.teamnotfound.app.model.board.entity.Article;
 import com.grepp.teamnotfound.app.model.board.entity.ArticleImg;
+import com.grepp.teamnotfound.app.model.board.entity.ArticleLike;
 import com.grepp.teamnotfound.app.model.board.entity.Board;
 import com.grepp.teamnotfound.app.model.board.repository.ArticleImgRepository;
 import com.grepp.teamnotfound.app.model.board.repository.ArticleLikeRepository;
@@ -28,6 +30,7 @@ import com.grepp.teamnotfound.infra.util.file.GoogleStorageManager;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -195,5 +198,49 @@ public class ArticleService {
         }
     }
 
+    @Transactional
+    public LikeResponse likeArticle(Long articleId, Long userId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));
+        Article article = articleRepository.findById(articleId)
+            .orElseThrow(() -> new BoardException(BoardErrorCode.ARTICLE_NOT_FOUND));
 
+        boolean exists = articleLikeRepository.existsByArticle_ArticleIdAndUser_UserId(articleId, userId);
+        if (exists) {
+            // 중복 요청은 무시
+            Integer count = articleLikeRepository.countByArticle_ArticleId(articleId);
+            return new LikeResponse(articleId, count, true);
+        }
+
+        ArticleLike articleLike = ArticleLike.builder()
+            .article(article)
+            .user(user)
+            .createdAt(OffsetDateTime.now())
+            .build();
+
+        articleLikeRepository.save(articleLike);
+        Integer totalCount = articleLikeRepository.countByArticle_ArticleId(articleId);
+
+        return new LikeResponse(articleId, totalCount, true);
+    }
+
+    @Transactional
+    public LikeResponse unlikeArticle(Long articleId, Long userId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));
+        Article article = articleRepository.findById(articleId)
+            .orElseThrow(() -> new BoardException(BoardErrorCode.ARTICLE_NOT_FOUND));
+
+        Optional<ArticleLike> result = articleLikeRepository.findByArticle_ArticleIdAndUser_UserId(
+            articleId, userId);
+        if (result.isEmpty()) {
+            // 좋아요 한 적 없었던 경우
+            Integer count = articleLikeRepository.countByArticle_ArticleId(articleId);
+            return new LikeResponse(articleId, count, false);
+        }
+
+        articleLikeRepository.delete(result.get());
+        Integer totalCount = articleLikeRepository.countByArticle_ArticleId(articleId);
+        return new LikeResponse(articleId, totalCount, false);
+    }
 }

@@ -196,18 +196,9 @@ public class ArticleApiController {
         @PathVariable Long articleId,
         @AuthenticationPrincipal Principal principal
     ) {
-        // 사용자 이메일로 요청 회원 특정
-        String userEmail = principal.getUsername();
-        System.out.println("userEmail: " + userEmail);
+        LikeResponse response = articleService.likeArticle(articleId, principal.getUserId());
 
-        LikeResponse response = LikeResponse.builder()
-            .articleId(13L)
-            .userEmail("user111@email.com")
-            .like(15)
-            .isLiked(true)
-            .build();
-
-        return ResponseEntity.ok(Map.of("data", response));
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @DeleteMapping("/v1/{articleId}/like")
@@ -217,15 +208,9 @@ public class ArticleApiController {
         @PathVariable Long articleId,
         @AuthenticationPrincipal Principal principal
     ) {
+        LikeResponse response = articleService.unlikeArticle(articleId, principal.getUserId());
 
-        LikeResponse response = LikeResponse.builder()
-            .articleId(13L)
-            .userEmail("user111@email.com")
-            .like(14)
-            .isLiked(false)
-            .build();
-
-        return ResponseEntity.ok(Map.of("data", response));
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @GetMapping("/v1/{articleId}/reply")
