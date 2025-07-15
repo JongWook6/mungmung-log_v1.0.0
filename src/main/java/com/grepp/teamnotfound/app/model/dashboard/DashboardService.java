@@ -57,15 +57,16 @@ public class DashboardService {
 
     public PetDto getProfile(Long petId, Long userId) {
         Pet pet = petService.getPet(petId);
-        if(pet.getUser().getUserId().equals(userId)) throw new UserException(UserErrorCode.USER_ACCESS_DENIED);
+        if(!pet.getUser().getUserId().equals(userId)) throw new UserException(UserErrorCode.USER_ACCESS_DENIED);
         return modelMapper.map(pet, PetDto.class);
     }
 
     public FeedingDashboardDto getFeeding(Long petId, Long userId, LocalDate date) {
         Pet pet = petService.getPet(petId);
-        if(pet.getUser().getUserId().equals(userId)) throw new UserException(UserErrorCode.USER_ACCESS_DENIED);
+        if(!pet.getUser().getUserId().equals(userId)) throw new UserException(UserErrorCode.USER_ACCESS_DENIED);
 
         List<FeedingData> datas = feedingService.getFeedingList(petId, date);
+        if (datas.isEmpty()) return new FeedingDashboardDto();
         Double amount = 0.0;
 
         for(FeedingData data : datas){
@@ -82,18 +83,27 @@ public class DashboardService {
 
     public NoteDto getNote(Long petId, Long userId, LocalDate date) {
         Pet pet = petService.getPet(petId);
-        if(pet.getUser().getUserId().equals(userId)) throw new UserException(UserErrorCode.USER_ACCESS_DENIED);
+        if(!pet.getUser().getUserId().equals(userId)) throw new UserException(UserErrorCode.USER_ACCESS_DENIED);
 
         Note note = noteService.findNote(petId, date);
-        return modelMapper.map(note, NoteDto.class);
+        NoteDto dto = NoteDto.builder()
+                .petId(petId)
+                .noteId(note.getNoteId())
+                .content(note.getContent())
+                .recordedAt(note.getRecordedAt()).build();
+
+        return dto;
     }
 
     public WalkingDashboardDto getWalking(Long petId, Long userId, LocalDate date) {
         Pet pet = petService.getPet(petId);
-        if(pet.getUser().getUserId().equals(userId)) throw new UserException(UserErrorCode.USER_ACCESS_DENIED);
+        if(!pet.getUser().getUserId().equals(userId)) throw new UserException(UserErrorCode.USER_ACCESS_DENIED);
 
         List<Walking> walkings = walkingService.getWalkingListDays(pet, date);
-        WalkingDashboardDto dto = new WalkingDashboardDto();
+
+        if (walkings.isEmpty()) return new WalkingDashboardDto();
+
+        WalkingDashboardDto dto = new WalkingDashboardDto(new ArrayList<>());
         Map<LocalDate, DayWalking> dayWalkingMap = new HashMap<>();
         Map<LocalDate, Integer> dayCnt = new HashMap<>();
 
@@ -134,7 +144,7 @@ public class DashboardService {
 
     public List<WeightDto> getWeight(Long petId, Long userId, LocalDate date) {
         Pet pet = petService.getPet(petId);
-        if(pet.getUser().getUserId().equals(userId)) throw new UserException(UserErrorCode.USER_ACCESS_DENIED);
+        if(!pet.getUser().getUserId().equals(userId)) throw new UserException(UserErrorCode.USER_ACCESS_DENIED);
 
         List<Weight> weights = weightService.getWeightList(pet, date);
         List<WeightDto> dtos = new ArrayList<>();
@@ -150,7 +160,7 @@ public class DashboardService {
 
     public List<SleepingDto> getSleeping(Long petId, Long userId, LocalDate date) {
         Pet pet = petService.getPet(petId);
-        if(pet.getUser().getUserId().equals(userId)) throw new UserException(UserErrorCode.USER_ACCESS_DENIED);
+        if(!pet.getUser().getUserId().equals(userId)) throw new UserException(UserErrorCode.USER_ACCESS_DENIED);
 
         List<Sleeping> sleepings = sleepingService.getSleepingList(pet, date);
         List<SleepingDto> dtos = new ArrayList<>();

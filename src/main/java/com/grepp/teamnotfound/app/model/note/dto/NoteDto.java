@@ -4,9 +4,11 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import lombok.Builder;
 import lombok.Data;
+import lombok.ToString;
 
 @Data
 @Builder
+@ToString
 public class NoteDto {
 
     private Long noteId;
