@@ -19,4 +19,5 @@ public interface FeedingRepository extends JpaRepository<Feeding, Long> {
     @Query("UPDATE Feeding f SET f.deletedAt = CURRENT_TIMESTAMP WHERE f.pet.petId = :petId AND f.recordedAt = :recordedAt AND f.deletedAt IS NULL")
     void delete(Long petId, LocalDate recordedAt);
 
+    List<Feeding> findAllByPetAndRecordedAtBetweenAndDeletedAtNull(Pet pet, LocalDate localDate, LocalDate localDate1);
 }

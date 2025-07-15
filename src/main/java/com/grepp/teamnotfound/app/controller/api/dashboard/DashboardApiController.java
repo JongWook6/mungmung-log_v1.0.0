@@ -3,11 +3,11 @@ package com.grepp.teamnotfound.app.controller.api.dashboard;
 import com.grepp.teamnotfound.app.controller.api.dashboard.payload.*;
 import com.grepp.teamnotfound.app.model.dashboard.DashboardService;
 import com.grepp.teamnotfound.app.model.dashboard.dto.FeedingDashboardDto;
-import com.grepp.teamnotfound.app.model.dashboard.dto.WeightDashboardDto;
 import com.grepp.teamnotfound.app.model.note.dto.NoteDto;
 import com.grepp.teamnotfound.app.model.pet.dto.PetDto;
 import com.grepp.teamnotfound.app.model.structured_data.dto.SleepingDto;
 import com.grepp.teamnotfound.app.model.structured_data.dto.WalkingDto;
+import com.grepp.teamnotfound.app.model.structured_data.dto.WeightDto;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
@@ -39,11 +39,11 @@ public class DashboardApiController {
     // 프로필에 견종 추가
     @GetMapping("/{petId}/dog-profile")
     public ResponseEntity<?> getDashboardProfile(
-            @PathVariable String petId,
+            @PathVariable Long petId,
             @RequestParam Long userId,
             @RequestParam LocalDate date
     ){
-        PetDto petDto = dashboardService.getProfile(petId, userId, date);
+        PetDto petDto = dashboardService.getProfile(petId, userId);
         ProfileResponse response = modelMapper.map(petDto, ProfileResponse.class);
 
         return ResponseEntity.ok(response);
@@ -51,7 +51,7 @@ public class DashboardApiController {
 
     @GetMapping("/{petId}/feeding")
     public ResponseEntity<?> getDashboardFeeding(
-            @PathVariable String petId,
+            @PathVariable Long petId,
             @RequestParam Long userId,
             @RequestParam LocalDate date
     ){
@@ -62,7 +62,7 @@ public class DashboardApiController {
 
     @GetMapping("/{petId}/note")
     public ResponseEntity<?> getDashboardNote(
-            @PathVariable String petId,
+            @PathVariable Long petId,
             @RequestParam Long userId,
             @RequestParam LocalDate date
     ){
@@ -74,7 +74,7 @@ public class DashboardApiController {
     // 산책시간 9일전 데이터까지만 받아오기
     @GetMapping("/{petId}/walking")
     public ResponseEntity<?> getDashboardWalking(
-            @PathVariable String petId,
+            @PathVariable Long petId,
             @RequestParam Long userId,
             @RequestParam LocalDate date
     ){
@@ -86,11 +86,11 @@ public class DashboardApiController {
     // 10개 받아오기
     @GetMapping("/{petId}/weight")
     public ResponseEntity<?> getDashboardWeight(
-            @PathVariable String petId,
+            @PathVariable Long petId,
             @RequestParam Long userId,
             @RequestParam LocalDate date
     ){
-        WeightDashboardDto weightDashboardDto = dashboardService.getWeight(petId, userId, date);
+        List<WeightDto> weightDashboardDto = dashboardService.getWeight(petId, userId, date);
         WeightResponse response = modelMapper.map(weightDashboardDto, WeightResponse.class);
         return ResponseEntity.ok(response);
     }
@@ -98,7 +98,7 @@ public class DashboardApiController {
     // 10개 받아오기
     @GetMapping("/{petId}/sleeping")
     public ResponseEntity<?> getDashboardSleeping(
-            @PathVariable String petId,
+            @PathVariable Long petId,
             @RequestParam Long userId,
             @RequestParam LocalDate date
     ){

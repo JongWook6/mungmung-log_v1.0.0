@@ -1,6 +1,7 @@
 package com.grepp.teamnotfound.app.model.structured_data;
 
 import com.grepp.teamnotfound.app.controller.api.life_record.payload.FeedingData;
+import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.structured_data.dto.FeedingDto;
 import com.grepp.teamnotfound.app.model.structured_data.entity.Feeding;
 import com.grepp.teamnotfound.app.model.structured_data.repository.FeedingRepository;
@@ -60,5 +61,19 @@ public class FeedingService {
         feedingRepository.delete(petId, recordedAt);
     }
 
+    // 일주일 간 평균 식사량
+    @Transactional
+    public Double getFeedingAverage(Pet pet, LocalDate date) {
+        List<Feeding> feedings = feedingRepository.findAllByPetAndRecordedAtBetweenAndDeletedAtNull(pet, date.minusWeeks(1), date.minusDays(1));
+        long dateCnt = feedings.stream().map(Feeding::getRecordedAt).distinct().count();
+        if (dateCnt == 0) return 0.0;
+        Double amount = 0.0;
+
+        for (Feeding feeding: feedings){
+            amount += feeding.getAmount();
+        }
+
+        return amount/dateCnt;
+    }
 }
 
