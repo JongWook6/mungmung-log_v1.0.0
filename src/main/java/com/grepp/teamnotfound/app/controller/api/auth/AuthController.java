@@ -128,7 +128,7 @@ public class AuthController {
                 .password(request.getPassword())
                 .build();
 
-        LoginResult dto = authService.login(command);
+        LoginResult dto = authService.adminLogin(command);
         createAuthTokenCookies(dto, response);
 
         TokenResponse tokenResponse = TokenResponse.builder()

@@ -42,6 +42,40 @@ public class AuthService {
         User user = userService.findByEmail(request.getEmail())
                 .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));
 
+        if (!user.getRole().isUser()) {
+            throw new AuthException(AuthErrorCode.NOT_USER_LOGIN);
+        }
+
+        UsernamePasswordAuthenticationToken authenticationToken =
+                new UsernamePasswordAuthenticationToken(
+                        user.getEmail(),
+                        request.getPassword());
+
+        Authentication authentication = authenticationManagerBuilder.getObject()
+                .authenticate(authenticationToken);
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        TokenDto tokenDto = processTokenLogin(((Principal) authentication.getPrincipal()).getUserId());
+
+        return LoginResult.builder()
+                .userId(user.getUserId())
+                .accessToken(tokenDto.getAccessToken())
+                .refreshToken(tokenDto.getRefreshToken())
+                .grantType(tokenDto.getGrantType())
+                .atExpiresIn(tokenDto.getAtExpiresIn())
+                .rtExpiresIn(tokenDto.getRtExpiresIn())
+                .build();
+    }
+
+    public LoginResult adminLogin(LoginCommand request) {
+        User user = userService.findByEmail(request.getEmail())
+                .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));
+
+        if (!user.getRole().isAdmin()) {
+            throw new AuthException(AuthErrorCode.NOT_ADMIN);
+        }
+
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(
                         user.getEmail(),
