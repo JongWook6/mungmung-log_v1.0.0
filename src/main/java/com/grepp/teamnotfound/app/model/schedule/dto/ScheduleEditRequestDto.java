@@ -1,13 +1,17 @@
 package com.grepp.teamnotfound.app.model.schedule.dto;
 
 import com.grepp.teamnotfound.app.model.schedule.code.ScheduleCycle;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class ScheduleEditRequestDto {
     private Long scheduleId;
     private Long userId;
