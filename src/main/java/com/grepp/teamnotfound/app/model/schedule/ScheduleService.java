@@ -37,15 +37,15 @@ public class ScheduleService {
     private final UserRepository userRepository;
 
     // 한달치 일정 조회
-    public List<ScheduleDto> getCalendar(String userEmail, LocalDate date) {
+    public List<ScheduleDto> getCalendar(Long userId, LocalDate date) {
         // user 검증
-        User user = userRepository.findByEmail(userEmail).orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
         YearMonth ym = YearMonth.from(date);
         LocalDate start = ym.atDay(1);
         LocalDate end = ym.atEndOfMonth();
 
-        List<Schedule> schedules = scheduleRepository.findByUserAndScheduleDateBetweenAndDeletedAtNull(user, start, end);
+        List<Schedule> schedules = scheduleRepository.findMonthListByUser(user, start, end);
         List<ScheduleDto> scheduleDtos = new ArrayList<>();
         schedules.forEach(schedule ->
                 scheduleDtos.add(ScheduleDto.builder()
@@ -54,7 +54,9 @@ public class ScheduleService {
                         .name(schedule.getName())
                         .cycle(schedule.getCycle())
                         .cycleEnd(schedule.getCycleEnd())
-                        .isDone(schedule.getIsDone()).build())
+                        .isDone(schedule.getIsDone())
+                        .petName(schedule.getPet().getName())
+                        .petId(schedule.getPet().getPetId()).build())
         );
 
         return scheduleDtos;

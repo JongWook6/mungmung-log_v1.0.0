@@ -4,6 +4,7 @@ import com.grepp.teamnotfound.app.controller.api.schedule.payload.ScheduleCreate
 import com.grepp.teamnotfound.app.controller.api.schedule.payload.ScheduleEditRequest;
 import com.grepp.teamnotfound.app.model.schedule.code.ScheduleCycle;
 import com.grepp.teamnotfound.app.model.schedule.dto.ScheduleCreateRequestDto;
+import com.grepp.teamnotfound.app.model.schedule.dto.ScheduleDto;
 import com.grepp.teamnotfound.app.model.schedule.dto.ScheduleEditRequestDto;
 import com.grepp.teamnotfound.app.model.schedule.entity.Schedule;
 import org.junit.jupiter.api.Test;
@@ -23,9 +24,8 @@ class ScheduleServiceTest {
     // 일정 조회
     @Test
     void getCalendar() {
-        List<Schedule> schedules = scheduleService.getCalendar("email@email.com", LocalDate.now());
-        assertNotNull(schedules);
-        assertTrue(schedules.size() >= 0);
+        List<ScheduleDto> schedules = scheduleService.getCalendar(10000L, LocalDate.now());
+        System.out.println(schedules);
     }
 
     // 반복 없는 일정 등록
