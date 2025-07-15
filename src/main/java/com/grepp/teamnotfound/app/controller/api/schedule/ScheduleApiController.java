@@ -43,6 +43,8 @@ public class ScheduleApiController {
                             .scheduleId(schedule.getScheduleId())
                             .date(schedule.getScheduleDate())
                             .name(schedule.getName())
+                            .cycle(schedule.getCycle())
+                            .cycleEnd(schedule.getCycleEnd())
                             .isDone(schedule.getIsDone()).build())
         );
         System.out.println(scheduleDtos);
