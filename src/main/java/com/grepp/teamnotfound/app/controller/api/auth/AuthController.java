@@ -1,14 +1,10 @@
 package com.grepp.teamnotfound.app.controller.api.auth;
 
-import com.grepp.teamnotfound.app.controller.api.auth.payload.EmailVerificationRequest;
-import com.grepp.teamnotfound.app.controller.api.auth.payload.EmailVerifyRequest;
-import com.grepp.teamnotfound.app.controller.api.auth.payload.RegisterRequest;
-import com.grepp.teamnotfound.app.controller.api.auth.payload.RegisterResponse;
+import com.grepp.teamnotfound.app.controller.api.auth.payload.*;
 import com.grepp.teamnotfound.app.model.auth.AuthService;
-import com.grepp.teamnotfound.app.model.auth.payload.LoginCommand;
+import com.grepp.teamnotfound.app.model.auth.dto.LoginCommand;
+import com.grepp.teamnotfound.app.model.auth.dto.LoginResult;
 import com.grepp.teamnotfound.infra.util.mail.MailService;
-import com.grepp.teamnotfound.app.controller.api.auth.payload.LoginRequest;
-import com.grepp.teamnotfound.app.controller.api.auth.payload.TokenResponse;
 import com.grepp.teamnotfound.app.model.auth.token.dto.TokenDto;
 import com.grepp.teamnotfound.app.model.user.UserService;
 import com.grepp.teamnotfound.app.model.user.dto.RegisterCommand;
@@ -96,14 +92,14 @@ public class AuthController {
 
     @Operation(summary = "회원 로그인")
     @PostMapping("v1/login")
-    public ResponseEntity<ApiResponse<TokenResponse>> login(@RequestBody LoginRequest request, HttpServletResponse response) {
+    public ResponseEntity<ApiResponse<LoginResponse>> login(@RequestBody LoginRequest request, HttpServletResponse response) {
 
         LoginCommand command = LoginCommand.builder()
                 .email(request.getEmail())
                 .password(request.getPassword())
                 .build();
 
-        TokenDto dto = authService.login(command);
+        LoginResult dto = authService.login(command);
         ResponseCookie accessTokenCookie = TokenCookieFactory.create(TokenType.ACCESS_TOKEN.name(),
                 dto.getAccessToken(), dto.getAtExpiresIn());
         ResponseCookie refreshTokenCookie = TokenCookieFactory.create(TokenType.REFRESH_TOKEN.name(),
@@ -117,7 +113,11 @@ public class AuthController {
                 .grantType(GrantType.BEARER)
                 .refreshToken(dto.getRefreshToken())
                 .build();
-        return ResponseEntity.ok(ApiResponse.success(tokenResponse));
+        LoginResponse loginResponse = LoginResponse.builder()
+                .tokenResponse(tokenResponse)
+                .userId(dto.getUserId())
+                .build();
+        return ResponseEntity.ok(ApiResponse.success(loginResponse));
 
     }
 
@@ -125,14 +125,14 @@ public class AuthController {
     @Operation(summary = "관리자 로그인")
     @PostMapping("v1/admin/login")
     @PreAuthorize("permitAll()")
-    public ResponseEntity<ApiResponse<TokenResponse>> adminLogin(@RequestBody LoginRequest request, HttpServletResponse response) {
+    public ResponseEntity<ApiResponse<LoginResponse>> adminLogin(@RequestBody LoginRequest request, HttpServletResponse response) {
 
         LoginCommand command = LoginCommand.builder()
                 .email(request.getEmail())
                 .password(request.getPassword())
                 .build();
 
-        TokenDto dto = authService.login(command);
+        LoginResult dto = authService.login(command);
         ResponseCookie accessTokenCookie = TokenCookieFactory.create(TokenType.ACCESS_TOKEN.name(),
                 dto.getAccessToken(), dto.getAtExpiresIn());
         ResponseCookie refreshTokenCookie = TokenCookieFactory.create(TokenType.REFRESH_TOKEN.name(),
@@ -146,7 +146,11 @@ public class AuthController {
                 .grantType(GrantType.BEARER)
                 .refreshToken(dto.getRefreshToken())
                 .build();
-        return ResponseEntity.ok(ApiResponse.success(tokenResponse));
+        LoginResponse loginResponse = LoginResponse.builder()
+                .tokenResponse(tokenResponse)
+                .userId(dto.getUserId())
+                .build();
+        return ResponseEntity.ok(ApiResponse.success(loginResponse));
 
     }
 
