@@ -1,5 +1,6 @@
 package com.grepp.teamnotfound.app.model.structured_data;
 
+import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.structured_data.dto.SleepingDto;
 import com.grepp.teamnotfound.app.model.structured_data.entity.Sleeping;
 import com.grepp.teamnotfound.app.model.structured_data.repository.SleepingRepository;
@@ -7,6 +8,8 @@ import com.grepp.teamnotfound.infra.error.exception.StructuredDataException;
 import com.grepp.teamnotfound.infra.error.exception.code.SleepingErrorCode;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -48,4 +51,7 @@ public class SleepingService {
         sleepingRepository.delete(petId, recordedAt);
     }
 
+    public List<Sleeping> getSleepingList(Pet pet, LocalDate date) {
+        return sleepingRepository.findTop10ByPetAndRecordedAtBeforeOrderByRecordedAtDesc(pet, date);
+    }
 }
