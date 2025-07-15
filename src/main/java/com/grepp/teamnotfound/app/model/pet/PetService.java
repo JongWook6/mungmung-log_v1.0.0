@@ -47,6 +47,10 @@ public class PetService {
     public List<PetDto> findAll() {
         List<Pet> pets = petRepository.findAll();
 
+        if (pets.isEmpty()) {
+            throw new BusinessException(PetErrorCode.PET_NOT_FOUND);
+        }
+
         return pets.stream()
             .map(PetDto::fromEntity)
             .collect(Collectors.toList());
