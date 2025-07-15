@@ -10,7 +10,6 @@ import java.time.LocalDate;
 @Builder
 public class ScheduleCreateRequest {
     private Long userId;
-    private Long petId;
     private String name;
     private LocalDate date;
     private ScheduleCycle cycle;
