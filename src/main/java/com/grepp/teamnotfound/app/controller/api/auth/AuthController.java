@@ -62,7 +62,7 @@ public class AuthController {
     }
 
     @Operation(summary = "최종 회원가입")
-    @PostMapping("v1/register")
+    @PostMapping("v2/register")
     public ResponseEntity<ApiResponse<?>> register(@RequestBody RegisterRequest request) {
 
         RegisterCommand command = RegisterCommand.builder()
@@ -78,7 +78,7 @@ public class AuthController {
     }
 
 
-    @PostMapping("v1/admin/register")
+    @PostMapping("v2/admin/register")
     @PreAuthorize("permitAll()")
     public ResponseEntity<ApiResponse<?>> registerAdmin(@RequestBody RegisterRequest request) {
 
