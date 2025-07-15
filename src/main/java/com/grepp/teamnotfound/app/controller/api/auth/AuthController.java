@@ -100,19 +100,15 @@ public class AuthController {
                 .build();
 
         LoginResult dto = authService.login(command);
-        ResponseCookie accessTokenCookie = TokenCookieFactory.create(TokenType.ACCESS_TOKEN.name(),
-                dto.getAccessToken(), dto.getAtExpiresIn());
-        ResponseCookie refreshTokenCookie = TokenCookieFactory.create(TokenType.REFRESH_TOKEN.name(),
-                dto.getRefreshToken(), dto.getRtExpiresIn());
+        createAuthTokenCookies(dto, response);
 
-        response.addHeader("Set-Cookie", accessTokenCookie.toString());
-        response.addHeader("Set-Cookie", refreshTokenCookie.toString());
         TokenResponse tokenResponse = TokenResponse.builder()
                 .accessToken(dto.getAccessToken())
                 .expiresIn(dto.getAtExpiresIn())
                 .grantType(GrantType.BEARER)
                 .refreshToken(dto.getRefreshToken())
                 .build();
+
         LoginResponse loginResponse = LoginResponse.builder()
                 .tokenResponse(tokenResponse)
                 .userId(dto.getUserId())
@@ -133,19 +129,15 @@ public class AuthController {
                 .build();
 
         LoginResult dto = authService.login(command);
-        ResponseCookie accessTokenCookie = TokenCookieFactory.create(TokenType.ACCESS_TOKEN.name(),
-                dto.getAccessToken(), dto.getAtExpiresIn());
-        ResponseCookie refreshTokenCookie = TokenCookieFactory.create(TokenType.REFRESH_TOKEN.name(),
-                dto.getRefreshToken(), dto.getRtExpiresIn());
+        createAuthTokenCookies(dto, response);
 
-        response.addHeader("Set-Cookie", accessTokenCookie.toString());
-        response.addHeader("Set-Cookie", refreshTokenCookie.toString());
         TokenResponse tokenResponse = TokenResponse.builder()
                 .accessToken(dto.getAccessToken())
                 .expiresIn(dto.getAtExpiresIn())
                 .grantType(GrantType.BEARER)
                 .refreshToken(dto.getRefreshToken())
                 .build();
+
         LoginResponse loginResponse = LoginResponse.builder()
                 .tokenResponse(tokenResponse)
                 .userId(dto.getUserId())
@@ -154,4 +146,13 @@ public class AuthController {
 
     }
 
+    private void createAuthTokenCookies(LoginResult dto, HttpServletResponse response) {
+        ResponseCookie accessTokenCookie = TokenCookieFactory.create(TokenType.ACCESS_TOKEN.name(),
+                dto.getAccessToken(), dto.getAtExpiresIn());
+        ResponseCookie refreshTokenCookie = TokenCookieFactory.create(TokenType.REFRESH_TOKEN.name(),
+                dto.getRefreshToken(), dto.getRtExpiresIn());
+
+        response.addHeader("Set-Cookie", accessTokenCookie.toString());
+        response.addHeader("Set-Cookie", refreshTokenCookie.toString());
+    }
 }
