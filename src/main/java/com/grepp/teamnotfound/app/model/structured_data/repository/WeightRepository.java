@@ -3,6 +3,7 @@ package com.grepp.teamnotfound.app.model.structured_data.repository;
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.structured_data.entity.Weight;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -19,4 +20,6 @@ public interface WeightRepository extends JpaRepository<Weight, Long> {
     void delete(Long petId, LocalDate recordedAt);
 
     Pet pet(Pet pet);
+
+    List<Weight> findTop10ByPetAndRecordedAtBeforeOrderByRecordedAtDesc(Pet pet, LocalDate date);
 }

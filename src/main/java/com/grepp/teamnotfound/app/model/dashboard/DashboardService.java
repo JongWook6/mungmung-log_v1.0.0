@@ -19,6 +19,7 @@ import com.grepp.teamnotfound.app.model.structured_data.dto.SleepingDto;
 import com.grepp.teamnotfound.app.model.structured_data.dto.WalkingDto;
 import com.grepp.teamnotfound.app.model.structured_data.dto.WeightDto;
 import com.grepp.teamnotfound.app.model.structured_data.entity.Walking;
+import com.grepp.teamnotfound.app.model.structured_data.entity.Weight;
 import com.grepp.teamnotfound.infra.error.exception.UserException;
 import com.grepp.teamnotfound.infra.error.exception.code.UserErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -131,6 +132,18 @@ public class DashboardService {
     }
 
     public List<WeightDto> getWeight(Long petId, Long userId, LocalDate date) {
+        Pet pet = petService.getPet(petId);
+        if(pet.getUser().getUserId().equals(userId)) throw new UserException(UserErrorCode.USER_ACCESS_DENIED);
+
+        List<Weight> weights = weightService.getWeightList(pet, date);
+        List<WeightDto> dtos = new ArrayList<>();
+
+        for (Weight weight : weights){
+            dtos.add(WeightDto.builder()
+                    .petId(petId).weight(weight.getWeight()).recordedAt(weight.getRecordedAt()).build());
+        }
+
+        return dtos;
     }
 
     public List<SleepingDto> getSleeping(Long petId, Long userId, LocalDate date) {
