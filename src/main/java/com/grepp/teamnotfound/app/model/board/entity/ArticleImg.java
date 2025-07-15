@@ -2,6 +2,7 @@ package com.grepp.teamnotfound.app.model.board.entity;
 
 import com.grepp.teamnotfound.infra.code.ImgType;
 import com.grepp.teamnotfound.infra.entity.BaseEntity;
+import com.grepp.teamnotfound.infra.util.file.FileDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -14,13 +15,19 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "ArticleImgs")
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class ArticleImg extends BaseEntity {
 
     @Id
@@ -54,4 +61,12 @@ public class ArticleImg extends BaseEntity {
     @JoinColumn(name = "article_id", nullable = false)
     private Article article;
 
+    public static ArticleImg fromFileDto(ImgType type, FileDto fileDto) {
+        return ArticleImg.builder()
+            .savePath(fileDto.savePath())
+            .type(type)
+            .originName(fileDto.originName())
+            .renamedName(fileDto.renamedName())
+            .build();
+    }
 }
