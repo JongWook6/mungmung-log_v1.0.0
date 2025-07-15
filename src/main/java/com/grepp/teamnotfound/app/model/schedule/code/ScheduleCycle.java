@@ -1,9 +1,13 @@
 package com.grepp.teamnotfound.app.model.schedule.code;
 
+import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
+
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
 public enum ScheduleCycle {
+    @JsonEnumDefaultValue // 모르는 값은 NONE 처리
+    NONE,
     WEEK, ONE_MONTH, THREE_MONTH, SIX_MONTH, YEAR;
 
     public int getDays(LocalDate date){
