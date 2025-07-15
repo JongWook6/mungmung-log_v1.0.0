@@ -6,13 +6,17 @@ import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleListResp
 import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleRequest;
 import com.grepp.teamnotfound.app.controller.api.article.payload.LikeResponse;
 import com.grepp.teamnotfound.app.controller.api.article.payload.PageInfo;
+import com.grepp.teamnotfound.app.model.auth.domain.Principal;
 import com.grepp.teamnotfound.app.model.board.ArticleService;
 import com.grepp.teamnotfound.app.model.board.dto.ArticleListDto;
+import com.grepp.teamnotfound.app.model.user.entity.UserDetailsImpl;
 import com.grepp.teamnotfound.infra.error.exception.AuthException;
 import com.grepp.teamnotfound.infra.error.exception.BusinessException;
 import com.grepp.teamnotfound.infra.error.exception.code.AuthErrorCode;
 import com.grepp.teamnotfound.infra.error.exception.code.BoardErrorCode;
+import com.grepp.teamnotfound.infra.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +25,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.BindingResult;
@@ -101,14 +106,9 @@ public class ArticleApiController {
     @GetMapping("/v2")
     @Operation(summary = "특정 게시판의 게시글 리스트 조회")
     public ResponseEntity<ArticleListResponse> getAllArticlesV2(
-        @ModelAttribute ArticleListRequest request,
-        BindingResult bindingResult
+        @ModelAttribute @Valid ArticleListRequest request
     ) {
-        // TODO 실제 로직으로 구현 예정
-        if (bindingResult.hasErrors()) {
-            throw new BusinessException(BoardErrorCode.BOARD_INVALID_PAGE);
-        }
-
+        // NOTE 여기서 예외처리를 어떻게 하는 게 좋을까? -> GlobalExceptionHandler 에서 일괄 처리
         PageRequest pageable = PageRequest.of(
             request.getPage() - 1,
             request.getSize(),
@@ -136,65 +136,69 @@ public class ArticleApiController {
 
     @PostMapping(value = "/v1", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "새로운 게시글 작성")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> createArticle(
         @RequestPart("request") ArticleRequest request,
-        @RequestPart(value = "images", required = false) List<MultipartFile> images
+        @RequestPart(value = "images", required = false) List<MultipartFile> images,
+        @AuthenticationPrincipal Principal principal
     ) {
-        return ResponseEntity.ok(Map.of("data", Map.of("articleId", 1, "msg", "게시글이 정상적으로 등록되었습니다.")));
+        Long articleId = articleService.writeArticle(request, images, principal.getUserId());
+
+        return ResponseEntity.ok(ApiResponse.success(Map.of("articleId", articleId)));
     }
 
     @GetMapping("/v1/{articleId}")
     @Operation(summary = "게시글 상세 조회")
     public ResponseEntity<?> getArticle(
-        @PathVariable Long articleId
+        @PathVariable Long articleId,
+        @AuthenticationPrincipal Principal principal
     ) {
-        ArticleDetailResponse response = ArticleDetailResponse.builder()
-            .articleId(articleId)
-            .nickname("유저닉네임")
-            .profileImgPath("/upload/profileImg")
-            .date(OffsetDateTime.now())
-            .title("요즘 뽀삐가 밥을 잘 안먹는데 왜 그럴까요?")
-            .content("우리집 댕댕이가 날씨 때문인지 최근 며칠 간 밥을 잘 안먹어서 고민입니다")
-            .replies(10)
-            .likes(15)
-            .views(20)
-            .isReported(false)
-            .isLiked(true)
-            .articleImgPathList(List.of("/upload/img1", "/upload/img2", "/upload/img3"))
-            .build();
+        Long userId = null;
+        if (principal != null) {
+            userId = principal.getUserId();
+        }
 
-        return ResponseEntity.ok(Map.of("data", response));
+        ArticleDetailResponse response = articleService.findByArticleIdAndUserId(articleId, userId);
+
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @PatchMapping( value = "/v1/{articleId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "게시글 수정")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> updateArticle(
         @PathVariable Long articleId,
         @RequestPart("request") ArticleRequest request,
-        @RequestPart(value = "images", required = false) List<MultipartFile> images
+        @RequestPart(value = "images", required = false) List<MultipartFile> images,
+        @AuthenticationPrincipal Principal principal
     ) {
-        return ResponseEntity.ok(Map.of("data", Map.of("msg", "게시글이 정상적으로 수정되었습니다.")));
+        articleService.updateArticle(articleId, request, images, principal.getUserId());
+
+        return ResponseEntity.ok(ApiResponse.success(Map.of("result", "게시글이 정상적으로 수정되었습니다.")));
     }
 
     @DeleteMapping("/v1/{articleId}")
     @Operation(summary = "게시글 삭제")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> deleteArticle(
-        @PathVariable Long articleId
+        @PathVariable Long articleId,
+        @AuthenticationPrincipal Principal principal
     ) {
-        return ResponseEntity.ok(Map.of("data", Map.of("msg", "게시글이 정상적으로 삭제되었습니다.")));
+        articleService.deleteArticle(articleId, principal.getUserId());
+
+        return ResponseEntity.ok(ApiResponse.success(Map.of("msg", "게시글이 정상적으로 삭제되었습니다.")));
     }
 
     @PostMapping("/v1/{articleId}/like")
     @Operation(summary = "게시글 좋아요 요청")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> likeArticle(
         @PathVariable Long articleId,
-        @AuthenticationPrincipal UserDetails userDetails
+        @AuthenticationPrincipal Principal principal
     ) {
-        if (userDetails == null) {
-            throw new AuthException(AuthErrorCode.UNAUTHENTICATED);
-        }
         // 사용자 이메일로 요청 회원 특정
-        String userEmail = userDetails.getUsername();
+        String userEmail = principal.getUsername();
+        System.out.println("userEmail: " + userEmail);
 
         LikeResponse response = LikeResponse.builder()
             .articleId(13L)
@@ -208,15 +212,11 @@ public class ArticleApiController {
 
     @DeleteMapping("/v1/{articleId}/like")
     @Operation(summary = "게시글 좋아요 취소")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> undoLikeArticle(
         @PathVariable Long articleId,
-        @AuthenticationPrincipal UserDetails userDetails
+        @AuthenticationPrincipal Principal principal
     ) {
-        if (userDetails == null) {
-            throw new AuthException(AuthErrorCode.UNAUTHENTICATED);
-        }
-        // 사용자 이메일로 요청 회원 특정
-        String username = userDetails.getUsername();
 
         LikeResponse response = LikeResponse.builder()
             .articleId(13L)
