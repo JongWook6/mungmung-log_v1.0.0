@@ -4,6 +4,7 @@ import com.grepp.teamnotfound.app.controller.api.schedule.payload.ScheduleCreate
 import com.grepp.teamnotfound.app.controller.api.schedule.payload.ScheduleEditRequest;
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.pet.repository.PetRepository;
+import com.grepp.teamnotfound.app.model.schedule.code.ScheduleCycle;
 import com.grepp.teamnotfound.app.model.schedule.dto.ScheduleCreateRequestDto;
 import com.grepp.teamnotfound.app.model.schedule.dto.ScheduleEditRequestDto;
 import com.grepp.teamnotfound.app.model.schedule.entity.Schedule;
@@ -51,13 +52,13 @@ public class ScheduleService {
         // petId, userId 존재 검증
         Pet pet = petRepository.findById(request.getPetId()).orElseThrow(() -> new PetException(PetErrorCode.PET_NOT_FOUND));
         User user = userRepository.findById(request.getUserId()).orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
-        if (request.getCycle() == null) {
+        if (request.getCycle().equals(ScheduleCycle.NONE)) {
             Schedule schedule = Schedule.builder()
                     .name(request.getName())
                     .scheduleDate(request.getDate())
+                    .isDone(false)
                     .cycle(request.getCycle())
                     .cycleEnd(request.getCycleEnd())
-                    .isDone(false)
                     .pet(pet)
                     .user(user).build();
             scheduleRepository.save(schedule);

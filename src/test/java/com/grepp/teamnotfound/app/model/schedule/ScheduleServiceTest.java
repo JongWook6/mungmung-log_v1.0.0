@@ -35,6 +35,8 @@ class ScheduleServiceTest {
                 .userId(1L)
                 .petId(1L)
                 .name("병원가는 날")
+                .cycle(ScheduleCycle.NONE)
+                .cycleEnd(LocalDate.now())
                 .date(LocalDate.now())
                 .build();
         scheduleService.createSchedule(request);
