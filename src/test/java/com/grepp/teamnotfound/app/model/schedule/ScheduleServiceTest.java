@@ -23,7 +23,7 @@ class ScheduleServiceTest {
     // 일정 조회
     @Test
     void getCalendar() {
-        List<Schedule> schedules = scheduleService.getCalendar(1L, LocalDate.now());
+        List<Schedule> schedules = scheduleService.getCalendar("email@email.com", LocalDate.now());
         assertNotNull(schedules);
         assertTrue(schedules.size() >= 0);
     }
@@ -35,6 +35,8 @@ class ScheduleServiceTest {
                 .userId(1L)
                 .petId(1L)
                 .name("병원가는 날")
+                .cycle(ScheduleCycle.NONE)
+                .cycleEnd(LocalDate.now())
                 .date(LocalDate.now())
                 .build();
         scheduleService.createSchedule(request);
