@@ -3,10 +3,10 @@ package com.grepp.teamnotfound.app.controller.api.dashboard;
 import com.grepp.teamnotfound.app.controller.api.dashboard.payload.*;
 import com.grepp.teamnotfound.app.model.dashboard.DashboardService;
 import com.grepp.teamnotfound.app.model.dashboard.dto.FeedingDashboardDto;
+import com.grepp.teamnotfound.app.model.dashboard.dto.WalkingDashboardDto;
 import com.grepp.teamnotfound.app.model.note.dto.NoteDto;
 import com.grepp.teamnotfound.app.model.pet.dto.PetDto;
 import com.grepp.teamnotfound.app.model.structured_data.dto.SleepingDto;
-import com.grepp.teamnotfound.app.model.structured_data.dto.WalkingDto;
 import com.grepp.teamnotfound.app.model.structured_data.dto.WeightDto;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -78,7 +78,7 @@ public class DashboardApiController {
             @RequestParam Long userId,
             @RequestParam LocalDate date
     ){
-        List<WalkingDto> walkingDtos = dashboardService.getWalking(petId, userId, date);
+        WalkingDashboardDto walkingDtos = dashboardService.getWalking(petId, userId, date);
         WalkingResponse response = modelMapper.map(walkingDtos, WalkingResponse.class);
         return ResponseEntity.ok(response);
     }

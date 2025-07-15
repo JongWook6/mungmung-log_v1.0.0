@@ -1,11 +1,13 @@
 package com.grepp.teamnotfound.app.model.structured_data;
 
 import com.grepp.teamnotfound.app.controller.api.life_record.payload.WalkingData;
+import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.structured_data.dto.WalkingDto;
 import com.grepp.teamnotfound.app.model.structured_data.entity.Walking;
 import com.grepp.teamnotfound.app.model.structured_data.repository.WalkingRepository;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -60,4 +62,7 @@ public class WalkingService {
         walkingRepository.delete(petId, recordedAt);
     }
 
+    public List<Walking> getWalkingListDays(Pet pet, LocalDate date) {
+        return walkingRepository.findAllByPetAndRecordedAtBetween(pet, date.minusDays(9), date).orElse(new ArrayList<>());
+    }
 }
