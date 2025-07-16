@@ -2,8 +2,7 @@ package com.grepp.teamnotfound.app.controller.api.dashboard;
 
 import com.grepp.teamnotfound.app.controller.api.dashboard.payload.*;
 import com.grepp.teamnotfound.app.model.dashboard.DashboardService;
-import com.grepp.teamnotfound.app.model.dashboard.dto.FeedingDashboardDto;
-import com.grepp.teamnotfound.app.model.dashboard.dto.WalkingDashboardDto;
+import com.grepp.teamnotfound.app.model.dashboard.dto.*;
 import com.grepp.teamnotfound.app.model.note.dto.NoteDto;
 import com.grepp.teamnotfound.app.model.pet.dto.PetDto;
 import com.grepp.teamnotfound.app.model.structured_data.dto.SleepingDto;
@@ -90,7 +89,7 @@ public class DashboardApiController {
             @RequestParam Long userId,
             @RequestParam LocalDate date
     ){
-        List<WeightDto> weightDashboardDto = dashboardService.getWeight(petId, userId, date);
+        WeightDashboardDto weightDashboardDto = dashboardService.getWeight(petId, userId, date);
         WeightResponse response = modelMapper.map(weightDashboardDto, WeightResponse.class);
         return ResponseEntity.ok(response);
     }
@@ -102,7 +101,7 @@ public class DashboardApiController {
             @RequestParam Long userId,
             @RequestParam LocalDate date
     ){
-        List<SleepingDto> sleepingDtos = dashboardService.getSleeping(petId, userId, date);
+        SleepingDashboardDto sleepingDtos = dashboardService.getSleeping(petId, userId, date);
         SleepingResponse response = modelMapper.map(sleepingDtos, SleepingResponse.class);
         return ResponseEntity.ok(response);
     }

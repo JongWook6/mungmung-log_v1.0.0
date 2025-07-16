@@ -13,5 +13,5 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class NoteResponse {
     private LocalDate date;
-    private String note;
+    private String content;
 }

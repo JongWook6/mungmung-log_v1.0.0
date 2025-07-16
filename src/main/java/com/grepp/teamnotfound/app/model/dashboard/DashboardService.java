@@ -1,9 +1,7 @@
 package com.grepp.teamnotfound.app.model.dashboard;
 
 import com.grepp.teamnotfound.app.controller.api.life_record.payload.FeedingData;
-import com.grepp.teamnotfound.app.model.dashboard.dto.DayWalking;
-import com.grepp.teamnotfound.app.model.dashboard.dto.FeedingDashboardDto;
-import com.grepp.teamnotfound.app.model.dashboard.dto.WalkingDashboardDto;
+import com.grepp.teamnotfound.app.model.dashboard.dto.*;
 import com.grepp.teamnotfound.app.model.note.NoteService;
 import com.grepp.teamnotfound.app.model.note.dto.NoteDto;
 import com.grepp.teamnotfound.app.model.note.entity.Note;
@@ -67,7 +65,7 @@ public class DashboardService {
         if(!pet.getUser().getUserId().equals(userId)) throw new UserException(UserErrorCode.USER_ACCESS_DENIED);
 
         List<FeedingData> datas = feedingService.getFeedingList(petId, date);
-        if (datas.isEmpty()) return new FeedingDashboardDto();
+        if (datas.isEmpty()) return FeedingDashboardDto.builder().average(feedingService.getFeedingAverage(pet, date)).build();
         Double amount = 0.0;
 
         for(FeedingData data : datas){
@@ -101,8 +99,6 @@ public class DashboardService {
         if(!pet.getUser().getUserId().equals(userId)) throw new UserException(UserErrorCode.USER_ACCESS_DENIED);
 
         List<Walking> walkings = walkingService.getWalkingListDays(pet, date);
-
-        if (walkings.isEmpty()) return new WalkingDashboardDto();
 
         WalkingDashboardDto dto = new WalkingDashboardDto(new ArrayList<>());
         Map<LocalDate, DayWalking> dayWalkingMap = new HashMap<>();
@@ -143,33 +139,33 @@ public class DashboardService {
         return dto;
     }
 
-    public List<WeightDto> getWeight(Long petId, Long userId, LocalDate date) {
+    public WeightDashboardDto getWeight(Long petId, Long userId, LocalDate date) {
         Pet pet = petService.getPet(petId);
         if(!pet.getUser().getUserId().equals(userId)) throw new UserException(UserErrorCode.USER_ACCESS_DENIED);
 
         List<Weight> weights = weightService.getWeightList(pet, date);
-        List<WeightDto> dtos = new ArrayList<>();
+        WeightDashboardDto dtos = new WeightDashboardDto(new ArrayList<>());
 
         for (Weight weight : weights){
-            dtos.add(WeightDto.builder()
-                    .petId(petId).weight(weight.getWeight())
-                    .recordedAt(weight.getRecordedAt()).build());
+            dtos.getWeightList().add(DayWeight.builder()
+                    .weight(weight.getWeight())
+                    .date(weight.getRecordedAt()).build());
         }
 
         return dtos;
     }
 
-    public List<SleepingDto> getSleeping(Long petId, Long userId, LocalDate date) {
+    public SleepingDashboardDto getSleeping(Long petId, Long userId, LocalDate date) {
         Pet pet = petService.getPet(petId);
         if(!pet.getUser().getUserId().equals(userId)) throw new UserException(UserErrorCode.USER_ACCESS_DENIED);
 
         List<Sleeping> sleepings = sleepingService.getSleepingList(pet, date);
-        List<SleepingDto> dtos = new ArrayList<>();
+        SleepingDashboardDto dtos = new SleepingDashboardDto(new ArrayList<>());
 
         for(Sleeping sleeping: sleepings){
-            dtos.add(SleepingDto.builder().petId(petId)
-                    .sleepingTime(sleeping.getSleepingTime())
-                    .recordedAt(sleeping.getRecordedAt()).build());
+            dtos.getSleepingList().add(DaySleeping.builder()
+                            .sleep(sleeping.getSleepingTime())
+                            .date(sleeping.getRecordedAt()).build());
         }
 
         return dtos;
