@@ -122,6 +122,17 @@ public class ScheduleService {
 
                 date = date.plusDays(request.getCycle().getDays(date));
             }
+            for(;date.isBefore(request.getCycleEnd()); date = date.plusDays(request.getCycle().getDays(request.getDate()))){
+                Schedule addSchedule = Schedule.builder()
+                        .name(request.getName())
+                        .scheduleDate(date)
+                        .cycle(request.getCycle())
+                        .cycleEnd(request.getCycleEnd())
+                        .isDone(false)
+                        .pet(pet)
+                        .user(user).build();
+                schedules.add(addSchedule);
+            }
             scheduleRepository.saveAll(schedules);
         }else {
             schedule.setName(request.getName());
