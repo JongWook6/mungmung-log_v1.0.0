@@ -109,6 +109,11 @@ public class ScheduleService {
             List<Schedule> schedules = scheduleRepository.findByNameAndCycleAndCycleEnd(schedule.getName(), schedule.getCycle(), schedule.getCycleEnd());
             LocalDate date = request.getDate();
             for(Schedule schedule1: schedules){
+                if (request.getCycle().equals(ScheduleCycle.NONE) && !schedule1.getScheduleId().equals(request.getScheduleId())){ // 반복이 없으면 삭제 해당 일정 제외
+                    schedule1.setDeletedAt(OffsetDateTime.now());
+                    continue;
+                }
+
                 schedule1.setName(request.getName());
                 schedule1.setScheduleDate(date);
                 schedule1.setCycle(request.getCycle());
