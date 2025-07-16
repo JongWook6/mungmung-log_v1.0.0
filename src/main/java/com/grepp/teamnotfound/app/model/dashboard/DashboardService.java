@@ -58,6 +58,7 @@ public class DashboardService {
     public PetDto getProfile(Long petId, Long userId) {
         Pet pet = petService.getPet(petId);
         if(!pet.getUser().getUserId().equals(userId)) throw new UserException(UserErrorCode.USER_ACCESS_DENIED);
+
         return modelMapper.map(pet, PetDto.class);
     }
 
