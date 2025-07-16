@@ -6,7 +6,6 @@ import com.grepp.teamnotfound.app.model.life_record.LifeRecordService;
 import com.grepp.teamnotfound.app.model.life_record.dto.LifeRecordDto;
 import com.grepp.teamnotfound.app.model.note.NoteService;
 import com.grepp.teamnotfound.app.model.pet.PetService;
-import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -116,8 +115,7 @@ public class LifeRecordApiController {
     public ResponseEntity<String> registLifeRecord(
             @RequestBody LifeRecordData data
     ){
-        LifeRecordDto dto = new LifeRecordDto();
-        dto = dto.toDto(data);
+        LifeRecordDto dto = LifeRecordDto.toDto(data);
         lifeRecordService.createLifeRecord(dto);
 
         return ResponseEntity.ok("등록 성공");
