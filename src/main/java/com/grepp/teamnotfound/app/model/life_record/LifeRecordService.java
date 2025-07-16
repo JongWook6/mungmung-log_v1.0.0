@@ -73,13 +73,13 @@ public class LifeRecordService {
 
         List<WalkingData> walkingList = lifeRecord.getWalkingList().stream()
                 .map(walking -> WalkingData.builder()
-                        .startTime(walking.getStartTime())
-                        .endTime(walking.getEndTime())
+                        .startTime(walking.getStartTime().toLocalDateTime())
+                        .endTime(walking.getEndTime().toLocalDateTime())
                         .pace(walking.getPace())
                         .build()).toList();
         List<FeedingData> feedingList = lifeRecord.getFeedingList().stream()
                 .map(feeding -> FeedingData.builder()
-                        .mealtime(feeding.getMealTime())
+                        .mealtime(feeding.getMealTime().toLocalDateTime())
                         .amount(feeding.getAmount())
                         .unit(feeding.getUnit())
                         .build()).toList();

@@ -2,7 +2,7 @@ package com.grepp.teamnotfound.app.controller.api.life_record.payload;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.grepp.teamnotfound.app.model.structured_data.code.FeedUnit;
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -12,7 +12,7 @@ import lombok.Getter;
 public class FeedingData {
 
     private Double amount;
-    private OffsetDateTime mealtime;
+    private LocalDateTime mealtime;
     private FeedUnit unit;
 
 }

@@ -1,9 +1,7 @@
 package com.grepp.teamnotfound.app.model.structured_data.dto;
 
-import com.grepp.teamnotfound.app.controller.api.life_record.payload.WalkingData;
 import com.grepp.teamnotfound.app.model.structured_data.entity.Walking;
 import java.time.OffsetDateTime;
-import java.util.List;
 import lombok.Builder;
 import lombok.Data;
 
