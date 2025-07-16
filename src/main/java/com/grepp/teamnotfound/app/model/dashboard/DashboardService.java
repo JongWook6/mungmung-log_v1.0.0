@@ -24,6 +24,7 @@ import com.grepp.teamnotfound.infra.error.exception.code.UserErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -46,6 +47,7 @@ public class DashboardService {
 
     ModelMapper modelMapper = new ModelMapper();
 
+    @Transactional
     public String getRecommend(Long petId, Long userId, LocalDate date) {
         Pet pet = petService.getPet(petId);
         if(pet.getUser().getUserId().equals(userId)) throw new UserException(UserErrorCode.USER_ACCESS_DENIED);
@@ -53,6 +55,7 @@ public class DashboardService {
         return dailyRecommendService.getRecommend(pet, date);
     }
 
+    @Transactional
     public PetDto getProfile(Long petId, Long userId) {
         Pet pet = petService.getPet(petId);
         if(!pet.getUser().getUserId().equals(userId)) throw new UserException(UserErrorCode.USER_ACCESS_DENIED);
@@ -60,6 +63,7 @@ public class DashboardService {
         return modelMapper.map(pet, PetDto.class);
     }
 
+    @Transactional
     public FeedingDashboardDto getFeeding(Long petId, Long userId, LocalDate date) {
         Pet pet = petService.getPet(petId);
         if(!pet.getUser().getUserId().equals(userId)) throw new UserException(UserErrorCode.USER_ACCESS_DENIED);
@@ -80,6 +84,7 @@ public class DashboardService {
                 .build();
     }
 
+    @Transactional
     public NoteDto getNote(Long petId, Long userId, LocalDate date) {
         Pet pet = petService.getPet(petId);
         if(!pet.getUser().getUserId().equals(userId)) throw new UserException(UserErrorCode.USER_ACCESS_DENIED);
@@ -94,6 +99,7 @@ public class DashboardService {
         return dto;
     }
 
+    @Transactional
     public WalkingDashboardDto getWalking(Long petId, Long userId, LocalDate date) {
         Pet pet = petService.getPet(petId);
         if(!pet.getUser().getUserId().equals(userId)) throw new UserException(UserErrorCode.USER_ACCESS_DENIED);
@@ -139,6 +145,7 @@ public class DashboardService {
         return dto;
     }
 
+    @Transactional
     public WeightDashboardDto getWeight(Long petId, Long userId, LocalDate date) {
         Pet pet = petService.getPet(petId);
         if(!pet.getUser().getUserId().equals(userId)) throw new UserException(UserErrorCode.USER_ACCESS_DENIED);
@@ -155,6 +162,7 @@ public class DashboardService {
         return dtos;
     }
 
+    @Transactional
     public SleepingDashboardDto getSleeping(Long petId, Long userId, LocalDate date) {
         Pet pet = petService.getPet(petId);
         if(!pet.getUser().getUserId().equals(userId)) throw new UserException(UserErrorCode.USER_ACCESS_DENIED);
