@@ -100,7 +100,7 @@ public class ArticleService {
     public ArticleListResponse getArticlesByQuerydsl(ArticleListRequest request) {
 
         Page<ArticleListDto> articleListPage = articleRepository.findArticleListWithMeta(
-            request.getPage() - 1, request.getSize());
+            request.getPage() - 1, request.getSize(), request.getSortType());
 
         return ArticleListResponse.builder()
             .articleList(articleListPage.toList())

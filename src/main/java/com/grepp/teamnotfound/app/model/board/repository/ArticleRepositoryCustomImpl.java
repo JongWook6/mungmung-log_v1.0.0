@@ -1,6 +1,7 @@
 package com.grepp.teamnotfound.app.model.board.repository;
 
 import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleDetailResponse;
+import com.grepp.teamnotfound.app.model.board.code.SortType;
 import com.grepp.teamnotfound.app.model.board.dto.ArticleImgDto;
 import com.grepp.teamnotfound.app.model.board.dto.ArticleListDto;
 import com.grepp.teamnotfound.app.model.board.entity.QArticle;
@@ -12,6 +13,7 @@ import com.grepp.teamnotfound.app.model.user.entity.QUserImg;
 import com.grepp.teamnotfound.infra.code.ImgType;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.ExpressionUtils;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
@@ -137,21 +139,21 @@ public class ArticleRepositoryCustomImpl implements ArticleRepositoryCustom {
     }
 
     @Override
-    public Page<ArticleListDto> findArticleListWithMeta(int page, int size) {
+    public Page<ArticleListDto> findArticleListWithMeta(int page, int size, SortType sortType) {
 
-        // 서브쿼리 : 좋아요 수
-        JPQLQuery<Integer> likes = JPAExpressions.select(articleLike.count().intValue())
-            .from(articleLike)
-            .where(articleLike.article.articleId.eq(article.articleId));
-
-        // 서브쿼리 : 댓글 수
-        JPQLQuery<Integer> replies = JPAExpressions.select(reply.count().intValue())
-            .from(reply)
-            .where(
-                reply.article.articleId.eq(article.articleId),
-                reply.deletedAt.isNull(),
-                reply.reportedAt.isNull()
-            );
+//        // 서브쿼리 : 좋아요 수
+//        JPQLQuery<Integer> likes = JPAExpressions.select(articleLike.count().intValue())
+//            .from(articleLike)
+//            .where(articleLike.article.articleId.eq(article.articleId));
+//
+//        // 서브쿼리 : 댓글 수
+//        JPQLQuery<Integer> replies = JPAExpressions.select(reply.count().intValue())
+//            .from(reply)
+//            .where(
+//                reply.article.articleId.eq(article.articleId),
+//                reply.deletedAt.isNull(),
+//                reply.reportedAt.isNull()
+//            );
 
         // 서브쿼리 : 썸네일 이미지 경로
         JPQLQuery<String> thumbnailImgPath = JPAExpressions.select(
@@ -166,6 +168,8 @@ public class ArticleRepositoryCustomImpl implements ArticleRepositoryCustom {
             .orderBy(articleImg.createdAt.desc()) // 가장 최근 썸네일 하나
             .limit(1);
 
+        // 정렬 기준 리스트
+        OrderSpecifier<?>[] orderSpecifiers = getOrderSpecifiers(sortType);
 
         // 메인 쿼리
         List<ArticleListDto> content = queryFactory
@@ -178,13 +182,25 @@ public class ArticleRepositoryCustomImpl implements ArticleRepositoryCustom {
                 article.updatedAt,
                 article.title,
                 article.content,
-                ExpressionUtils.as(likes, "likes"),
-                ExpressionUtils.as(replies, "replies"),
-                article.views,
+//                ExpressionUtils.as(likes, "likes"),
+//                ExpressionUtils.as(replies, "replies"),
+                // COUNT DISTINCT 필수 (한 게시글에 좋아요 2개, 댓글 3개 -> 총 6개 로 집계됨)
+                articleLike.countDistinct().intValue().as("likes"), // 기본적으로 long 타입 반환
+                reply.countDistinct().intValue().as("replies"),
+                article.views.intValue(),
                 ExpressionUtils.as(thumbnailImgPath, "thumbnailImgPath")
             ))
             .from(article)
             .join(article.user, user)
+            // LEFT JOIN 으로 좋아요, 댓글, 사진이 없는 게시글도 포함
+            .leftJoin(articleLike).on(
+                articleLike.article.articleId.eq(article.articleId)
+            )
+            .leftJoin(reply).on(
+                reply.article.articleId.eq(article.articleId),
+                reply.deletedAt.isNull(),
+                reply.reportedAt.isNull()
+            )
             .leftJoin(userImg).on(
                 userImg.user.userId.eq(user.userId),
                 userImg.deletedAt.isNull()
@@ -193,7 +209,19 @@ public class ArticleRepositoryCustomImpl implements ArticleRepositoryCustom {
                 article.deletedAt.isNull(),
                 article.reportedAt.isNull()
             )
-            .orderBy(article.createdAt.desc()) // TODO 동적으로 정렬 필요
+            // 집계 함수가 아닌 필드는 모두 GROUP BY 절에 포함
+            .groupBy(
+                article.articleId,
+                user.nickname,
+                userImg.savePath,
+                userImg.renamedName,
+                article.createdAt,
+                article.updatedAt,
+                article.title,
+                article.content,
+                article.views
+            )
+            .orderBy(orderSpecifiers) // 동적으로 정렬 적용
             .offset((long) page * size)
             .limit(size)
             .fetch();
@@ -206,5 +234,13 @@ public class ArticleRepositoryCustomImpl implements ArticleRepositoryCustom {
             .fetchOne();
 
         return new PageImpl<>(content, PageRequest.of(page, size), total);
+    }
+
+    private OrderSpecifier<?>[] getOrderSpecifiers(SortType sortType) {
+        return switch (sortType) {
+            case DATE -> new OrderSpecifier[]{article.createdAt.desc()};
+            case LIKE -> new OrderSpecifier[]{articleLike.countDistinct().desc()};
+            case VIEW -> new OrderSpecifier[]{article.views.desc()};
+        };
     }
 }
