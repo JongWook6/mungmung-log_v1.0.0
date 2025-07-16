@@ -1,10 +1,10 @@
 package com.grepp.teamnotfound.app.controller.api.admin;
 
-import com.grepp.teamnotfound.app.controller.api.admin.payload.UserCountResponse;
-import com.grepp.teamnotfound.app.controller.api.admin.payload.UsersListRequest;
-import com.grepp.teamnotfound.app.controller.api.admin.payload.UsersListResponse;
+import com.grepp.teamnotfound.app.controller.api.admin.code.StatsUnit;
+import com.grepp.teamnotfound.app.controller.api.admin.payload.*;
 import com.grepp.teamnotfound.app.model.user.AdminService;
-import com.grepp.teamnotfound.app.model.user.dto.TotalUsersCount;
+import com.grepp.teamnotfound.app.model.user.UserService;
+import com.grepp.teamnotfound.app.model.user.dto.*;
 import com.grepp.teamnotfound.infra.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -41,13 +41,6 @@ public class AdminController {
         return ResponseEntity.ok((ApiResponse.success(response)));
     }
 
-//    @Operation(summary = "가입자 수 추이 조회")
-//    @GetMapping("v1/stats/transition")
-//    public ResponseEntity<ApiResponse<List<?>>> userStatsList(){
-//        List<UsersStatsResponse> response = adminService.getUserStatsList();
-//        return ResponseEntity.ok(ApiResponse.success(response));
-//    }
-
     @Operation(summary = "회원 목록 조회")
     @GetMapping("v1/users")
     public ResponseEntity<ApiResponse<List<UsersListResponse>>> usersList(
@@ -57,12 +50,52 @@ public class AdminController {
         return ResponseEntity.ok(ApiResponse.success(responseList));
     }
 
-//    @Operation(summary = "게시글 수 추이 조회")
-//    @GetMapping("v1/stats/articles")
-//    public ResponseEntity<ApiResponse<List<?>>> userStatsList(){
-//        List<ArticlesStatsResponse> response = adminService.getArticleStatsList();
-//        return ResponseEntity.ok(ApiResponse.success(response));
-//    }
+    @Operation(summary = "가입/탈퇴자 수 추이 조회")
+    @GetMapping("v1/stats/transition")
+    public ResponseEntity<ApiResponse<UserStatsResponse>> userStatsList(
+            @RequestParam(defaultValue = "MONTH") StatsUnit unit
+    ) {
 
+        if (unit == StatsUnit.MONTH) {
+            List<MonthlyUserStats> monthlyStats = adminService.getMonthlyUsersStats();
+            return ResponseEntity.ok(ApiResponse.success(
+                    UserStatsResponse.<MonthlyUserStats>builder()
+                            .viewDat(OffsetDateTime.now())
+                            .stats(monthlyStats)
+                            .build()));
+        }
+        else {
+            List<YearlyUserStats> yearlyStats = adminService.getYearlyUsersStats();
+            return ResponseEntity.ok(ApiResponse.success(
+                    UserStatsResponse.<YearlyUserStats>builder()
+                            .viewDat(OffsetDateTime.now())
+                            .stats(yearlyStats)
+                            .build()));
+        }
+    }
+
+    @Operation(summary = "게시글 수 추이 조회")
+    @GetMapping("v1/stats/articles")
+    public ResponseEntity<ApiResponse<ArticlesStatsResponse>> articlesStatsList(
+            @RequestParam(defaultValue = "MONTH") StatsUnit unit
+    ) {
+
+        if (unit == StatsUnit.MONTH) {
+            List<MonthlyArticlesStats> monthlyStats = adminService.getMonthlyArticlesStats();
+            return ResponseEntity.ok(ApiResponse.success(
+                    ArticlesStatsResponse.<MonthlyArticlesStats>builder()
+                            .viewDat(OffsetDateTime.now())
+                            .stats(monthlyStats)
+                            .build()));
+        }
+        else {
+            List<YearlyArticlesStats> yearlyStats = adminService.getYearlyArticlesStats();
+            return ResponseEntity.ok(ApiResponse.success(
+                    ArticlesStatsResponse.<YearlyArticlesStats>builder()
+                            .viewDat(OffsetDateTime.now())
+                            .stats(yearlyStats)
+                            .build()));
+        }
+    }
 
 }
