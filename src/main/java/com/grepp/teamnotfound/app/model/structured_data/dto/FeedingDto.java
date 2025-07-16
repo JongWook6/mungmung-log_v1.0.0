@@ -1,9 +1,9 @@
 package com.grepp.teamnotfound.app.model.structured_data.dto;
 
-import com.grepp.teamnotfound.app.model.pet.entity.Pet;
+import com.grepp.teamnotfound.app.controller.api.life_record.payload.FeedingData;
 import com.grepp.teamnotfound.app.model.structured_data.FeedUnit;
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.List;
 import lombok.Builder;
 import lombok.Data;
 
@@ -12,13 +12,9 @@ import lombok.Data;
 public class FeedingDto {
 
     private Long feedingId;
-    private Long petId;
 
     private Double amount;
     private OffsetDateTime mealTime;
     private FeedUnit unit;
-    private LocalDate recordedAt;
-
-    private OffsetDateTime createdAt = OffsetDateTime.now();
 
 }
