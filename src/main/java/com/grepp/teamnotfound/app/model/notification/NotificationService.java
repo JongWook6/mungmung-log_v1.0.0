@@ -27,6 +27,22 @@ public class NotificationService {
 
     ModelMapper modelMapper = new ModelMapper();
 
+    public NotiUserSettingDto getUserSetting(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+
+        NotiManagement noti = notiManagementRepository.findByUser(user)
+            .orElseGet(() -> {
+                log.warn("회원가입 당시 NotiManagement 미생성 오류 지금 생성 작업 진행 userId: {}", userId);
+
+                NotiManagement created = new NotiManagement();
+                created.setUser(user);
+
+                return notiManagementRepository.save(created);
+            });
+
+        NotiUserSettingDto dto = modelMapper.map(noti, NotiUserSettingDto.class);
+        return dto;
+    }
     @Transactional
     public void createManagement(Long userId) {
         User user = userRepository.findById(userId)
