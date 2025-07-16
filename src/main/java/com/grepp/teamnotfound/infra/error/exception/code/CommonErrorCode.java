@@ -14,7 +14,8 @@ public enum CommonErrorCode implements BaseErrorCode {
     TOO_MANY_REQUESTS(HttpStatus.TOO_MANY_REQUESTS.value(), "COMMON_004", "너무 많은 요청입니다."),
     FILE_TOO_BIG(HttpStatus.INTERNAL_SERVER_ERROR.value(), "FILE_001", "파일 용량이 초과되었습니다."),
     FILE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR.value(), "FILE_002", "파일 업로드에 실패했습니다."),
-    FILE_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR.value(), "FILE_003", "파일 삭제에 실패했습니다.");
+    FILE_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR.value(), "FILE_003", "파일 삭제에 실패했습니다."),
+    FILE_INVALID_NAME(HttpStatus.BAD_REQUEST.value(), "FILE_004", "사용할 수 없는 파일 이름입니다.");
 
     private final int status;
     private final String code;

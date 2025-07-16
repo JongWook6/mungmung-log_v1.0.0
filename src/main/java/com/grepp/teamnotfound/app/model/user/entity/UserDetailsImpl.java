@@ -1,5 +1,6 @@
 package com.grepp.teamnotfound.app.model.user.entity;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -9,6 +10,7 @@ import java.util.Collection;
 import java.util.List;
 
 @RequiredArgsConstructor
+@Builder
 public class UserDetailsImpl implements UserDetails {
 
     @Getter

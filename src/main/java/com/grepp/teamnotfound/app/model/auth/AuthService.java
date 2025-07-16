@@ -1,7 +1,8 @@
 package com.grepp.teamnotfound.app.model.auth;
 
 import com.grepp.teamnotfound.app.model.auth.domain.Principal;
-import com.grepp.teamnotfound.app.model.auth.payload.LoginCommand;
+import com.grepp.teamnotfound.app.model.auth.dto.LoginCommand;
+import com.grepp.teamnotfound.app.model.auth.dto.LoginResult;
 import com.grepp.teamnotfound.app.model.auth.token.RefreshTokenService;
 import com.grepp.teamnotfound.app.model.auth.token.dto.AccessTokenDto;
 import com.grepp.teamnotfound.app.model.auth.token.dto.TokenDto;
@@ -37,9 +38,13 @@ public class AuthService {
     private final TokenBlackListRepository tokenBlackListRepository;
 
 
-    public TokenDto login(LoginCommand request) {
+    public LoginResult login(LoginCommand request) {
         User user = userService.findByEmail(request.getEmail())
                 .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));
+
+        if (!user.getRole().isUser()) {
+            throw new AuthException(AuthErrorCode.NOT_USER_LOGIN);
+        }
 
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(
@@ -50,8 +55,47 @@ public class AuthService {
                 .authenticate(authenticationToken);
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        // Object gerPrincipal 이므로 Principal로 캐스팅
-        return processTokenLogin(((Principal) authentication.getPrincipal()).getUserId());
+
+        TokenDto tokenDto = processTokenLogin(((Principal) authentication.getPrincipal()).getUserId());
+
+        return LoginResult.builder()
+                .userId(user.getUserId())
+                .accessToken(tokenDto.getAccessToken())
+                .refreshToken(tokenDto.getRefreshToken())
+                .grantType(tokenDto.getGrantType())
+                .atExpiresIn(tokenDto.getAtExpiresIn())
+                .rtExpiresIn(tokenDto.getRtExpiresIn())
+                .build();
+    }
+
+    public LoginResult adminLogin(LoginCommand request) {
+        User user = userService.findByEmail(request.getEmail())
+                .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));
+
+        if (!user.getRole().isAdmin()) {
+            throw new AuthException(AuthErrorCode.NOT_ADMIN);
+        }
+
+        UsernamePasswordAuthenticationToken authenticationToken =
+                new UsernamePasswordAuthenticationToken(
+                        user.getEmail(),
+                        request.getPassword());
+
+        Authentication authentication = authenticationManagerBuilder.getObject()
+                .authenticate(authenticationToken);
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        TokenDto tokenDto = processTokenLogin(((Principal) authentication.getPrincipal()).getUserId());
+
+        return LoginResult.builder()
+                .userId(user.getUserId())
+                .accessToken(tokenDto.getAccessToken())
+                .refreshToken(tokenDto.getRefreshToken())
+                .grantType(tokenDto.getGrantType())
+                .atExpiresIn(tokenDto.getAtExpiresIn())
+                .rtExpiresIn(tokenDto.getRtExpiresIn())
+                .build();
     }
 
     private TokenDto processTokenLogin(Long userId) {
