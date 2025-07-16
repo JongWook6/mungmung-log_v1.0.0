@@ -1,4 +1,4 @@
-package com.grepp.teamnotfound.app.model.auth.payload;
+package com.grepp.teamnotfound.app.model.auth.dto;
 
 import lombok.Builder;
 import lombok.Getter;

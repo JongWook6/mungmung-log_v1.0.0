@@ -5,6 +5,7 @@ import com.grepp.teamnotfound.app.model.auth.token.dto.AccessTokenDto;
 import com.grepp.teamnotfound.app.model.user.entity.User;
 import com.grepp.teamnotfound.app.model.user.repository.UserRepository;
 import com.grepp.teamnotfound.infra.auth.token.code.TokenType;
+import com.grepp.teamnotfound.infra.error.exception.AuthException;
 import com.grepp.teamnotfound.infra.error.exception.BusinessException;
 import com.grepp.teamnotfound.infra.error.exception.code.UserErrorCode;
 import io.jsonwebtoken.*;
@@ -107,12 +108,9 @@ public class JwtProvider {
         Long userId = Long.parseLong(claims.getSubject());
 
         // UserService에서 갖고올 시, 순환참조 발생
-        User user = userRepository.findByUserId(userId);
-        if (user == null) {
-            throw new BusinessException(UserErrorCode.USER_NOT_FOUND);
-        }
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));
 
-        // findByUserId 중복 조회로 findAuthorities 메서드 삭제
         List<SimpleGrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority(user.getRole().name()));
 
