@@ -15,7 +15,9 @@ import com.grepp.teamnotfound.app.model.structured_data.WalkingService;
 import com.grepp.teamnotfound.app.model.structured_data.WeightService;
 import com.grepp.teamnotfound.app.model.structured_data.entity.Feeding;
 import com.grepp.teamnotfound.app.model.structured_data.entity.Walking;
+import com.grepp.teamnotfound.infra.error.exception.LifeRecordException;
 import com.grepp.teamnotfound.infra.error.exception.PetException;
+import com.grepp.teamnotfound.infra.error.exception.code.LifeRecordErrorCode;
 import com.grepp.teamnotfound.infra.error.exception.code.PetErrorCode;
 import java.time.LocalDate;
 import java.util.List;
@@ -69,36 +71,46 @@ public class LifeRecordService {
 
     // 생활기록 조회
     @Transactional(readOnly = true)
-    public LifeRecordData getLifeRecord(Long petId, LocalDate recordedAt){
-        String content = noteService.getNote(petId, recordedAt);
-        Integer sleepingTime = sleepingService.getSleeping(petId, recordedAt);
-        Double weight = weightService.getWeight(petId, recordedAt);
-        List<WalkingData> walkingList = walkingService.getWalkingList(petId, recordedAt);
-        List<FeedingData> feedingList = feedingService.getFeedingList(petId, recordedAt);
+    public LifeRecordData getLifeRecord(Long lifeRecordId){
+        LifeRecord lifeRecord = lifeRecordRepository.findByLifeRecordId(lifeRecordId)
+                .orElseThrow(() -> new LifeRecordException(LifeRecordErrorCode.LIFERECORD_NOT_FOUND));
 
-        LifeRecordData lifeRecord = new LifeRecordData();
-        lifeRecord.setPetId(petId);
-        lifeRecord.setRecordAt(recordedAt);
-        lifeRecord.setContent(content);
-        lifeRecord.setSleepTime(sleepingTime);
-        lifeRecord.setWeight(weight);
-        lifeRecord.setWalkingList(walkingList);
-        lifeRecord.setFeedingList(feedingList);
+        List<WalkingData> walkingList = lifeRecord.getWalkingList().stream()
+                .map(walking -> WalkingData.builder()
+                        .startTime(walking.getStartTime())
+                        .endTime(walking.getEndTime())
+                        .pace(walking.getPace())
+                        .build()).toList();
+        List<FeedingData> feedingList = lifeRecord.getFeedingList().stream()
+                .map(feeding -> FeedingData.builder()
+                        .mealtime(feeding.getMealTime())
+                        .amount(feeding.getAmount())
+                        .unit(feeding.getUnit())
+                        .build()).toList();
 
-        return lifeRecord;
+        return LifeRecordData.builder()
+                .lifeRecordId(lifeRecord.getLifeRecordId())
+                .petId(lifeRecord.getPet().getPetId())
+                .recordAt(lifeRecord.getRecordedAt())
+                .content(lifeRecord.getContent())
+                .weight(lifeRecord.getWeight())
+                .sleepTime(lifeRecord.getSleepingTime())
+                .walkingList(walkingList)
+                .feedingList(feedingList)
+                .build();
     }
 
     // 생활기록 수정
     @Transactional
     public void updateLifeRecord(Long petId, LifeRecordDto dto){
-        // 기존 데이터 삭제
-        deleteLifeRecord(petId, dto.getRecordAt());
-        // 생활 기록 수정
-        noteService.updateNote(dto.getNote());
-        sleepingService.updateSleeping(dto.getSleepTime());
-        weightService.updateWeight(dto.getWeight());
-        walkingService.updateWalkingList(dto.getWalkingList());
-        feedingService.updateFeedingList(dto.getFeedingList());
+//        // 기존 데이터 삭제
+//        deleteLifeRecord(petId, dto.getRecordAt());
+//        // 생활 기록 수정
+//        noteService.updateNote(dto.getNote());
+//        sleepingService.updateSleeping(dto.getSleepTime());
+//        weightService.updateWeight(dto.getWeight());
+//        walkingService.updateWalkingList(dto.getWalkingList());
+//        feedingService.updateFeedingList(dto.getFeedingList());
     }
 
     // 생활기록 삭제

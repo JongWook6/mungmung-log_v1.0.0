@@ -83,12 +83,11 @@ public class LifeRecordApiController {
     }
 
     // 생활기록 상세정보 조회
-    @GetMapping("/v1/pets/{petId}")
+    @GetMapping("/v2/detail/{lifeRecordId}")
     public ResponseEntity<Map<String, LifeRecordData>> getLifeRecordDetail(
-        @PathVariable Long petId,
-        @RequestParam LocalDate date
+        @PathVariable Long lifeRecordId
     ){
-        LifeRecordData lifeRecord = lifeRecordService.getLifeRecord(petId, date);
+        LifeRecordData lifeRecord = lifeRecordService.getLifeRecord(lifeRecordId);
 
         return ResponseEntity.ok(Map.of("data", lifeRecord));
     }
