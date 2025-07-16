@@ -1,6 +1,6 @@
 package com.grepp.teamnotfound.app.model.structured_data.dto;
 
-import com.grepp.teamnotfound.app.model.structured_data.FeedUnit;
+import com.grepp.teamnotfound.app.model.structured_data.code.FeedUnit;
 import com.grepp.teamnotfound.app.model.structured_data.entity.Feeding;
 import java.time.OffsetDateTime;
 import lombok.Builder;

@@ -4,7 +4,6 @@ import com.grepp.teamnotfound.app.controller.api.life_record.payload.LifeRecordL
 import com.grepp.teamnotfound.app.controller.api.life_record.payload.LifeRecordData;
 import com.grepp.teamnotfound.app.model.life_record.LifeRecordService;
 import com.grepp.teamnotfound.app.model.life_record.dto.LifeRecordDto;
-import com.grepp.teamnotfound.app.model.note.NoteService;
 import com.grepp.teamnotfound.app.model.pet.PetService;
 import io.swagger.v3.oas.annotations.Operation;
 import java.time.LocalDate;
@@ -33,7 +32,6 @@ public class LifeRecordApiController {
 
     private final PetService petService;
     private final LifeRecordService lifeRecordService;
-    private final NoteService noteService;
 
     @Operation(summary = "생활기록 리스트 조회")
     @GetMapping("/v1/users/{userId}")

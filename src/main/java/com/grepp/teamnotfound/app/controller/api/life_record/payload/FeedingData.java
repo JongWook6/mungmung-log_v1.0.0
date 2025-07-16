@@ -1,7 +1,7 @@
 package com.grepp.teamnotfound.app.controller.api.life_record.payload;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.grepp.teamnotfound.app.model.structured_data.FeedUnit;
+import com.grepp.teamnotfound.app.model.structured_data.code.FeedUnit;
 import java.time.OffsetDateTime;
 import lombok.Builder;
 import lombok.Getter;

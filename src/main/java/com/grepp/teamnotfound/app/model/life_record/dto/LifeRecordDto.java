@@ -1,11 +1,8 @@
 package com.grepp.teamnotfound.app.model.life_record.dto;
 
 import com.grepp.teamnotfound.app.controller.api.life_record.payload.LifeRecordData;
-import com.grepp.teamnotfound.app.model.note.dto.NoteDto;
 import com.grepp.teamnotfound.app.model.structured_data.dto.FeedingDto;
-import com.grepp.teamnotfound.app.model.structured_data.dto.SleepingDto;
 import com.grepp.teamnotfound.app.model.structured_data.dto.WalkingDto;
-import com.grepp.teamnotfound.app.model.structured_data.dto.WeightDto;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.Data;

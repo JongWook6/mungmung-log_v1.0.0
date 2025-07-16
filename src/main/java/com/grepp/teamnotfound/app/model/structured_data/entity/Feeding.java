@@ -1,7 +1,7 @@
 package com.grepp.teamnotfound.app.model.structured_data.entity;
 
 import com.grepp.teamnotfound.app.model.life_record.entity.LifeRecord;
-import com.grepp.teamnotfound.app.model.structured_data.FeedUnit;
+import com.grepp.teamnotfound.app.model.structured_data.code.FeedUnit;
 import com.grepp.teamnotfound.infra.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
