@@ -6,13 +6,10 @@ import com.grepp.teamnotfound.app.controller.api.life_record.payload.WalkingData
 import com.grepp.teamnotfound.app.model.life_record.dto.LifeRecordDto;
 import com.grepp.teamnotfound.app.model.life_record.entity.LifeRecord;
 import com.grepp.teamnotfound.app.model.life_record.repository.LifeRecordRepository;
-import com.grepp.teamnotfound.app.model.note.NoteService;
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.pet.repository.PetRepository;
 import com.grepp.teamnotfound.app.model.structured_data.FeedingService;
-import com.grepp.teamnotfound.app.model.structured_data.SleepingService;
 import com.grepp.teamnotfound.app.model.structured_data.WalkingService;
-import com.grepp.teamnotfound.app.model.structured_data.WeightService;
 import com.grepp.teamnotfound.app.model.structured_data.entity.Feeding;
 import com.grepp.teamnotfound.app.model.structured_data.entity.Walking;
 import com.grepp.teamnotfound.infra.error.exception.LifeRecordException;
@@ -20,6 +17,7 @@ import com.grepp.teamnotfound.infra.error.exception.PetException;
 import com.grepp.teamnotfound.infra.error.exception.code.LifeRecordErrorCode;
 import com.grepp.teamnotfound.infra.error.exception.code.PetErrorCode;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -30,9 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class LifeRecordService {
 
-    private final NoteService noteService;
-    private final WeightService weightService;
-    private final SleepingService sleepingService;
     private final WalkingService walkingService;
     private final FeedingService feedingService;
     private final LifeRecordRepository lifeRecordRepository;
@@ -109,15 +104,17 @@ public class LifeRecordService {
 
     // 생활기록 수정
     @Transactional
-    public void updateLifeRecord(Long petId, LifeRecordDto dto){
-//        // 기존 데이터 삭제
-//        deleteLifeRecord(petId, dto.getRecordAt());
-//        // 생활 기록 수정
-//        noteService.updateNote(dto.getNote());
-//        sleepingService.updateSleeping(dto.getSleepTime());
-//        weightService.updateWeight(dto.getWeight());
-//        walkingService.updateWalkingList(dto.getWalkingList());
-//        feedingService.updateFeedingList(dto.getFeedingList());
+    public void updateLifeRecord(Long lifeRecordId, LifeRecordDto dto){
+        LifeRecord lifeRecord = lifeRecordRepository.findByLifeRecordId(lifeRecordId)
+                .orElseThrow(() -> new LifeRecordException(LifeRecordErrorCode.LIFERECORD_NOT_FOUND));
+
+        lifeRecord.setContent(dto.getContent());
+        lifeRecord.setWeight(dto.getWeight());
+        lifeRecord.setSleepingTime(dto.getSleepTime());
+        lifeRecord.setUpdatedAt(OffsetDateTime.now());
+
+        walkingService.updateWalkingList(lifeRecord, dto.getWalkingList());
+        feedingService.updateFeedingList(lifeRecord, dto.getFeedingList());
     }
 
     // 생활기록 삭제

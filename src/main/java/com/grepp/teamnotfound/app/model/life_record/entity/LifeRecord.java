@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Where;
 
 
 @Entity
@@ -57,10 +58,12 @@ public class LifeRecord extends BaseEntity {
     @JoinColumn(name = "pet_id", nullable = false)
     private Pet pet;
 
-    @OneToMany(mappedBy = "lifeRecord", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "lifeRecord", cascade = CascadeType.ALL)
+    @Where(clause = "deleted_at IS NULL")
     private List<Walking> walkingList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "lifeRecord", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "lifeRecord", cascade = CascadeType.ALL)
+    @Where(clause = "deleted_at IS NULL")
     private List<Feeding> feedingList = new ArrayList<>();
 
     public void addWalking(Walking walking) {

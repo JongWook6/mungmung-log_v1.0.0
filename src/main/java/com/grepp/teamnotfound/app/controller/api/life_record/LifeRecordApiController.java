@@ -125,16 +125,17 @@ public class LifeRecordApiController {
     }
 
     // 생활기록 수정
-    @PutMapping
-    public ResponseEntity<Map<String, LifeRecordData>> modifyLifeRecord(
+    @PutMapping("/v2/{lifeRecordId}/update")
+    public ResponseEntity<String> modifyLifeRecord(
+            @PathVariable Long lifeRecordId,
             @RequestBody LifeRecordData data
     ){
-        LifeRecordDto dto = new LifeRecordDto();
-        dto = dto.toDto(data);
-        lifeRecordService.updateLifeRecord(data.getPetId(), dto);
+        LifeRecordDto dto = LifeRecordDto.toDto(data);
+        lifeRecordService.updateLifeRecord(lifeRecordId, dto);
 
-        return ResponseEntity.ok(Map.of("data", data));
+        return ResponseEntity.ok("수정 성공");
     }
+
     // 생활기록 삭제
     @DeleteMapping("/v1/pets/{petId}/delete")
     public ResponseEntity<String> deleteLifeRecord(

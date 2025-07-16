@@ -13,6 +13,7 @@ import lombok.Data;
 @Data
 public class LifeRecordDto {
 
+    private Long lifeRecordId;
     private Long petId;
     private LocalDate recordAt;
 
@@ -25,6 +26,7 @@ public class LifeRecordDto {
 
     public static LifeRecordDto toDto(LifeRecordData data) {
         LifeRecordDto dto = new LifeRecordDto();
+        dto.setLifeRecordId(data.getLifeRecordId());
         dto.setPetId(data.getPetId());
         dto.setRecordAt(data.getRecordAt());
         dto.setContent(data.getContent());
