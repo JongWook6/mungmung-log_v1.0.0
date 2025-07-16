@@ -73,7 +73,7 @@ class ScheduleServiceTest {
         ScheduleEditRequestDto request = ScheduleEditRequestDto.builder()
                 .petId(10000L).userId(10000L).scheduleId(10014L)
                 .date(LocalDate.now().plusDays(2))
-                .name("목욕하는 날 수정")
+                .name("목욕하는 날")
                 .cycleLink(true)
                 .cycle(ScheduleCycle.ONE_MONTH)
                 .cycleEnd(LocalDate.now().plusMonths(5))
@@ -91,6 +91,34 @@ class ScheduleServiceTest {
                 .cycleLink(true)
                 .cycle(ScheduleCycle.WEEK)
                 .cycleEnd(LocalDate.now().plusMonths(5))
+                .build();
+        scheduleService.editSchedule(request);
+    }
+
+    // 반복 없는 일정 반복 있게 수정
+    @Test
+    void editCycleSchedule3() {
+        ScheduleEditRequestDto request = ScheduleEditRequestDto.builder()
+                .petId(10000L).userId(10000L).scheduleId(10013L)
+                .date(LocalDate.now().plusDays(2))
+                .name("string aaa")
+                .cycleLink(true)
+                .cycle(ScheduleCycle.WEEK)
+                .cycleEnd(LocalDate.now().plusMonths(1))
+                .build();
+        scheduleService.editSchedule(request);
+    }
+
+    // 반복 있는 일정 반복 없게 수정
+    @Test
+    void editCycleSchedule4() {
+        ScheduleEditRequestDto request = ScheduleEditRequestDto.builder()
+                .petId(10000L).userId(10000L).scheduleId(10013L)
+                .date(LocalDate.now().plusDays(2))
+                .name("string aaa")
+                .cycleLink(true)
+                .cycle(ScheduleCycle.NONE)
+                .cycleEnd(LocalDate.now().plusDays(2))
                 .build();
         scheduleService.editSchedule(request);
     }
