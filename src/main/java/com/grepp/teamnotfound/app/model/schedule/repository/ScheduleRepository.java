@@ -15,16 +15,5 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
 
     List<Schedule> findByNameAndCycleAndCycleEnd(String name, ScheduleCycle cycle, LocalDate cycleEnd);
 
-    @Query("""
-           select s
-           from   Schedule s
-           join   fetch s.pet p
-           where  s.user         = :user
-             and  s.scheduleDate between :start and :end
-             and  s.deletedAt    is null
-           """)
-    List<Schedule> findMonthListByUser(
-            @Param("user")  User      user,
-            @Param("start") LocalDate start,
-            @Param("end")   LocalDate end);
+    List<Schedule> findByUserAndScheduleDateBetweenAndDeletedAtNull(User user, LocalDate start, LocalDate end);
 }

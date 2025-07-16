@@ -37,6 +37,7 @@ public class ScheduleService {
     private final UserRepository userRepository;
 
     // 한달치 일정 조회
+    @Transactional
     public List<ScheduleDto> getCalendar(Long userId, LocalDate date) {
         // user 검증
         User user = userRepository.findById(userId).orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
@@ -45,7 +46,7 @@ public class ScheduleService {
         LocalDate start = ym.atDay(1);
         LocalDate end = ym.atEndOfMonth();
 
-        List<Schedule> schedules = scheduleRepository.findMonthListByUser(user, start, end);
+        List<Schedule> schedules = scheduleRepository.findByUserAndScheduleDateBetweenAndDeletedAtNull(user, start, end);
         List<ScheduleDto> scheduleDtos = new ArrayList<>();
         schedules.forEach(schedule ->
                 scheduleDtos.add(ScheduleDto.builder()
