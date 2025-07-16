@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -94,19 +95,22 @@ public class LifeRecordApiController {
 
 
     // 날짜, 애완동물 기준으로 기존 생활기록 데이터 있는지 체크
-    @GetMapping("/v1/pets/{petId}/check")
-    public ResponseEntity<Map<String, LifeRecordData>> checkLifeRecord(
+    @GetMapping("/v2/pets/{petId}/check")
+    public ResponseEntity<?> checkLifeRecord(
             @PathVariable Long petId,
             @RequestParam LocalDate date
     ){
         // 기존 데이터가 있으면 기존 데이터 반환
-        if(noteService.existsLifeRecord(petId, date)){
-            LifeRecordData lifeRecord = lifeRecordService.getLifeRecord(petId, date);
+        Optional<Long> lifeRecordIdOptional = lifeRecordService.findLifeRecordId(petId, date);
+
+        if (lifeRecordIdOptional.isPresent()) {
+            Long lifeRecordId = lifeRecordIdOptional.get();
+            LifeRecordData lifeRecord = lifeRecordService.getLifeRecord(lifeRecordId);
 
             return ResponseEntity.ok(Map.of("data", lifeRecord));
         }
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("데이터 등록 가능");
     }
 
     // 생활기록 등록

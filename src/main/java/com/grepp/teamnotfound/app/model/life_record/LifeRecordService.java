@@ -21,6 +21,7 @@ import com.grepp.teamnotfound.infra.error.exception.code.LifeRecordErrorCode;
 import com.grepp.teamnotfound.infra.error.exception.code.PetErrorCode;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -98,6 +99,12 @@ public class LifeRecordService {
                 .walkingList(walkingList)
                 .feedingList(feedingList)
                 .build();
+    }
+
+    // 생활기록 존재하는지 체크
+    @Transactional(readOnly = true)
+    public Optional<Long> findLifeRecordId(Long petId, LocalDate date) {
+        return lifeRecordRepository.findLifeRecordId(petId, date);
     }
 
     // 생활기록 수정
