@@ -5,30 +5,18 @@ import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleListRequ
 import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleListResponse;
 import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleRequest;
 import com.grepp.teamnotfound.app.controller.api.article.payload.LikeResponse;
-import com.grepp.teamnotfound.app.controller.api.article.payload.PageInfo;
 import com.grepp.teamnotfound.app.model.auth.domain.Principal;
 import com.grepp.teamnotfound.app.model.board.ArticleService;
-import com.grepp.teamnotfound.app.model.board.dto.ArticleListDto;
-import com.grepp.teamnotfound.app.model.user.entity.UserDetailsImpl;
-import com.grepp.teamnotfound.infra.error.exception.AuthException;
-import com.grepp.teamnotfound.infra.error.exception.BusinessException;
-import com.grepp.teamnotfound.infra.error.exception.code.AuthErrorCode;
-import com.grepp.teamnotfound.infra.error.exception.code.BoardErrorCode;
 import com.grepp.teamnotfound.infra.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -49,89 +37,11 @@ public class ArticleApiController {
 
     @GetMapping("/v1")
     @Operation(summary = "특정 게시판의 게시글 리스트 조회")
-    public ResponseEntity<ArticleListResponse> getAllArticles(
-        @ModelAttribute ArticleListRequest request,
-        BindingResult bindingResult
-    ) {
-        // TODO BindingResult 로 세밀한 예외처리로 디벨롭
-        if (request.getPage() < 1) {
-            throw new BusinessException(BoardErrorCode.BOARD_INVALID_PAGE);
-        }
-
-        ArticleListResponse response = new ArticleListResponse();
-
-        if (request.getPage() == 1) {
-            for (int i = 1; i <= 10; i++) {
-                ArticleListDto dto = ArticleListDto.builder()
-                    .articleId(Integer.toUnsignedLong(i))
-                    .title("마음이의 산책 일상 " + i)
-                    .nickname("사용자 " + i)
-                    .likes(i)
-                    .replies(i)
-                    .views(i)
-                    .date(OffsetDateTime.now())
-                    .build();
-
-                response.getData().add(dto);
-            }
-        } else {
-            for (int i = 1; i <= 9; i++) {
-                ArticleListDto dto = ArticleListDto.builder()
-                    .articleId(Integer.toUnsignedLong(i))
-                    .title("마음이의 산책 일상 " + i)
-                    .nickname("사용자 " + i)
-                    .likes(i)
-                    .replies(i)
-                    .views(i)
-                    .date(OffsetDateTime.now())
-                    .build();
-
-                response.getData().add(dto);
-            }
-        }
-
-        PageInfo pageInfo = PageInfo.builder()
-            .page(request.getPage())
-            .size(request.getSize())
-            .totalPages(5)
-            .totalElements(48)
-            .hasNext(true)
-            .hasPrevious(false)
-            .build();
-
-        response.setPageInfo(pageInfo);
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/v2")
-    @Operation(summary = "특정 게시판의 게시글 리스트 조회")
-    public ResponseEntity<ArticleListResponse> getAllArticlesV2(
+    public ResponseEntity<?> getAllArticles(
         @ModelAttribute @Valid ArticleListRequest request
     ) {
-        // NOTE 여기서 예외처리를 어떻게 하는 게 좋을까? -> GlobalExceptionHandler 에서 일괄 처리
-        PageRequest pageable = PageRequest.of(
-            request.getPage() - 1,
-            request.getSize(),
-            request.getSortType().toSort()
-        );
-
-        Page<ArticleListDto> page = articleService.searchArticles(
-            request.getBoardType(),
-            request.getSearchType(),
-            request.getKeyword(),
-            pageable
-        );
-
-        PageInfo pageInfo = PageInfo.builder()
-            .page(page.getNumber() + 1)
-            .size(page.getSize())
-            .totalPages(page.getTotalPages())
-            .totalElements((int) page.getTotalElements())
-            .hasNext(page.hasNext())
-            .hasPrevious(page.hasPrevious())
-            .build();
-
-        return ResponseEntity.ok(new ArticleListResponse(page.getContent(), pageInfo));
+        ArticleListResponse response = articleService.getArticlesByQuerydsl(request);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @PostMapping(value = "/v1", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -143,7 +53,6 @@ public class ArticleApiController {
         @AuthenticationPrincipal Principal principal
     ) {
         Long articleId = articleService.writeArticle(request, images, principal.getUserId());
-
         return ResponseEntity.ok(ApiResponse.success(Map.of("articleId", articleId)));
     }
 
@@ -159,7 +68,6 @@ public class ArticleApiController {
         }
 
         ArticleDetailResponse response = articleService.findByArticleIdAndUserId(articleId, userId);
-
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
@@ -173,7 +81,6 @@ public class ArticleApiController {
         @AuthenticationPrincipal Principal principal
     ) {
         articleService.updateArticle(articleId, request, images, principal.getUserId());
-
         return ResponseEntity.ok(ApiResponse.success(Map.of("result", "게시글이 정상적으로 수정되었습니다.")));
     }
 
@@ -185,7 +92,6 @@ public class ArticleApiController {
         @AuthenticationPrincipal Principal principal
     ) {
         articleService.deleteArticle(articleId, principal.getUserId());
-
         return ResponseEntity.ok(ApiResponse.success(Map.of("msg", "게시글이 정상적으로 삭제되었습니다.")));
     }
 
@@ -197,7 +103,6 @@ public class ArticleApiController {
         @AuthenticationPrincipal Principal principal
     ) {
         LikeResponse response = articleService.likeArticle(articleId, principal.getUserId());
-
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
@@ -209,7 +114,6 @@ public class ArticleApiController {
         @AuthenticationPrincipal Principal principal
     ) {
         LikeResponse response = articleService.unlikeArticle(articleId, principal.getUserId());
-
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

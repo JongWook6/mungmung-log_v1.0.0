@@ -1,11 +1,12 @@
 package com.grepp.teamnotfound.app.model.board;
 
 import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleDetailResponse;
+import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleListRequest;
+import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleListResponse;
 import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleRequest;
 import com.grepp.teamnotfound.app.controller.api.article.payload.LikeResponse;
-import com.grepp.teamnotfound.app.model.auth.domain.Principal;
-import com.grepp.teamnotfound.app.model.board.code.BoardType;
-import com.grepp.teamnotfound.app.model.board.code.SearchType;
+import com.grepp.teamnotfound.app.controller.api.article.payload.PageInfo;
+import com.grepp.teamnotfound.app.model.board.dto.ArticleImgDto;
 import com.grepp.teamnotfound.app.model.board.dto.ArticleListDto;
 import com.grepp.teamnotfound.app.model.board.entity.Article;
 import com.grepp.teamnotfound.app.model.board.entity.ArticleImg;
@@ -16,6 +17,7 @@ import com.grepp.teamnotfound.app.model.board.repository.ArticleLikeRepository;
 import com.grepp.teamnotfound.app.model.board.repository.ArticleRepository;
 import com.grepp.teamnotfound.app.model.board.repository.BoardRepository;
 import com.grepp.teamnotfound.app.model.reply.repository.ReplyRepository;
+import com.grepp.teamnotfound.app.model.user.UserService;
 import com.grepp.teamnotfound.app.model.user.entity.User;
 import com.grepp.teamnotfound.app.model.user.repository.UserRepository;
 import com.grepp.teamnotfound.infra.code.ImgType;
@@ -35,6 +37,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -52,20 +55,57 @@ public class ArticleService {
     private final ArticleImgRepository articleImgRepository;
     private final ArticleLikeRepository articleLikeRepository;
     private final ReplyRepository replyRepository;
+    private final UserService userService;
 
-    public Page<ArticleListDto> findPaged(PageRequest pageable) {
-//        List articleRepository.findPaged(pageable);
-        return null;
+    @Transactional(readOnly = true)
+    public ArticleListResponse getArticlesByJPA(ArticleListRequest request) {
+
+        Pageable pageable = PageRequest.of(request.getPage() - 1, request.getSize(),
+            request.getSortType().toSort());
+        Page<Article> articlePage = articleRepository.findByDeletedAtIsNullAndReportedAtIsNull(pageable);
+
+        List<ArticleListDto> articleList = articlePage.stream()
+            .map(article -> {
+                String profileImgPath = userService.getProfileImgPath(
+                    article.getUser().getUserId());
+                Optional<ArticleImg> imgOptional = article.getArticleImgs().stream()
+                    .filter(articleImg -> articleImg.getType().equals(ImgType.THUMBNAIL))
+                    .findFirst();
+
+                return ArticleListDto.builder()
+                    .articleId(article.getArticleId())
+                    .nickname(article.getUser().getNickname())
+                    .profileImgPath(profileImgPath)
+                    .createdAt(article.getCreatedAt())
+                    .updatedAt(article.getUpdatedAt())
+                    .title(article.getTitle())
+                    .content(article.getContent())
+                    .likes(getLikeCount(article.getArticleId()))
+                    .replies(getReplyCount(article.getArticleId()))
+                    .views(article.getViews())
+                    .thumbnailImgPath(imgOptional.map(
+                            articleImg -> articleImg.getSavePath() + articleImg.getRenamedName())
+                        .orElse(null))
+                    .build();
+            })
+            .toList();
+
+        return ArticleListResponse.builder()
+            .articleList(articleList)
+            .pageInfo(PageInfo.fromPage(articlePage))
+            .build();
     }
 
-    public Page<ArticleListDto> searchArticles(BoardType boardType, SearchType searchType,
-        String keyword, PageRequest pageable) {
+    @Transactional
+    public ArticleListResponse getArticlesByQuerydsl(ArticleListRequest request) {
 
-        if (keyword == null || searchType == null) {
-            return articleRepository.findByBoard(boardType, pageable);
-        }
+        Page<ArticleListDto> articleListPage = articleRepository.findArticleListWithMeta(
+            request.getPage() - 1, request.getSize());
 
-        return null;
+        return ArticleListResponse.builder()
+            .articleList(articleListPage.toList())
+            .pageInfo(PageInfo.fromPage(articleListPage))
+            .build();
     }
 
     @Transactional
@@ -250,7 +290,7 @@ public class ArticleService {
         articleRepository.findById(articleId)
             .orElseThrow(() -> new BoardException(BoardErrorCode.ARTICLE_NOT_FOUND));
 
-        return replyRepository.countByArticle_ArticleId(articleId);
+        return replyRepository.countByArticle_ArticleIdAndDeletedAtIsNullAndReportedAtIsNull(articleId);
     }
 
     @Transactional(readOnly = true)
@@ -258,6 +298,6 @@ public class ArticleService {
         articleRepository.findById(articleId)
             .orElseThrow(() -> new BoardException(BoardErrorCode.ARTICLE_NOT_FOUND));
 
-        return articleLikeRepository.countByArticle_ArticleId(articleId);
+        return articleRepository.countByArticleIdAndDeletedAtIsNullAndReportedAtIsNull(articleId);
     }
 }

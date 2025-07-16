@@ -1,5 +1,6 @@
 package com.grepp.teamnotfound.app.model.reply;
 
+import com.grepp.teamnotfound.app.controller.api.article.payload.PageInfo;
 import com.grepp.teamnotfound.app.controller.api.reply.payload.ReplyDetailResponse;
 import com.grepp.teamnotfound.app.controller.api.reply.payload.ReplyListResponse;
 import com.grepp.teamnotfound.app.controller.api.reply.payload.ReplyRequest;
@@ -7,6 +8,7 @@ import com.grepp.teamnotfound.app.model.board.entity.Article;
 import com.grepp.teamnotfound.app.model.board.repository.ArticleRepository;
 import com.grepp.teamnotfound.app.model.reply.entity.Reply;
 import com.grepp.teamnotfound.app.model.reply.repository.ReplyRepository;
+import com.grepp.teamnotfound.app.model.user.UserService;
 import com.grepp.teamnotfound.app.model.user.entity.User;
 import com.grepp.teamnotfound.app.model.user.entity.UserImg;
 import com.grepp.teamnotfound.app.model.user.repository.UserImgRepository;
@@ -31,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ReplyService {
 
+    private final UserService userService;
     private final UserRepository userRepository;
     private final ArticleRepository articleRepository;
     private final UserImgRepository userImgRepository;
@@ -42,7 +45,8 @@ public class ReplyService {
             .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));
         Article article = articleRepository.findById(articleId)
             .orElseThrow(() -> new BoardException(BoardErrorCode.ARTICLE_NOT_FOUND));
-        String profileImgPath = getProfileImgPath(userId);
+
+        String profileImgPath = userService.getProfileImgPath(userId);
 
         Reply reply = Reply.builder()
             .article(article)
@@ -79,7 +83,7 @@ public class ReplyService {
         reply.setUpdatedAt(OffsetDateTime.now());
         Reply savedReply = replyRepository.save(reply);
 
-        String profileImgPath = getProfileImgPath(userId);
+        String profileImgPath = userService.getProfileImgPath(userId);
 
         return ReplyDetailResponse
             .builder()
@@ -110,25 +114,15 @@ public class ReplyService {
         replyRepository.save(reply);
     }
 
-    private String getProfileImgPath(Long userId) {
-        String profileImgPath = null;
-        Optional<UserImg> optionalUserImg = userImgRepository.findByUser_UserIdAndDeletedAtIsNull(userId);
-        if (optionalUserImg.isPresent()) {
-            UserImg userImg = optionalUserImg.get();
-            profileImgPath = userImg.getSavePath() + userImg.getRenamedName();
-        }
-        return profileImgPath;
-    }
-
     @Transactional(readOnly = true)
     public ReplyListResponse getReplies(Long articleId, int page, int size) {
 
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Direction.DESC, "createdAt"));
         Page<Reply> replyPage = replyRepository.findByArticle_ArticleIdAndDeletedAtIsNullAndReportedAtIsNull(articleId, pageable);
 
-        List<ReplyDetailResponse> data = replyPage.stream()
+        List<ReplyDetailResponse> replyList = replyPage.stream()
             .map(reply -> {
-                String profileImgPath = getProfileImgPath(reply.getUser().getUserId());
+                String profileImgPath = userService.getProfileImgPath(reply.getUser().getUserId());
                 return ReplyDetailResponse.builder()
                     .articleId(articleId)
                     .replyId(reply.getReplyId())
@@ -142,12 +136,8 @@ public class ReplyService {
             .toList();
 
         return ReplyListResponse.builder()
-            .data(data)
-            .currentPage(replyPage.getNumber() + 1)
-            .totalPage(replyPage.getTotalPages())
-            .totalElements(replyPage.getTotalElements())
-            .isFirst(replyPage.isFirst())
-            .isLast(replyPage.isLast())
+            .replyList(replyList)
+            .pageInfo(PageInfo.fromPage(replyPage))
             .build();
     }
 }

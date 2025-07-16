@@ -16,7 +16,8 @@ public interface ReplyRepository extends JpaRepository<Reply, Long> {
     @Query("UPDATE Reply r SET r.deletedAt = :deletedAt WHERE r.article.articleId = :articleId AND r.deletedAt IS NULL")
     void softDeleteByArticleId(@Param("articleId") Long articleId, @Param("deletedAt") OffsetDateTime deletedAt);
 
-    Integer countByArticle_ArticleId(Long articleId);
+    Integer countByArticle_ArticleIdAndDeletedAtIsNullAndReportedAtIsNull(Long articleId);
 
     Page<Reply> findByArticle_ArticleIdAndDeletedAtIsNullAndReportedAtIsNull(Long articleId, Pageable pageable);
+
 }

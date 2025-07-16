@@ -109,4 +109,14 @@ public class UserService {
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
+
+    public String getProfileImgPath(Long userId) {
+        String profileImgPath = null;
+        Optional<UserImg> optionalUserImg = userImgRepository.findByUser_UserIdAndDeletedAtIsNull(userId);
+        if (optionalUserImg.isPresent()) {
+            UserImg userImg = optionalUserImg.get();
+            profileImgPath = userImg.getSavePath() + userImg.getRenamedName();
+        }
+        return profileImgPath;
+    }
 }
