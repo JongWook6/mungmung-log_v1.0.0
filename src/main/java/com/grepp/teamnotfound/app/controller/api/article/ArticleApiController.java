@@ -230,4 +230,6 @@ public class ArticleApiController {
         Integer likeCount = articleService.getLikeCount(articleId);
         return ResponseEntity.ok(ApiResponse.success(Map.of("likes", likeCount)));
     }
+
+    // TODO 게시글 신고 기능
 }
