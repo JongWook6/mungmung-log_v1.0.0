@@ -2,7 +2,6 @@ package com.grepp.teamnotfound.app.model.pet.repository;
 
 
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
-import com.grepp.teamnotfound.app.model.user.entity.User;
 import feign.Param;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -12,8 +11,8 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface PetRepository extends JpaRepository<Pet, Long> {
 
-    Pet findFirstByUser(User user);
-    List<Pet> findAllByUser(User user);
+    @Query("SELECT p FROM Pet p WHERE p.user.userId = :userId AND p.deletedAt IS NULL")
+    List<Pet> findAllByUser(Long userId);
 
     @Modifying(clearAutomatically=true, flushAutomatically=true)
     @Query("UPDATE Pet p SET p.deletedAt = :deletedAt WHERE p.petId = :petId")
