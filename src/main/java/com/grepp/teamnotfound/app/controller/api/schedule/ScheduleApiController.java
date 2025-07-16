@@ -30,12 +30,12 @@ public class ScheduleApiController {
     // 일정 조회 시 한달치의 일정 넘기기
     @GetMapping("/{userId}/calendar")
     public ResponseEntity<?> getPetCalendar(
-            @RequestParam String userEmail,
+            @RequestParam Long userId,
             @RequestParam LocalDate date
             ){
         //todo 요청한 유저가 맞는지 검증로직
 
-        List<ScheduleDto> schedules = scheduleService.getCalendar(userEmail, date);
+        List<ScheduleDto> schedules = scheduleService.getCalendar(userId, date);
 
         return ResponseEntity.ok(Map.of("data", schedules));
     }
