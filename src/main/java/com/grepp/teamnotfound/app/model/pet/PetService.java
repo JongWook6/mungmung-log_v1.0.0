@@ -58,7 +58,7 @@ public class PetService {
 
     public List<ProfilePetResponse> findByUserId(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(NotFoundException::new);
-        List<Pet> pets = petRepository.findAllByUser(user);
+        List<Pet> pets = petRepository.findAllByUser(user.getUserId());
 
         return pets.stream()
             .map(pet -> {
