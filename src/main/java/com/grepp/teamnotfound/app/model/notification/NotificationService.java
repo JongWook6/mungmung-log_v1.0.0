@@ -65,9 +65,15 @@ public class NotificationService {
 
                 NotiManagement created = new NotiManagement();
                 created.setUser(user);
+    @Transactional
+    public NotiUserSettingDto changeNotiSetting(Long userId, NotiTarget target) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
 
                 return notiManagementRepository.save(created);
             });
+        NotiManagement noti = notiManagementRepository.findByUser(user)
+            .orElseThrow(() -> new BusinessException(NotificationErrorCode.NOTIFICATION_MANAGEMENT_NOT_FOUND));
 
         if (target.equals(NotiTarget.SERVICE)) {
             noti.setIsNotiService(!noti.getIsNotiService());
@@ -82,5 +88,9 @@ public class NotificationService {
         noti.setUpdatedAt(OffsetDateTime.now());
 
         notiManagementRepository.save(noti);
+
+        NotiUserSettingDto dto = modelMapper.map(noti, NotiUserSettingDto.class);
+        return dto;
     }
+
 }

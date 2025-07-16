@@ -32,8 +32,7 @@ public class NotificationApiController {
         @PathVariable("userId") Long userId,
         @RequestParam("target") NotiTarget target
     ) {
-        notificationService.changeNotiSetting(userId, target);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(notificationService.changeNotiSetting(userId, target));
     }
 //
 //    @PatchMapping("/v1/{notiId}/read")
