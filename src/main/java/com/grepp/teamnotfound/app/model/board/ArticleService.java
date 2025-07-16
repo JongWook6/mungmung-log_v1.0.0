@@ -95,6 +95,7 @@ public class ArticleService {
     @Transactional
     public ArticleDetailResponse findByArticleIdAndUserId(Long articleId, Long userId) {
         // 로그인한 회원일 경우 DB 와 정합성 검증
+        // TODO 만약 게시판에서 최종 수정일자를 보여주고 싶다면 updatedAt 을 가져와야 함
         if (userId != null) {
             userRepository.findById(userId)
                 .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));

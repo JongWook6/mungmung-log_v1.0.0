@@ -2,6 +2,9 @@ package com.grepp.teamnotfound.app.model.reply.repository;
 
 import com.grepp.teamnotfound.app.model.reply.entity.Reply;
 import java.time.OffsetDateTime;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -14,4 +17,6 @@ public interface ReplyRepository extends JpaRepository<Reply, Long> {
     void softDeleteByArticleId(@Param("articleId") Long articleId, @Param("deletedAt") OffsetDateTime deletedAt);
 
     Integer countByArticle_ArticleId(Long articleId);
+
+    Page<Reply> findByArticle_ArticleIdAndDeletedAtIsNullAndReportedAtIsNull(Long articleId, Pageable pageable);
 }

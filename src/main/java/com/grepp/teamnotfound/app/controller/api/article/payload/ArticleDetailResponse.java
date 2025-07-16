@@ -16,7 +16,7 @@ public class ArticleDetailResponse {
     private Long articleId;
     private String nickname;
     private String profileImgPath;
-    private OffsetDateTime date;
+    private OffsetDateTime dateTime;
     private String title;
     private String content;
     private Integer replies;
@@ -32,7 +32,7 @@ public class ArticleDetailResponse {
         Long articleId,
         String nickname,
         String profileImgPath,
-        OffsetDateTime date,
+        OffsetDateTime dateTime,
         String title,
         String content,
         Integer replies,
@@ -46,7 +46,7 @@ public class ArticleDetailResponse {
         this.articleId = articleId;
         this.nickname = nickname;
         this.profileImgPath = profileImgPath;
-        this.date = date;
+        this.dateTime = dateTime;
         this.title = title;
         this.content = content;
         this.replies = replies;
