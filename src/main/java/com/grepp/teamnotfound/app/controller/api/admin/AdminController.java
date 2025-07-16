@@ -4,6 +4,7 @@ import com.grepp.teamnotfound.app.controller.api.admin.payload.UserCountResponse
 import com.grepp.teamnotfound.app.controller.api.admin.payload.UsersListRequest;
 import com.grepp.teamnotfound.app.controller.api.admin.payload.UsersListResponse;
 import com.grepp.teamnotfound.app.model.user.AdminService;
+import com.grepp.teamnotfound.app.model.user.dto.TotalUsersCount;
 import com.grepp.teamnotfound.infra.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @RestController
@@ -31,7 +33,11 @@ public class AdminController {
     @Operation(summary = "전체 가입자 수 조회")
     @GetMapping("v1/stats/users")
     public ResponseEntity<ApiResponse<UserCountResponse>> users(){
-        UserCountResponse response = adminService.getTotalUsersCount();
+        TotalUsersCount totalUsersCount = adminService.getTotalUsersCount();
+        UserCountResponse response = UserCountResponse.builder()
+                .date(OffsetDateTime.now())
+                .total(totalUsersCount.getTotal())
+                .build();
         return ResponseEntity.ok((ApiResponse.success(response)));
     }
 

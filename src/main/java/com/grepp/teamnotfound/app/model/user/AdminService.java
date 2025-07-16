@@ -3,6 +3,7 @@ package com.grepp.teamnotfound.app.model.user;
 import com.grepp.teamnotfound.app.controller.api.admin.payload.UserCountResponse;
 import com.grepp.teamnotfound.app.controller.api.admin.payload.UsersListRequest;
 import com.grepp.teamnotfound.app.controller.api.admin.payload.UsersListResponse;
+import com.grepp.teamnotfound.app.model.user.dto.TotalUsersCount;
 import com.grepp.teamnotfound.app.model.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,9 +21,9 @@ public class AdminService {
     private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
-    public UserCountResponse getTotalUsersCount() {
+    public TotalUsersCount getTotalUsersCount() {
         long totalUsers = userRepository.count();
-        return UserCountResponse.builder()
+        return TotalUsersCount.builder()
                 .date(OffsetDateTime.now())
                 .total(totalUsers)
                 .build();

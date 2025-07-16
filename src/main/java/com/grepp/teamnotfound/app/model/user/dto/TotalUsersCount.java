@@ -1,14 +1,13 @@
-package com.grepp.teamnotfound.app.controller.api.admin.payload;
+package com.grepp.teamnotfound.app.model.user.dto;
 
 import lombok.Builder;
-import lombok.Data;
 import lombok.Getter;
 
 import java.time.OffsetDateTime;
 
 @Getter
 @Builder
-public class UserCountResponse {
+public class TotalUsersCount {
 
     private OffsetDateTime date;
     private long total;
