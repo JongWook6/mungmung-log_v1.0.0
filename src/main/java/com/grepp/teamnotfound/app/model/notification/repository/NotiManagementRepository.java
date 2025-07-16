@@ -7,4 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface NotiManagementRepository extends JpaRepository<NotiManagement, Long> {
 
+    Optional<NotiManagement> findByUser(User user);
 }

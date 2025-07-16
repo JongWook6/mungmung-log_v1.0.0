@@ -38,4 +38,33 @@ public class NotificationService {
         notiManagementRepository.save(noti);
     }
 
+    @Transactional
+    public void changeNotiSetting(Long userId, NotiTarget target) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+
+        NotiManagement noti = notiManagementRepository.findByUser(user)
+            .orElseGet(() -> {
+                log.warn("회원가입 당시 NotiManagement 미생성 오류 지금 생성 작업 진행 userId: {}", userId);
+
+                NotiManagement created = new NotiManagement();
+                created.setUser(user);
+
+                return notiManagementRepository.save(created);
+            });
+
+        if (target.equals(NotiTarget.SERVICE)) {
+            noti.setIsNotiService(!noti.getIsNotiService());
+        } else if (target.equals(NotiTarget.SCHEDULE)) {
+            noti.setIsNotiSchedule(!noti.getIsNotiSchedule());
+        } else {
+            Boolean allNotiState = noti.getIsNotiAll();
+            noti.setIsNotiService(!allNotiState);
+            noti.setIsNotiSchedule(!allNotiState);
+            noti.setIsNotiAll(!allNotiState);
+        }
+        noti.setUpdatedAt(OffsetDateTime.now());
+
+        notiManagementRepository.save(noti);
+    }
 }
