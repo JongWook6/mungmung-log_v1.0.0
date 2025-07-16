@@ -16,7 +16,7 @@ public interface WalkingRepository extends JpaRepository<Walking, Long> {
     List<Walking> findWalkingList(Long petId, LocalDate recordedAt);
 
     @Modifying(clearAutomatically=true, flushAutomatically=true)
-    @Query("UPDATE Walking w SET w.deletedAt = CURRENT_TIMESTAMP WHERE w.pet.petId = :petId AND w.recordedAt = :recordedAt AND w.deletedAt IS NULL")
-    void delete(Long petId, LocalDate recordedAt);
+    @Query("UPDATE Walking w SET w.deletedAt = CURRENT_TIMESTAMP WHERE w.lifeRecord.lifeRecordId = :lifeRecordId AND w.deletedAt IS NULL")
+    void delete(@Param("lifeRecordId") Long lifeRecordId);
 
 }

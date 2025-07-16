@@ -82,8 +82,8 @@ public class WalkingService {
 
     // 산책 정보 삭제
     @Transactional
-    public void deleteWalkingList(Long petId, LocalDate recordedAt){
-        walkingRepository.delete(petId, recordedAt);
+    public void deleteWalkingList(Long lifeRecordId){
+        walkingRepository.delete(lifeRecordId);
     }
 
 }

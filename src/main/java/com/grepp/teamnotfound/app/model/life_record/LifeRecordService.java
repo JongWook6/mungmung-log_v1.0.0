@@ -119,12 +119,13 @@ public class LifeRecordService {
 
     // 생활기록 삭제
     @Transactional
-    public void deleteLifeRecord(Long petId, LocalDate date){
-        noteService.deleteNote(petId, date);
-        sleepingService.deleteSleeping(petId, date);
-        weightService.deleteWeight(petId, date);
-        walkingService.deleteWalkingList(petId, date);
-        feedingService.deleteFeedingList(petId, date);
+    public void deleteLifeRecord(Long lifeRecordId){
+        LifeRecord lifeRecord = lifeRecordRepository.findByLifeRecordId(lifeRecordId)
+                .orElseThrow(() -> new LifeRecordException(LifeRecordErrorCode.LIFERECORD_NOT_FOUND));
+
+        lifeRecord.setDeletedAt(OffsetDateTime.now());
+        walkingService.deleteWalkingList(lifeRecordId);
+        feedingService.deleteFeedingList(lifeRecordId);
     }
 
 }

@@ -82,8 +82,8 @@ public class FeedingService {
 
     // 식사 정보 삭제
     @Transactional
-    public void deleteFeedingList(Long petId, LocalDate recordedAt){
-        feedingRepository.delete(petId, recordedAt);
+    public void deleteFeedingList(Long lifeRecordId){
+        feedingRepository.delete(lifeRecordId);
     }
 
 }

@@ -137,12 +137,11 @@ public class LifeRecordApiController {
     }
 
     // 생활기록 삭제
-    @DeleteMapping("/v1/pets/{petId}/delete")
+    @DeleteMapping("/v2/{lifeRecordId}/delete")
     public ResponseEntity<String> deleteLifeRecord(
-            @PathVariable Long petId,
-            @RequestParam LocalDate date
+            @PathVariable Long lifeRecordId
     ){
-        lifeRecordService.deleteLifeRecord(petId, date);
+        lifeRecordService.deleteLifeRecord(lifeRecordId);
 
         return ResponseEntity.ok("삭제 성공");
     }
