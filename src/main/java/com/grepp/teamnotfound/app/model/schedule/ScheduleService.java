@@ -1,7 +1,8 @@
 package com.grepp.teamnotfound.app.model.schedule;
 
-import com.grepp.teamnotfound.app.controller.api.schedule.payload.ScheduleCreateRequest;
-import com.grepp.teamnotfound.app.controller.api.schedule.payload.ScheduleEditRequest;
+import com.grepp.teamnotfound.app.model.notification.NotificationService;
+import com.grepp.teamnotfound.app.model.notification.code.NotiType;
+import com.grepp.teamnotfound.app.model.notification.dto.NotiScheduleCreateDto;
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.pet.repository.PetRepository;
 import com.grepp.teamnotfound.app.model.schedule.code.ScheduleCycle;
@@ -18,16 +19,14 @@ import com.grepp.teamnotfound.infra.error.exception.UserException;
 import com.grepp.teamnotfound.infra.error.exception.code.PetErrorCode;
 import com.grepp.teamnotfound.infra.error.exception.code.ScheduleErrorCode;
 import com.grepp.teamnotfound.infra.error.exception.code.UserErrorCode;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestParam;
-
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +34,7 @@ public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
     private final PetRepository petRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     // 한달치 일정 조회
     @Transactional
@@ -79,6 +79,14 @@ public class ScheduleService {
                     .pet(pet)
                     .user(user).build();
             scheduleRepository.save(schedule);
+
+            NotiScheduleCreateDto notiDto = NotiScheduleCreateDto.builder()
+                                                .scheduleId(schedule.getScheduleId())
+                                                .scheduleDate(schedule.getScheduleDate())
+                                                .build();
+
+            notificationService.createNoti(user.getUserId(), NotiType.SCHEDULE, notiDto);
+
         }else{
             for(LocalDate date = request.getDate(); date.isBefore(request.getCycleEnd()); date = date.plusDays(request.getCycle().getDays(request.getDate()))){
                 Schedule schedule = Schedule.builder()
@@ -90,6 +98,13 @@ public class ScheduleService {
                         .pet(pet)
                         .user(user).build();
                 scheduleRepository.save(schedule);
+
+                NotiScheduleCreateDto notiDto = NotiScheduleCreateDto.builder()
+                                                    .scheduleId(schedule.getScheduleId())
+                                                    .scheduleDate(schedule.getScheduleDate())
+                                                    .build();
+
+                notificationService.createNoti(user.getUserId(), NotiType.SCHEDULE, notiDto);
             }
         }
 

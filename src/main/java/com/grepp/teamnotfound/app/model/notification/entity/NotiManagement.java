@@ -16,7 +16,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "noti_management")
+@Table(name = "NotiManagements")
 @Getter
 @Setter
 public class NotiManagement extends BaseEntity {

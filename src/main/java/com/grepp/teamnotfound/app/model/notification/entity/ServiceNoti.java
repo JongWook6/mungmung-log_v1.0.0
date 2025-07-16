@@ -20,7 +20,7 @@ import lombok.Setter;
 
 
 @Entity
-@Table(name = "ScheduleNoti")
+@Table(name = "ServiceNotis")
 @Getter
 @Setter
 public class ServiceNoti extends BaseEntity {
@@ -40,7 +40,7 @@ public class ServiceNoti extends BaseEntity {
     private Long serviceNotiId;
 
     @Column
-    private String url;
+    private Long targetId;
 
     @Column(nullable = false)
     private String content;

@@ -2,12 +2,18 @@ package com.grepp.teamnotfound.app.model.notification;
 
 import com.grepp.teamnotfound.app.model.notification.code.NotiTarget;
 import com.grepp.teamnotfound.app.model.notification.code.NotiType;
+import com.grepp.teamnotfound.app.model.notification.dto.NotiBasicDto;
+import com.grepp.teamnotfound.app.model.notification.dto.NotiScheduleCreateDto;
+import com.grepp.teamnotfound.app.model.notification.dto.NotiServiceCreateDto;
+import com.grepp.teamnotfound.app.model.notification.dto.NotiUserSettingDto;
 import com.grepp.teamnotfound.app.model.notification.entity.NotiManagement;
-import com.grepp.teamnotfound.app.model.notification.entity.ScheduleNoti;
+import com.grepp.teamnotfound.app.model.notification.handler.ScheduleNotiHandlerImpl;
+import com.grepp.teamnotfound.app.model.notification.handler.ServiceNotiHandlerImpl;
 import com.grepp.teamnotfound.app.model.notification.repository.NotiManagementRepository;
 import com.grepp.teamnotfound.app.model.user.entity.User;
 import com.grepp.teamnotfound.app.model.user.repository.UserRepository;
 import com.grepp.teamnotfound.infra.error.exception.BusinessException;
+import com.grepp.teamnotfound.infra.error.exception.code.NotificationErrorCode;
 import com.grepp.teamnotfound.infra.error.exception.code.UserErrorCode;
 import java.time.OffsetDateTime;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +30,8 @@ public class NotificationService {
 
     private final UserRepository userRepository;
     private final NotiManagementRepository notiManagementRepository;
+    private final ScheduleNotiHandlerImpl scheduleNotiHandlerImpl;
+    private final ServiceNotiHandlerImpl serviceNotiHandlerImpl;
 
     ModelMapper modelMapper = new ModelMapper();
 
@@ -43,6 +51,7 @@ public class NotificationService {
         NotiUserSettingDto dto = modelMapper.map(noti, NotiUserSettingDto.class);
         return dto;
     }
+
     @Transactional
     public void createManagement(Long userId) {
         User user = userRepository.findById(userId)
@@ -55,23 +64,22 @@ public class NotificationService {
     }
 
     @Transactional
-    public void changeNotiSetting(Long userId, NotiTarget target) {
+    public void createNoti(Long userId, NotiType notiType, NotiBasicDto dto) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
 
-        NotiManagement noti = notiManagementRepository.findByUser(user)
-            .orElseGet(() -> {
-                log.warn("회원가입 당시 NotiManagement 미생성 오류 지금 생성 작업 진행 userId: {}", userId);
+        if (notiType == NotiType.SCHEDULE) {
+            scheduleNotiHandlerImpl.handle(user, (NotiScheduleCreateDto) dto);
+        } else {
+            serviceNotiHandlerImpl.handle(user, (NotiServiceCreateDto) dto);
+        }
+    }
 
-                NotiManagement created = new NotiManagement();
-                created.setUser(user);
     @Transactional
     public NotiUserSettingDto changeNotiSetting(Long userId, NotiTarget target) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
 
-                return notiManagementRepository.save(created);
-            });
         NotiManagement noti = notiManagementRepository.findByUser(user)
             .orElseThrow(() -> new BusinessException(NotificationErrorCode.NOTIFICATION_MANAGEMENT_NOT_FOUND));
 

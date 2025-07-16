@@ -14,11 +14,12 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "ScheduleNoti")
+@Table(name = "ScheduleNotis")
 @Getter
 @Setter
 public class ScheduleNoti extends BaseEntity {
@@ -47,5 +48,8 @@ public class ScheduleNoti extends BaseEntity {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "schedule_id", nullable = false, unique = true)
     private Schedule schedule;
+
+    @Column(nullable = false)
+    private LocalDate notiDate;
 
 }
