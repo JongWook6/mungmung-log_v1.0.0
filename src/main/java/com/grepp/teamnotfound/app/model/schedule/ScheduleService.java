@@ -124,6 +124,12 @@ public class ScheduleService {
             List<Schedule> schedules = scheduleRepository.findByNameAndCycleAndCycleEnd(schedule.getName(), schedule.getCycle(), schedule.getCycleEnd());
             LocalDate date = request.getDate();
             for(Schedule schedule1: schedules){
+                // 반복이 없으면 삭제 해당 일정 제외
+                if (request.getCycle().equals(ScheduleCycle.NONE) && !schedule1.getScheduleId().equals(request.getScheduleId())){
+                    schedule1.setDeletedAt(OffsetDateTime.now());
+                    continue;
+                }
+
                 schedule1.setName(request.getName());
                 schedule1.setScheduleDate(date);
                 schedule1.setCycle(request.getCycle());
@@ -137,8 +143,21 @@ public class ScheduleService {
 
                 date = date.plusDays(request.getCycle().getDays(date));
             }
+            // 부족한 일정 추가 생성
+            for(;date.isBefore(request.getCycleEnd()); date = date.plusDays(request.getCycle().getDays(request.getDate()))){
+                Schedule addSchedule = Schedule.builder()
+                        .name(request.getName())
+                        .scheduleDate(date)
+                        .cycle(request.getCycle())
+                        .cycleEnd(request.getCycleEnd())
+                        .isDone(false)
+                        .pet(pet)
+                        .user(user).build();
+                schedules.add(addSchedule);
+            }
             scheduleRepository.saveAll(schedules);
         }else {
+            // 단독 일정만 수정
             schedule.setName(request.getName());
             schedule.setScheduleDate(request.getDate());
             schedule.setUpdatedAt(OffsetDateTime.now());
