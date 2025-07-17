@@ -5,8 +5,9 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class YearlyArticlesStats {
+public class YearlyUserStatsDto {
 
     private int year;
-    private int articlesCount;
+    private int joinedCount;
+    private int leaveCount;
 }

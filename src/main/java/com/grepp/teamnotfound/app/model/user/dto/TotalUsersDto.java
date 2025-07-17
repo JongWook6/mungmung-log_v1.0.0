@@ -7,7 +7,7 @@ import java.time.OffsetDateTime;
 
 @Getter
 @Builder
-public class TotalUsersCount {
+public class TotalUsersDto {
 
     private OffsetDateTime date;
     private long total;
