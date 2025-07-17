@@ -72,19 +72,9 @@ public class LifeRecordApiController {
     public ResponseEntity<Map<String, List<Map<Long, String>>>> getPetList(
             @AuthenticationPrincipal Principal principal
     ){
-        // TODO: 반려견 목록 조회 Service 구현
+        List<Map<Long, String>> petLists = petService.findPetListByUserId(principal.getUserId());
 
-        // Mock Data
-        Map<Long, String> pet1 = new HashMap<>();
-        pet1.put(1L, "이마음");
-        Map<Long, String> pet2 = new HashMap<>();
-        pet2.put(2L, "김행복");
-        Map<Long, String> pet3 = new HashMap<>();
-        pet3.put(3L, "박슬픔");
-
-        List<Map<Long, String>> list = new ArrayList<>(List.of(pet1, pet2, pet3));
-
-        return ResponseEntity.ok(Map.of("data",list));
+        return ResponseEntity.ok(Map.of("data", petLists));
     }
 
     @Operation(summary = "생활기록 상세정보 조회")
