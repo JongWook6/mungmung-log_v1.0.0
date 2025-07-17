@@ -14,7 +14,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-            .allowedOrigins(frontServer, "https://mungdiary-172598302113.asia-northeast3.run.app")
+            .allowedOrigins(frontServer, "https://mungdiary-172598302113.asia-northeast3.run.app", "https://404-notfound-git-feature-login-run2gos-projects-afcc796b.vercel.app/")
             .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
             .allowedHeaders("*")
             .allowCredentials(true)
