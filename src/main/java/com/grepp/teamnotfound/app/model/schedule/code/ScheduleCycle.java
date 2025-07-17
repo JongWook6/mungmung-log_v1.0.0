@@ -12,6 +12,7 @@ public enum ScheduleCycle {
 
     public int getDays(LocalDate date){
         return switch (this) {
+            case NONE -> 0;
             case WEEK -> 7;
             case ONE_MONTH -> (int) ChronoUnit.DAYS.between(date, date.plusMonths(1));
             case THREE_MONTH -> (int) ChronoUnit.DAYS.between(date, date.plusMonths(3));
