@@ -1,6 +1,7 @@
 package com.grepp.teamnotfound.app.model.board.repository;
 
 import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleDetailResponse;
+import com.grepp.teamnotfound.app.model.board.code.SearchType;
 import com.grepp.teamnotfound.app.model.board.code.SortType;
 import com.grepp.teamnotfound.app.model.board.dto.ArticleImgDto;
 import com.grepp.teamnotfound.app.model.board.dto.ArticleListDto;
@@ -11,6 +12,7 @@ import com.grepp.teamnotfound.app.model.reply.entity.QReply;
 import com.grepp.teamnotfound.app.model.user.entity.QUser;
 import com.grepp.teamnotfound.app.model.user.entity.QUserImg;
 import com.grepp.teamnotfound.infra.code.ImgType;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.OrderSpecifier;
@@ -141,10 +143,29 @@ public class ArticleRepositoryCustomImpl implements ArticleRepositoryCustom {
     }
 
     @Override
-    public Page<ArticleListDto> findArticleListWithMeta(int page, int size, SortType sortType) {
+    public Page<ArticleListDto> findArticleListWithMeta(int page, int size, SortType sortType, SearchType searchType, String keyword) {
 
         // 정렬 기준 리스트
         OrderSpecifier<?>[] orderSpecifiers = getOrderSpecifiers(sortType);
+
+        // 검색 조건 빌더
+        BooleanBuilder searchCondition = new BooleanBuilder();
+        searchCondition.and(article.deletedAt.isNull());
+        searchCondition.and(article.reportedAt.isNull());
+
+        // 검색 조건 추가
+        if (searchType != null && keyword != null && !keyword.trim().isEmpty()) {
+            String trimmedKeyword = keyword.trim();
+            switch (searchType) {
+                case TITLE -> searchCondition.and(article.title.containsIgnoreCase(trimmedKeyword));
+                case CONTENT ->
+                    searchCondition.and(article.content.containsIgnoreCase(trimmedKeyword));
+                case TITLE_CONTENT -> searchCondition.and(
+                    article.title.containsIgnoreCase(trimmedKeyword).or(article.content.containsIgnoreCase(trimmedKeyword)));
+                case AUTHOR ->
+                    searchCondition.and(user.nickname.containsIgnoreCase(trimmedKeyword));
+            }
+        }
 
         // 메인 쿼리
         List<ArticleListDto> content = queryFactory
@@ -177,10 +198,8 @@ public class ArticleRepositoryCustomImpl implements ArticleRepositoryCustom {
                 userImg.user.userId.eq(user.userId),
                 userImg.deletedAt.isNull()
             )
-            .where(
-                article.deletedAt.isNull(),
-                article.reportedAt.isNull()
-            )
+            // 동적 검색조건 적용
+            .where(searchCondition)
             // 집계 함수가 아닌 필드는 모두 GROUP BY 절에 포함
             .groupBy(
                 article.articleId,
@@ -234,17 +253,18 @@ public class ArticleRepositoryCustomImpl implements ArticleRepositoryCustom {
             }
         }
 
-        // 페이징을 위한 총 개수 조회
+        // 페이징을 위한 총 개수 조회 (검색 조건 적용)
         Long total = queryFactory
             .select(article.count())
             .from(article)
-            .where(article.deletedAt.isNull(), article.reportedAt.isNull())
+            .where(searchCondition)
             .fetchOne();
 
         return new PageImpl<>(content, PageRequest.of(page, size), total);
     }
 
     // SortType -> Querydsl 정렬 기준으로 매칭
+    // SQL ORDER BY 처럼 복수의 정렬 조건이 들어갈 수 있어 배열로 구현됨
     private OrderSpecifier<?>[] getOrderSpecifiers(SortType sortType) {
         return switch (sortType) {
             case DATE -> new OrderSpecifier[]{article.createdAt.desc()};

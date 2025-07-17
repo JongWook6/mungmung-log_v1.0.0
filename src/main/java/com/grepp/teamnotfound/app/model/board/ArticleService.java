@@ -32,7 +32,6 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,7 +54,12 @@ public class ArticleService {
     public ArticleListResponse getArticles(ArticleListRequest request) {
 
         Page<ArticleListDto> articleListPage = articleRepository.findArticleListWithMeta(
-            request.getPage() - 1, request.getSize(), request.getSortType());
+            request.getPage() - 1,
+            request.getSize(),
+            request.getSortType(),
+            request.getSearchType(),
+            request.getKeyword()
+        );
 
         return ArticleListResponse.builder()
             .articleList(articleListPage.toList())
@@ -165,31 +169,33 @@ public class ArticleService {
     }
 
     private void uploadAndSaveImgs(List<MultipartFile> images, Article targetArticle) {
-        if (images != null || !images.getFirst().isEmpty() ) {
-            try {
-                // GCP bucket 에 업로드
-                List<FileDto> imgList = fileManager.upload(images, "article");
+        if (images == null || images.isEmpty()) {
+            return;
+        }
 
-                // repository 에 저장
-                List<ArticleImg> articleImgs = imgList
-                    .stream()
-                    .map(fileDto -> {
-                        ImgType type = ImgType.DESC;
-                        // NOTE 게시글을 작성할 때 썸네일을 설정할 수 있게? 아니면 첫번째 이미지?
-                        if (imgList.getFirst().originName().equals(fileDto.originName())) {
-                            type = ImgType.THUMBNAIL;
-                        }
-                        ArticleImg articleImg = ArticleImg.fromFileDto(type, fileDto);
-                        articleImg.setArticle(targetArticle);
-                        return articleImg;
-                    })
-                    .toList();
+        try {
+            // GCP bucket 에 업로드
+            List<FileDto> imgList = fileManager.upload(images, "article");
 
-                articleImgRepository.saveAll(articleImgs);
+            // repository 에 저장
+            List<ArticleImg> articleImgs = imgList
+                .stream()
+                .map(fileDto -> {
+                    ImgType type = ImgType.DESC;
+                    // NOTE 게시글을 작성할 때 썸네일을 설정할 수 있게? 아니면 첫번째 이미지?
+                    if (imgList.getFirst().originName().equals(fileDto.originName())) {
+                        type = ImgType.THUMBNAIL;
+                    }
+                    ArticleImg articleImg = ArticleImg.fromFileDto(type, fileDto);
+                    articleImg.setArticle(targetArticle);
+                    return articleImg;
+                })
+                .toList();
 
-            } catch (IOException e) {
-                throw new CommonException(CommonErrorCode.FILE_UPLOAD_FAILED);
-            }
+            articleImgRepository.saveAll(articleImgs);
+
+        } catch (IOException e) {
+            throw new CommonException(CommonErrorCode.FILE_UPLOAD_FAILED);
         }
     }
 
@@ -200,7 +206,8 @@ public class ArticleService {
         Article article = articleRepository.findById(articleId)
             .orElseThrow(() -> new BoardException(BoardErrorCode.ARTICLE_NOT_FOUND));
 
-        boolean exists = articleLikeRepository.existsByArticle_ArticleIdAndUser_UserId(articleId, userId);
+        boolean exists = articleLikeRepository.existsByArticle_ArticleIdAndUser_UserId(articleId,
+            userId);
         if (exists) {
             // 중복 요청은 무시
             Integer count = articleLikeRepository.countByArticle_ArticleId(articleId);
@@ -244,7 +251,8 @@ public class ArticleService {
         articleRepository.findById(articleId)
             .orElseThrow(() -> new BoardException(BoardErrorCode.ARTICLE_NOT_FOUND));
 
-        return replyRepository.countByArticle_ArticleIdAndDeletedAtIsNullAndReportedAtIsNull(articleId);
+        return replyRepository.countByArticle_ArticleIdAndDeletedAtIsNullAndReportedAtIsNull(
+            articleId);
     }
 
     @Transactional(readOnly = true)

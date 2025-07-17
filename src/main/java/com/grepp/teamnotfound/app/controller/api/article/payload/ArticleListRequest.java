@@ -33,5 +33,4 @@ public class ArticleListRequest {
 
     private SearchType searchType;
     private String keyword;
-
 }

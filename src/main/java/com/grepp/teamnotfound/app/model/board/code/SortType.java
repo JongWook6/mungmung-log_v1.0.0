@@ -2,5 +2,5 @@ package com.grepp.teamnotfound.app.model.board.code;
 
 public enum SortType {
     DATE, LIKE, VIEW;
-    // TODO 이외의 값이 들어오면 UNKNOWN 으로 처리 -> 예외 처리
+    // TODO enum 값과 매칭이 안될 경우 프론트에 상세한 사유 전달
 }

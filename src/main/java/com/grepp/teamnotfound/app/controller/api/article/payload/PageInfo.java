@@ -26,8 +26,8 @@ public class PageInfo {
             .currentPage(replyPage.getNumber() + 1)
             .totalPages(replyPage.getTotalPages())
             .totalElements(replyPage.getTotalElements())
-            .isFirst(replyPage.hasPrevious())
-            .isLast(replyPage.hasNext())
+            .isFirst(replyPage.isFirst())
+            .isLast(replyPage.isLast())
             .build();
     }
 }
