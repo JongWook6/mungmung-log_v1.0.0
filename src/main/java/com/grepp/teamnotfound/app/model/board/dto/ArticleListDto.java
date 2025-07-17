@@ -23,5 +23,5 @@ public class ArticleListDto {
     private Integer likes;
     private Integer replies;
     private Integer views;
-    private String thumbnailImgPath;
+    private List<ArticleImgDto> articleImgPath;
 }

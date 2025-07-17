@@ -6,7 +6,6 @@ import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleListResp
 import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleRequest;
 import com.grepp.teamnotfound.app.controller.api.article.payload.LikeResponse;
 import com.grepp.teamnotfound.app.controller.api.article.payload.PageInfo;
-import com.grepp.teamnotfound.app.model.board.dto.ArticleImgDto;
 import com.grepp.teamnotfound.app.model.board.dto.ArticleListDto;
 import com.grepp.teamnotfound.app.model.board.entity.Article;
 import com.grepp.teamnotfound.app.model.board.entity.ArticleImg;
@@ -17,7 +16,6 @@ import com.grepp.teamnotfound.app.model.board.repository.ArticleLikeRepository;
 import com.grepp.teamnotfound.app.model.board.repository.ArticleRepository;
 import com.grepp.teamnotfound.app.model.board.repository.BoardRepository;
 import com.grepp.teamnotfound.app.model.reply.repository.ReplyRepository;
-import com.grepp.teamnotfound.app.model.user.UserService;
 import com.grepp.teamnotfound.app.model.user.entity.User;
 import com.grepp.teamnotfound.app.model.user.repository.UserRepository;
 import com.grepp.teamnotfound.infra.code.ImgType;
@@ -36,8 +34,6 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -50,54 +46,13 @@ public class ArticleService {
     private final UserRepository userRepository;
     private final BoardRepository boardRepository;
 
-    private final ModelMapper modelMapper;
     private final GoogleStorageManager fileManager;
     private final ArticleImgRepository articleImgRepository;
     private final ArticleLikeRepository articleLikeRepository;
     private final ReplyRepository replyRepository;
-    private final UserService userService;
-
-    @Transactional(readOnly = true)
-    public ArticleListResponse getArticlesByJPA(ArticleListRequest request) {
-
-        Pageable pageable = PageRequest.of(request.getPage() - 1, request.getSize(),
-            request.getSortType().toSort());
-        Page<Article> articlePage = articleRepository.findByDeletedAtIsNullAndReportedAtIsNull(pageable);
-
-        List<ArticleListDto> articleList = articlePage.stream()
-            .map(article -> {
-                String profileImgPath = userService.getProfileImgPath(
-                    article.getUser().getUserId());
-                Optional<ArticleImg> imgOptional = article.getArticleImgs().stream()
-                    .filter(articleImg -> articleImg.getType().equals(ImgType.THUMBNAIL))
-                    .findFirst();
-
-                return ArticleListDto.builder()
-                    .articleId(article.getArticleId())
-                    .nickname(article.getUser().getNickname())
-                    .profileImgPath(profileImgPath)
-                    .createdAt(article.getCreatedAt())
-                    .updatedAt(article.getUpdatedAt())
-                    .title(article.getTitle())
-                    .content(article.getContent())
-                    .likes(getLikeCount(article.getArticleId()))
-                    .replies(getReplyCount(article.getArticleId()))
-                    .views(article.getViews())
-                    .thumbnailImgPath(imgOptional.map(
-                            articleImg -> articleImg.getSavePath() + articleImg.getRenamedName())
-                        .orElse(null))
-                    .build();
-            })
-            .toList();
-
-        return ArticleListResponse.builder()
-            .articleList(articleList)
-            .pageInfo(PageInfo.fromPage(articlePage))
-            .build();
-    }
 
     @Transactional
-    public ArticleListResponse getArticlesByQuerydsl(ArticleListRequest request) {
+    public ArticleListResponse getArticles(ArticleListRequest request) {
 
         Page<ArticleListDto> articleListPage = articleRepository.findArticleListWithMeta(
             request.getPage() - 1, request.getSize(), request.getSortType());
@@ -135,25 +90,24 @@ public class ArticleService {
     @Transactional
     public ArticleDetailResponse findByArticleIdAndUserId(Long articleId, Long userId) {
         // 로그인한 회원일 경우 DB 와 정합성 검증
-        // TODO 만약 게시판에서 최종 수정일자를 보여주고 싶다면 updatedAt 을 가져와야 함
         if (userId != null) {
             userRepository.findById(userId)
                 .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));
         }
 
-        ArticleDetailResponse response = articleRepository.findDetailById(articleId, userId);
+        Article article = articleRepository.findById(articleId)
+            .orElseThrow(() -> new BoardException(BoardErrorCode.ARTICLE_NOT_FOUND));
 
-        if (response == null) {
-            throw new BoardException(BoardErrorCode.ARTICLE_NOT_FOUND);
-        }
-
-        if (response.getIsDeleted()) {
+        // JOIN 해서 상세 정보를 모두 가져오기 전에 빠른 리턴
+        if (article.getDeletedAt() != null) {
             throw new BoardException(BoardErrorCode.ARTICLE_DELETED);
         }
 
-        if (response.getIsReported()) {
+        if (article.getReportedAt() != null) {
             throw new BoardException(BoardErrorCode.ARTICLE_REPORTED);
         }
+
+        ArticleDetailResponse response = articleRepository.findDetailById(articleId, userId);
 
         articleRepository.plusViewById(articleId);
         response.setViews(response.getViews() + 1);

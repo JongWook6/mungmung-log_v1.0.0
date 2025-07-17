@@ -20,14 +20,4 @@ public class ArticleImgDto {
     private String savePath;
 
     private ImgType imgType;
-
-    public static ArticleImgDto fromEntity(ArticleImg articleImg) {
-        return ArticleImgDto.builder()
-            .articleImgId(articleImg.getArticleImgId())
-            .articleId(articleImg.getArticle().getArticleId())
-            .savePath(articleImg.getSavePath() + articleImg.getRenamedName())
-            .imgType(articleImg.getType())
-            .build();
-    }
-
 }

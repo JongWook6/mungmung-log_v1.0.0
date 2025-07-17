@@ -1,16 +1,6 @@
 package com.grepp.teamnotfound.app.model.board.code;
 
-
-import org.springframework.data.domain.Sort;
-
 public enum SortType {
     DATE, LIKE, VIEW;
-
-    public Sort toSort() {
-        return switch (this) {
-            case DATE -> Sort.by("createdAt").descending();
-            case LIKE -> Sort.by("likes").descending();
-            case VIEW -> Sort.by("views").descending();
-        };
-    }
+    // TODO 이외의 값이 들어오면 UNKNOWN 으로 처리 -> 예외 처리
 }

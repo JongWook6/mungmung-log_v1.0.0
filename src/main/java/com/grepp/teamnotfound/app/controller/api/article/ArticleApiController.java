@@ -40,7 +40,7 @@ public class ArticleApiController {
     public ResponseEntity<?> getAllArticles(
         @ModelAttribute @Valid ArticleListRequest request
     ) {
-        ArticleListResponse response = articleService.getArticlesByQuerydsl(request);
+        ArticleListResponse response = articleService.getArticles(request);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

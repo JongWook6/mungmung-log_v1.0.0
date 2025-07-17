@@ -34,14 +34,4 @@ public class ArticleListRequest {
     private SearchType searchType;
     private String keyword;
 
-//    @QueryProjection
-//    public ArticleListRequest(int page, int size, BoardType boardType, SortType sortType,
-//        SearchType searchType, String keyword) {
-//        this.page = page;
-//        this.size = size;
-//        this.boardType = boardType;
-//        this.sortType = sortType;
-//        this.searchType = searchType;
-//        this.keyword = keyword;
-//    }
 }

@@ -6,11 +6,13 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @Data
 @Builder
 @ToString
+@NoArgsConstructor
 public class ArticleDetailResponse {
 
     private Long articleId;
@@ -23,8 +25,6 @@ public class ArticleDetailResponse {
     private Integer replies;
     private Integer likes;
     private Integer views;
-    private Boolean isDeleted;
-    private Boolean isReported;
     private Boolean isLiked;
     private List<ArticleImgDto> images;
 
@@ -40,8 +40,6 @@ public class ArticleDetailResponse {
         Integer replies,
         Integer likes,
         Integer views,
-        Boolean isDeleted,
-        Boolean isReported,
         Boolean isLiked,
         List<ArticleImgDto> images
     ) {
@@ -55,8 +53,6 @@ public class ArticleDetailResponse {
         this.replies = replies;
         this.likes = likes;
         this.views = views;
-        this.isDeleted = isDeleted;
-        this.isReported = isReported;
         this.isLiked = isLiked;
         this.images = images;
     }
