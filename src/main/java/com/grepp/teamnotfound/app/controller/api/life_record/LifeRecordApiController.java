@@ -2,6 +2,7 @@ package com.grepp.teamnotfound.app.controller.api.life_record;
 
 import com.grepp.teamnotfound.app.controller.api.life_record.payload.LifeRecordListResponse;
 import com.grepp.teamnotfound.app.controller.api.life_record.payload.LifeRecordData;
+import com.grepp.teamnotfound.app.model.auth.domain.Principal;
 import com.grepp.teamnotfound.app.model.life_record.LifeRecordService;
 import com.grepp.teamnotfound.app.model.life_record.dto.LifeRecordDto;
 import com.grepp.teamnotfound.app.model.pet.PetService;
@@ -15,6 +16,8 @@ import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -34,12 +37,13 @@ public class LifeRecordApiController {
     private final LifeRecordService lifeRecordService;
 
     @Operation(summary = "생활기록 리스트 조회")
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/v1/users/{userId}")
     public ResponseEntity<Map<String, List<LifeRecordListResponse>>> getLifeRecordList(
-            @PathVariable Long userId,
             @RequestParam(required = false) Long petId,
             @RequestParam Integer page,
             @RequestParam Integer size
+            @AuthenticationPrincipal Principal principal,
     ){
         // TODO: 생활기록 리스트 조회 Service 구현
 
@@ -63,9 +67,10 @@ public class LifeRecordApiController {
     }
 
     @Operation(summary = "보호자의 반려견 목록 조회") // 특정 반려견 생활기록만 보기 위하여 필요
-    @GetMapping("/v1/users/{userId}/pet-list")
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/v1/users/pet-list")
     public ResponseEntity<Map<String, List<Map<Long, String>>>> getPetList(
-            @PathVariable Long userId
+            @AuthenticationPrincipal Principal principal
     ){
         // TODO: 반려견 목록 조회 Service 구현
 
@@ -83,6 +88,7 @@ public class LifeRecordApiController {
     }
 
     @Operation(summary = "생활기록 상세정보 조회")
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/v2/detail/{lifeRecordId}")
     public ResponseEntity<Map<String, LifeRecordData>> getLifeRecordDetail(
             @PathVariable Long lifeRecordId
@@ -93,6 +99,7 @@ public class LifeRecordApiController {
     }
 
     @Operation(summary = "기존 생활기록 데이터 존재 여부 체크")
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/v2/pets/{petId}/check")
     public ResponseEntity<?> checkLifeRecord(
             @PathVariable Long petId,
@@ -112,6 +119,7 @@ public class LifeRecordApiController {
     }
 
     @Operation(summary = "생활기록 등록")
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("/v2/create")
     public ResponseEntity<Map<String, Long>> registLifeRecord(
             @RequestBody LifeRecordData data
@@ -123,6 +131,7 @@ public class LifeRecordApiController {
     }
 
     @Operation(summary = "생활기록 수정")
+    @PreAuthorize("isAuthenticated()")
     @PatchMapping("/v2/{lifeRecordId}/update")
     public ResponseEntity<Map<String, Long>> modifyLifeRecord(
             @PathVariable Long lifeRecordId,
@@ -135,6 +144,7 @@ public class LifeRecordApiController {
     }
 
     @Operation(summary = "생활기록 삭제")
+    @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/v2/{lifeRecordId}/delete")
     public ResponseEntity<String> deleteLifeRecord(
             @PathVariable Long lifeRecordId
