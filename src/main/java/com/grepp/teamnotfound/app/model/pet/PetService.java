@@ -47,6 +47,10 @@ public class PetService {
     public List<PetDto> findAll() {
         List<Pet> pets = petRepository.findAll();
 
+        if (pets.isEmpty()) {
+            throw new BusinessException(PetErrorCode.PET_NOT_FOUND);
+        }
+
         return pets.stream()
             .map(PetDto::fromEntity)
             .collect(Collectors.toList());
@@ -54,7 +58,7 @@ public class PetService {
 
     public List<ProfilePetResponse> findByUserId(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(NotFoundException::new);
-        List<Pet> pets = petRepository.findAllByUser(user);
+        List<Pet> pets = petRepository.findAllByUser(user.getUserId());
 
         return pets.stream()
             .map(pet -> {

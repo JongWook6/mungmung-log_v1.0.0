@@ -37,9 +37,10 @@ public class ScheduleService {
     private final UserRepository userRepository;
 
     // 한달치 일정 조회
-    public List<ScheduleDto> getCalendar(String userEmail, LocalDate date) {
+    @Transactional
+    public List<ScheduleDto> getCalendar(Long userId, LocalDate date) {
         // user 검증
-        User user = userRepository.findByEmail(userEmail).orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
         YearMonth ym = YearMonth.from(date);
         LocalDate start = ym.atDay(1);
@@ -54,7 +55,9 @@ public class ScheduleService {
                         .name(schedule.getName())
                         .cycle(schedule.getCycle())
                         .cycleEnd(schedule.getCycleEnd())
-                        .isDone(schedule.getIsDone()).build())
+                        .isDone(schedule.getIsDone())
+                        .petName(schedule.getPet().getName())
+                        .petId(schedule.getPet().getPetId()).build())
         );
 
         return scheduleDtos;
@@ -106,6 +109,12 @@ public class ScheduleService {
             List<Schedule> schedules = scheduleRepository.findByNameAndCycleAndCycleEnd(schedule.getName(), schedule.getCycle(), schedule.getCycleEnd());
             LocalDate date = request.getDate();
             for(Schedule schedule1: schedules){
+                // 반복이 없으면 삭제 해당 일정 제외
+                if (request.getCycle().equals(ScheduleCycle.NONE) && !schedule1.getScheduleId().equals(request.getScheduleId())){
+                    schedule1.setDeletedAt(OffsetDateTime.now());
+                    continue;
+                }
+
                 schedule1.setName(request.getName());
                 schedule1.setScheduleDate(date);
                 schedule1.setCycle(request.getCycle());
@@ -119,8 +128,21 @@ public class ScheduleService {
 
                 date = date.plusDays(request.getCycle().getDays(date));
             }
+            // 부족한 일정 추가 생성
+            for(;date.isBefore(request.getCycleEnd()); date = date.plusDays(request.getCycle().getDays(request.getDate()))){
+                Schedule addSchedule = Schedule.builder()
+                        .name(request.getName())
+                        .scheduleDate(date)
+                        .cycle(request.getCycle())
+                        .cycleEnd(request.getCycleEnd())
+                        .isDone(false)
+                        .pet(pet)
+                        .user(user).build();
+                schedules.add(addSchedule);
+            }
             scheduleRepository.saveAll(schedules);
         }else {
+            // 단독 일정만 수정
             schedule.setName(request.getName());
             schedule.setScheduleDate(request.getDate());
             schedule.setUpdatedAt(OffsetDateTime.now());
