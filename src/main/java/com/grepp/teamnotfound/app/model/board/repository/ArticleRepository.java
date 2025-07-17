@@ -21,4 +21,8 @@ public interface ArticleRepository extends JpaRepository<Article, Long>, Article
     Integer plusViewById(@Param("articleId") Long articleId);
 
     Integer countByArticleIdAndDeletedAtIsNullAndReportedAtIsNull(Long articleId);
+
+
+    @Query("SELECT COUNT(a) FROM Article  a WHERE a.createdAt BETWEEN :start AND :end")
+    int countArticlesBetween(OffsetDateTime start, OffsetDateTime end);
 }

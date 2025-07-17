@@ -6,6 +6,8 @@ import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleListResp
 import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleRequest;
 import com.grepp.teamnotfound.app.controller.api.article.payload.LikeResponse;
 import com.grepp.teamnotfound.app.controller.api.article.payload.PageInfo;
+import com.grepp.teamnotfound.app.model.board.code.BoardType;
+import com.grepp.teamnotfound.app.model.board.code.SearchType;
 import com.grepp.teamnotfound.app.model.board.dto.ArticleListDto;
 import com.grepp.teamnotfound.app.model.board.entity.Article;
 import com.grepp.teamnotfound.app.model.board.entity.ArticleImg;
@@ -21,6 +23,7 @@ import com.grepp.teamnotfound.app.model.user.repository.UserRepository;
 import com.grepp.teamnotfound.infra.code.ImgType;
 import com.grepp.teamnotfound.infra.error.exception.AuthException;
 import com.grepp.teamnotfound.infra.error.exception.BoardException;
+import com.grepp.teamnotfound.infra.error.exception.BusinessException;
 import com.grepp.teamnotfound.infra.error.exception.CommonException;
 import com.grepp.teamnotfound.infra.error.exception.code.BoardErrorCode;
 import com.grepp.teamnotfound.infra.error.exception.code.CommonErrorCode;
@@ -36,6 +39,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.time.OffsetDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -261,5 +268,14 @@ public class ArticleService {
             .orElseThrow(() -> new BoardException(BoardErrorCode.ARTICLE_NOT_FOUND));
 
         return articleRepository.countByArticleIdAndDeletedAtIsNullAndReportedAtIsNull(articleId);
+    }
+
+    public int countArticles(OffsetDateTime monthStart, OffsetDateTime monthEnd) {
+        return articleRepository.countArticlesBetween(monthStart, monthEnd);
+    }
+
+    public Long getRequiredArticleIdByReplyId(Long replyId) {
+        return replyRepository.findArticleIdByReplyId(replyId)
+                .orElseThrow(()-> new BusinessException(BoardErrorCode.ARTICLE_NOT_FOUND));
     }
 }

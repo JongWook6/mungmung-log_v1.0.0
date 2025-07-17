@@ -5,6 +5,8 @@ import java.time.OffsetDateTime;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -20,4 +22,7 @@ public interface ReplyRepository extends JpaRepository<Reply, Long> {
 
     Page<Reply> findByArticle_ArticleIdAndDeletedAtIsNullAndReportedAtIsNull(Long articleId, Pageable pageable);
 
+
+
+    Optional<Long> findArticleIdByReplyId(Long replyId);
 }
