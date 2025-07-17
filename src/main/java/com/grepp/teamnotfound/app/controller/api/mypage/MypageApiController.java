@@ -3,9 +3,12 @@ package com.grepp.teamnotfound.app.controller.api.mypage;
 
 import com.grepp.teamnotfound.app.controller.api.mypage.payload.PetWriteRequest;
 import com.grepp.teamnotfound.app.controller.api.mypage.payload.VaccineWriteRequest;
+import com.grepp.teamnotfound.app.controller.api.profile.payload.ProfilePetResponse;
 import com.grepp.teamnotfound.app.model.auth.domain.Principal;
 import com.grepp.teamnotfound.app.model.pet.PetService;
 import com.grepp.teamnotfound.app.model.pet.dto.PetDto;
+import com.grepp.teamnotfound.app.model.user.UserService;
+import com.grepp.teamnotfound.app.model.user.dto.UserDto;
 import com.grepp.teamnotfound.app.model.vaccination.VaccinationService;
 import com.grepp.teamnotfound.app.model.vaccination.dto.VaccinationDto;
 import jakarta.validation.Valid;
@@ -32,7 +35,32 @@ import org.springframework.web.bind.annotation.RestController;
 public class MypageApiController {
 
     private final PetService petService;
+    private final UserService userService;
     private final VaccinationService vaccinationService;
+
+    /**
+        * 펫 관련 API
+     **/
+    @GetMapping("/v1/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<UserDto> getUser(
+        @AuthenticationPrincipal Principal principal
+    ) {
+        Long userId = principal.getUserId();
+
+        return ResponseEntity.ok(userService.findByUserId(userId));
+    }
+
+    @GetMapping("/v1/pets")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<ProfilePetResponse>> getUserPets(
+        @AuthenticationPrincipal Principal principal
+    ) {
+        Long userId = principal.getUserId();
+
+        List<ProfilePetResponse> response = petService.findByUserId(userId);
+        return ResponseEntity.ok(response);
+    }
 
     /**
      * 펫 관련 API
