@@ -94,19 +94,27 @@ public class UserService {
         mailService.sendVerificationEmail(email);
     }
 
+    @Transactional(readOnly = true)
     public void validateEmailDuplication(String email) {
         userRepository.findByEmail(email).ifPresent(user -> {
             throw new BusinessException(UserErrorCode.USER_EMAIL_ALREADY_EXISTS);
         });
     }
 
+    @Transactional(readOnly = true)
     public void validateNicknameDuplication(String nickname) {
         userRepository.findByNickname(nickname).ifPresent(user -> {
             throw new BusinessException(UserErrorCode.USER_NICKNAME_ALREADY_EXISTS);
         });
     }
 
+    @Transactional(readOnly = true)
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
+    }
+
+    @Transactional(readOnly = true)
+    public String getRequiredUserNickname(Long userId) {
+        return userRepository.findNicknameByUserId(userId);
     }
 }

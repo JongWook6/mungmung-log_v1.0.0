@@ -18,4 +18,8 @@ public interface ArticleRepository extends JpaRepository<Article, Long>, Article
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("UPDATE Article a SET a.views = a.views + 1 WHERE a.articleId = :articleId AND a.deletedAt IS NULL")
     Integer plusViewById(@Param("articleId") Long articleId);
+
+
+    @Query("SELECT COUNT(a) FROM Article  a WHERE a.createdAt BETWEEN :start AND :end")
+    int countArticlesBetween(OffsetDateTime start, OffsetDateTime end);
 }
