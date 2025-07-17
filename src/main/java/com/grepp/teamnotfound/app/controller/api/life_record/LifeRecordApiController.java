@@ -113,25 +113,25 @@ public class LifeRecordApiController {
 
     @Operation(summary = "생활기록 등록")
     @PostMapping("/v2/create")
-    public ResponseEntity<String> registLifeRecord(
+    public ResponseEntity<Map<String, Long>> registLifeRecord(
             @RequestBody LifeRecordData data
     ){
         LifeRecordDto dto = LifeRecordDto.toDto(data);
-        lifeRecordService.createLifeRecord(dto);
+        Long lifeRecordId = lifeRecordService.createLifeRecord(dto);
 
-        return ResponseEntity.ok("등록 성공");
+        return ResponseEntity.ok(Map.of("lifeRecordId", lifeRecordId));
     }
 
     @Operation(summary = "생활기록 수정")
     @PatchMapping("/v2/{lifeRecordId}/update")
-    public ResponseEntity<String> modifyLifeRecord(
+    public ResponseEntity<Map<String, Long>> modifyLifeRecord(
             @PathVariable Long lifeRecordId,
             @RequestBody LifeRecordData data
     ){
         LifeRecordDto dto = LifeRecordDto.toDto(data);
         lifeRecordService.updateLifeRecord(lifeRecordId, dto);
 
-        return ResponseEntity.ok("수정 성공");
+        return ResponseEntity.ok(Map.of("lifeRecordId", lifeRecordId));
     }
 
     @Operation(summary = "생활기록 삭제")
