@@ -1,6 +1,6 @@
 package com.grepp.teamnotfound.app.model.structured_data.entity;
 
-import com.grepp.teamnotfound.app.model.pet.entity.Pet;
+import com.grepp.teamnotfound.app.model.life_record.entity.LifeRecord;
 import com.grepp.teamnotfound.infra.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,7 +12,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import lombok.Getter;
 import lombok.Setter;
@@ -47,11 +46,8 @@ public class Walking extends BaseEntity {
     @Column(nullable = false)
     private Integer pace;
 
-    @Column(nullable = false)
-    private LocalDate recordedAt;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "pet_id", nullable = false)
-    private Pet pet;
+    @JoinColumn(name = "life_record_id", nullable = false)
+    private LifeRecord lifeRecord;
 
 }
