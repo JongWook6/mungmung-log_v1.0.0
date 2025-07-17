@@ -98,7 +98,7 @@ public class AdminController {
     }
 
     @Operation(summary = "신고내역 상세 보기")
-    @GetMapping("v1/stats/reports")
+    @GetMapping("v1/reports/{reportId}")
     public ResponseEntity<ReportDetailResponse> getReportDetail(@PathVariable Long reportId) {
 
         ReportDetailDto dto = reportService.getReportDetail(reportId);
