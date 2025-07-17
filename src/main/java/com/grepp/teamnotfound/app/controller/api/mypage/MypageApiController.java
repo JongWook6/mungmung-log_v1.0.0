@@ -39,7 +39,7 @@ public class MypageApiController {
     private final VaccinationService vaccinationService;
 
     /**
-        * 펫 관련 API
+     * 나 & 내 펫 정보 반환
      **/
     @GetMapping("/v1/me")
     @PreAuthorize("isAuthenticated()")
