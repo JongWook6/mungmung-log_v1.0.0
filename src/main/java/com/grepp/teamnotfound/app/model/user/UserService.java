@@ -115,6 +115,6 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public String getRequiredUserNickname(Long userId) {
-        return userRepository.findNicknameById(userId);
+        return userRepository.findNicknameByUserId(userId);
     }
 }

@@ -22,5 +22,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT COUNT(u) FROM User u WHERE u.deletedAt BETWEEN :start AND :end")
     int countLeftUsersBetween(@Param("start") OffsetDateTime start, @Param("end") OffsetDateTime end);
 
-    String findNicknameById(Long userid);
+    String findNicknameByUserId(Long userid);
 }
