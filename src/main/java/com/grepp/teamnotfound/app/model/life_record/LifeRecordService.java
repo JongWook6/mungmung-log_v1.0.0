@@ -35,7 +35,7 @@ public class LifeRecordService {
 
     // 생활기록 등록
     @Transactional
-    public void createLifeRecord(LifeRecordDto dto){
+    public Long createLifeRecord(LifeRecordDto dto){
         Pet pet = petRepository.findById(dto.getPetId())
                 .orElseThrow(() -> new PetException(PetErrorCode.PET_NOT_FOUND));
 
@@ -62,7 +62,8 @@ public class LifeRecordService {
             lifeRecord.addFeeding(feeding);
         });
 
-        lifeRecordRepository.save(lifeRecord);
+        LifeRecord savedLifeRecord = lifeRecordRepository.save(lifeRecord);
+        return savedLifeRecord.getLifeRecordId();
     }
 
     // 생활기록 조회
