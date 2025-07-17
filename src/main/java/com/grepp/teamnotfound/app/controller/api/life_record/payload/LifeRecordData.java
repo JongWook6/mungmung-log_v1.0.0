@@ -2,10 +2,14 @@ package com.grepp.teamnotfound.app.controller.api.life_record.payload;
 
 import java.time.LocalDate;
 import java.util.List;
-import lombok.Data;
+import lombok.Builder;
+import lombok.Getter;
 
-@Data
+@Getter
+@Builder
 public class LifeRecordData {
+
+    private Long lifeRecordId;
 
     private Long petId;
     private LocalDate recordAt;
