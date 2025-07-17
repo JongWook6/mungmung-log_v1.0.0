@@ -16,6 +16,7 @@ import lombok.ToString;
 public class ArticleDetailResponse {
 
     private Long articleId;
+    private Long userId;
     private String nickname;
     private String profileImgPath;
     private OffsetDateTime createdAt;
@@ -31,6 +32,7 @@ public class ArticleDetailResponse {
     @QueryProjection
     public ArticleDetailResponse(
         Long articleId,
+        Long userId,
         String nickname,
         String profileImgPath,
         OffsetDateTime createdAt,
@@ -44,6 +46,7 @@ public class ArticleDetailResponse {
         List<ArticleImgDto> images
     ) {
         this.articleId = articleId;
+        this.userId = userId;
         this.nickname = nickname;
         this.profileImgPath = profileImgPath;
         this.createdAt = createdAt;

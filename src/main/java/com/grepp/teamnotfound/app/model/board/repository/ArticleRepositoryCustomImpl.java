@@ -69,6 +69,7 @@ public class ArticleRepositoryCustomImpl implements ArticleRepositoryCustom {
         ArticleDetailResponse detailResponse = queryFactory.select(Projections.fields(
                 ArticleDetailResponse.class,
                 article.articleId,
+                user.userId,
                 user.nickname,
                 userImg.savePath.append(userImg.renamedName).as("profileImgPath"),
                 article.createdAt,
@@ -105,6 +106,7 @@ public class ArticleRepositoryCustomImpl implements ArticleRepositoryCustom {
             // isLiked 는 서브쿼리이므로 미포함
             .groupBy(
                 article.articleId,
+                user.userId,
                 user.nickname,
                 userImg.savePath,
                 userImg.renamedName,
@@ -172,6 +174,7 @@ public class ArticleRepositoryCustomImpl implements ArticleRepositoryCustom {
             .select(Projections.fields(
                 ArticleListDto.class,
                 article.articleId,
+                user.userId,
                 user.nickname,
                 userImg.savePath.append(userImg.renamedName).as("profileImgPath"),
                 article.createdAt,
@@ -203,6 +206,7 @@ public class ArticleRepositoryCustomImpl implements ArticleRepositoryCustom {
             // 집계 함수가 아닌 필드는 모두 GROUP BY 절에 포함
             .groupBy(
                 article.articleId,
+                user.userId,
                 user.nickname,
                 userImg.savePath,
                 userImg.renamedName,

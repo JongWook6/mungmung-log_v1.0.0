@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 public class ArticleListDto {
 
     private Long articleId;
+    private Long userId;
     private String nickname;
     private String profileImgPath;
     private OffsetDateTime createdAt;

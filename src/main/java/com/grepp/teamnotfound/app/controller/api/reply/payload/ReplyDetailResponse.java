@@ -13,6 +13,7 @@ public class ReplyDetailResponse {
 
     private Long articleId;
     private Long replyId;
+    private Long userId;
     private String nickname;
     private String profileImgPath;
     private String content;
@@ -23,6 +24,7 @@ public class ReplyDetailResponse {
     public ReplyDetailResponse(
         Long articleId,
         Long replyId,
+        Long userId,
         String nickname,
         String profileImgPath,
         String content,
@@ -31,6 +33,7 @@ public class ReplyDetailResponse {
     ) {
         this.articleId = articleId;
         this.replyId = replyId;
+        this.userId = userId;
         this.nickname = nickname;
         this.profileImgPath = profileImgPath;
         this.content = content;
