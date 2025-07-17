@@ -10,6 +10,6 @@ import java.util.List;
 @Builder
 public class UserStatsResponse<T> {
 
-    private OffsetDateTime viewDat;
+    private OffsetDateTime viewDate;
     private List<T> stats;
 }

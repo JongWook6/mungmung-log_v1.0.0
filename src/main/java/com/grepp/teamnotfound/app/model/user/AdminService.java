@@ -83,6 +83,7 @@ public class AdminService {
         return response;
     }
 
+    @Transactional(readOnly = true)
     public List<MonthlyArticlesStatsDto> getMonthlyArticlesStats() {
 
         OffsetDateTime now = OffsetDateTime.now();
@@ -107,6 +108,7 @@ public class AdminService {
 
     }
 
+    @Transactional(readOnly = true)
     public List<YearlyArticlesStatsDto> getYearlyArticlesStats() {
         OffsetDateTime now = OffsetDateTime.now();
 

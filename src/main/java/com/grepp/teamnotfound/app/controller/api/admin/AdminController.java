@@ -59,7 +59,7 @@ public class AdminController {
             List<MonthlyUserStatsDto> monthlyStats = adminService.getMonthlyUsersStats();
             return ResponseEntity.ok(
                     UserStatsResponse.<MonthlyUserStatsDto>builder()
-                            .viewDat(OffsetDateTime.now())
+                            .viewDate(OffsetDateTime.now())
                             .stats(monthlyStats)
                             .build());
         }
@@ -67,7 +67,7 @@ public class AdminController {
             List<YearlyUserStatsDto> yearlyStats = adminService.getYearlyUsersStats();
             return ResponseEntity.ok(
                     UserStatsResponse.<YearlyUserStatsDto>builder()
-                            .viewDat(OffsetDateTime.now())
+                            .viewDate(OffsetDateTime.now())
                             .stats(yearlyStats)
                             .build());
         }
