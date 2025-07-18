@@ -1,9 +1,15 @@
 package com.grepp.teamnotfound.infra.config;
 
+import com.grepp.teamnotfound.app.model.auth.oauth.CustomOAuth2UserService;
+import com.grepp.teamnotfound.infra.auth.oauth2.OAuth2FailureHandler;
+import com.grepp.teamnotfound.infra.auth.oauth2.OAuth2SuccessHandler;
 import com.grepp.teamnotfound.infra.auth.token.filter.AuthExceptionFilter;
 import com.grepp.teamnotfound.infra.auth.token.filter.JwtAuthenticationFilter;
 import com.grepp.teamnotfound.infra.auth.token.filter.LogoutFilter;
 import com.grepp.teamnotfound.infra.util.requestmatcher.RequestMatcherHolder;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,9 +18,11 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
@@ -22,6 +30,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -34,6 +43,33 @@ public class SecurityConfig {
     private final AuthExceptionFilter authExceptionFilter;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final RequestMatcherHolder requestMatcherHolder;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
+    private final OAuth2FailureHandler oAuth2FailureHandler;
+
+    @Bean
+    public AuthenticationSuccessHandler successHandler(){
+        return new AuthenticationSuccessHandler() {
+            @Override
+            public void onAuthenticationSuccess(HttpServletRequest request,
+                                                HttpServletResponse response, Authentication authentication)
+                    throws IOException, ServletException {
+
+                boolean isAdmin = authentication.getAuthorities()
+                        .stream()
+                        .anyMatch(authority ->
+                                authority.getAuthority().equals("ROLE_ADMIN"));
+
+                if(isAdmin){
+                    // TODO 관리자 로그인 후 메인화면(실재 화면 경로)
+                    response.sendRedirect("/");
+                    return;
+                }
+
+                // TODO 회원 로그인 후 메인화면(실재 화면 경로)
+                response.sendRedirect("/");
+            }
+        };
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, LogoutFilter logoutFilter) throws Exception {
@@ -45,15 +81,14 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
-//                .oauth2Login(oauth ->
-//                        oauth.successHandler(oAuth2SuccessHandler)
-//                                .failureHandler(oAuth2FailureHandler)
-//
-//                )
+                .oauth2Login(oauth ->
+                        oauth.successHandler(oAuth2SuccessHandler)
+                                .failureHandler(oAuth2FailureHandler)
+
+                )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(
                         authorize -> authorize
-
                                 .requestMatchers(permitAllMatcher).permitAll()
                                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll() // 프리플라이트 허용
                                 .anyRequest().authenticated()

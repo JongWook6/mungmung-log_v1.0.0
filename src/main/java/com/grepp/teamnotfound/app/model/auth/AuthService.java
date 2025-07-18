@@ -98,7 +98,7 @@ public class AuthService {
                 .build();
     }
 
-    private TokenDto processTokenLogin(Long userId) {
+    public TokenDto processTokenLogin(Long userId) {
 
         AccessTokenDto accessToken = jwtProvider.generateAccessToken(userId);
         RefreshToken refreshToken = refreshTokenService.saveWithAtId(accessToken.getId());
