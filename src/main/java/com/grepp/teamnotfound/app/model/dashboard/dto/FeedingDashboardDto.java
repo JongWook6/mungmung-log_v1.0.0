@@ -1,6 +1,6 @@
 package com.grepp.teamnotfound.app.model.dashboard.dto;
 
-import com.grepp.teamnotfound.app.model.structured_data.FeedUnit;
+import com.grepp.teamnotfound.app.model.structured_data.code.FeedUnit;
 import lombok.*;
 
 import java.time.LocalDate;

@@ -1,24 +1,17 @@
 package com.grepp.teamnotfound.app.model.dashboard;
 
-import com.grepp.teamnotfound.app.controller.api.life_record.payload.FeedingData;
 import com.grepp.teamnotfound.app.model.dashboard.dto.*;
-import com.grepp.teamnotfound.app.model.note.NoteService;
-import com.grepp.teamnotfound.app.model.note.dto.NoteDto;
-import com.grepp.teamnotfound.app.model.note.entity.Note;
+import com.grepp.teamnotfound.app.model.life_record.LifeRecordService;
+import com.grepp.teamnotfound.app.model.life_record.entity.LifeRecord;
 import com.grepp.teamnotfound.app.model.pet.PetService;
 import com.grepp.teamnotfound.app.model.pet.dto.PetDto;
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.recommend.DailyRecommendService;
 import com.grepp.teamnotfound.app.model.structured_data.FeedingService;
-import com.grepp.teamnotfound.app.model.structured_data.SleepingService;
 import com.grepp.teamnotfound.app.model.structured_data.WalkingService;
-import com.grepp.teamnotfound.app.model.structured_data.WeightService;
-import com.grepp.teamnotfound.app.model.structured_data.dto.SleepingDto;
-import com.grepp.teamnotfound.app.model.structured_data.dto.WalkingDto;
-import com.grepp.teamnotfound.app.model.structured_data.dto.WeightDto;
-import com.grepp.teamnotfound.app.model.structured_data.entity.Sleeping;
+import com.grepp.teamnotfound.app.model.structured_data.code.FeedUnit;
+import com.grepp.teamnotfound.app.model.structured_data.entity.Feeding;
 import com.grepp.teamnotfound.app.model.structured_data.entity.Walking;
-import com.grepp.teamnotfound.app.model.structured_data.entity.Weight;
 import com.grepp.teamnotfound.infra.error.exception.UserException;
 import com.grepp.teamnotfound.infra.error.exception.code.UserErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -28,22 +21,17 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class DashboardService {
 
-    private final NoteService noteService;
     private final PetService petService;
-    private final WeightService weightService;
-    private final SleepingService sleepingService;
     private final WalkingService walkingService;
     private final FeedingService feedingService;
     private final DailyRecommendService dailyRecommendService;
+    private final LifeRecordService lifeRecordService;
 
     ModelMapper modelMapper = new ModelMapper();
 
@@ -55,7 +43,7 @@ public class DashboardService {
         return dailyRecommendService.getRecommend(pet, date);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public PetDto getProfile(Long petId, Long userId) {
         Pet pet = petService.getPet(petId);
         if(!pet.getUser().getUserId().equals(userId)) throw new UserException(UserErrorCode.USER_ACCESS_DENIED);
@@ -63,119 +51,140 @@ public class DashboardService {
         return modelMapper.map(pet, PetDto.class);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public FeedingDashboardDto getFeeding(Long petId, Long userId, LocalDate date) {
         Pet pet = petService.getPet(petId);
         if(!pet.getUser().getUserId().equals(userId)) throw new UserException(UserErrorCode.USER_ACCESS_DENIED);
+        // 기록일별 생활기록id 가져오기
+        Map<Long, LocalDate> lifeRecordIds = lifeRecordService.get7LifeRecordList(pet, date);
+        // 기록일별 식사량 리스트 가져오기
+        Map<LocalDate, List<Feeding>> feedingList = feedingService.getFeedingList(lifeRecordIds);
+        if (feedingList.isEmpty()) return FeedingDashboardDto.builder().average(0.0).build();
+        Map<LocalDate, Double> dailyFeeding = calculateDailyFeeding(feedingList);
 
-        List<FeedingData> datas = feedingService.getFeedingList(petId, date);
-        if (datas.isEmpty()) return FeedingDashboardDto.builder().average(feedingService.getFeedingAverage(pet, date)).build();
-        Double amount = 0.0;
+        double total = dailyFeeding.values().stream()
+                .mapToDouble(Double::doubleValue)
+                .sum();
 
-        for(FeedingData data : datas){
-            amount += data.getAmount();
-        }
+        FeedUnit unit = feedingList.values().stream()
+                .flatMap(List::stream)
+                .map(Feeding::getUnit)
+                .findFirst()
+                .orElse(null);
 
         return FeedingDashboardDto.builder()
-                .amount(amount)
-                .average(feedingService.getFeedingAverage(pet, date))
-                .unit(datas.getFirst().getUnit())
+                .amount(dailyFeeding.get(date))
+                .average(total / dailyFeeding.size())
+                .unit(unit)
                 .date(date)
                 .build();
     }
 
-    @Transactional
-    public NoteDto getNote(Long petId, Long userId, LocalDate date) {
-        Pet pet = petService.getPet(petId);
-        if(!pet.getUser().getUserId().equals(userId)) throw new UserException(UserErrorCode.USER_ACCESS_DENIED);
-
-        Note note = noteService.findNote(petId, date);
-        NoteDto dto = NoteDto.builder()
-                .petId(petId)
-                .noteId(note.getNoteId())
-                .content(note.getContent())
-                .recordedAt(note.getRecordedAt()).build();
-
-        return dto;
-    }
-
-    @Transactional
+    @Transactional(readOnly = true)
     public WalkingDashboardDto getWalking(Long petId, Long userId, LocalDate date) {
         Pet pet = petService.getPet(petId);
         if(!pet.getUser().getUserId().equals(userId)) throw new UserException(UserErrorCode.USER_ACCESS_DENIED);
 
-        List<Walking> walkings = walkingService.getWalkingListDays(pet, date);
+        // 기록일 별로 정리
+        Map<Long, LocalDate> lifeRecordIds = lifeRecordService.get9LifeRecordList(pet, date);
+        Map<LocalDate, List<Walking>> walkingListMap = walkingService.getWalkingList(lifeRecordIds);
 
         WalkingDashboardDto dto = new WalkingDashboardDto(new ArrayList<>());
-        Map<LocalDate, DayWalking> dayWalkingMap = new HashMap<>();
-        Map<LocalDate, Integer> dayCnt = new HashMap<>();
+        if (walkingListMap.isEmpty()) return dto;
 
-        // 하루 산책량 총합 계산, 산책 횟수 계산
-        for (Walking walking:walkings){
-            LocalDate day = walking.getRecordedAt();
-            long time = Duration.between(walking.getStartTime(), walking.getEndTime()).toMinutes();
+        // 날짜별 계산
+        for (Map.Entry<LocalDate, List<Walking>> entry : walkingListMap.entrySet()) {
+            LocalDate recordDate = entry.getKey();
+            List<Walking> walkings = entry.getValue();
 
-            if (dayWalkingMap.containsKey(day)) {
-                DayWalking existing = dayWalkingMap.get(day);
-                existing.setTime(existing.getTime() + time);
-                existing.setPace(existing.getPace() + walking.getPace());
-                dayCnt.replace(day, dayCnt.get(day) + 1);
-            } else {
-                dayWalkingMap.put(day,
-                        DayWalking.builder()
-                                .date(walking.getRecordedAt())
-                                .time(time)
-                                .pace(walking.getPace())
-                                .build());
-                dayCnt.put(day, 1);
+            long totalMinutes = 0;
+            int totalPace = 0;
+
+            for (Walking walking : walkings) {
+                long minutes = Duration.between(walking.getStartTime(), walking.getEndTime()).toMinutes();
+                totalMinutes += minutes;
+                totalPace += walking.getPace();
             }
+
+            int averagePace = walkings.isEmpty() ? 0 : totalPace / walkings.size();
+
+            DayWalking dayWalking = DayWalking.builder()
+                    .date(recordDate)
+                    .time(totalMinutes)
+                    .pace(averagePace).build();
+
+            dto.getWalkingList().add(dayWalking);
         }
-
-        // 하루 평균 pace 계산
-        for (Map.Entry<LocalDate, DayWalking> entry : dayWalkingMap.entrySet()) {
-            LocalDate day = entry.getKey();
-            DayWalking daily = entry.getValue();
-
-            int cnt = dayCnt.get(day);
-            daily.setPace(daily.getPace() / cnt);
-        }
-
-        dto.getWalkingList().addAll(dayWalkingMap.values());
-
         return dto;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public WeightDashboardDto getWeight(Long petId, Long userId, LocalDate date) {
         Pet pet = petService.getPet(petId);
         if(!pet.getUser().getUserId().equals(userId)) throw new UserException(UserErrorCode.USER_ACCESS_DENIED);
 
-        List<Weight> weights = weightService.getWeightList(pet, date);
+        List<LifeRecord> lifeRecords = lifeRecordService.getWeightLifeRecordList(pet, date);
+        if (lifeRecords.isEmpty()) return new WeightDashboardDto(new ArrayList<>());
+
         WeightDashboardDto dtos = new WeightDashboardDto(new ArrayList<>());
 
-        for (Weight weight : weights){
+        for (LifeRecord lifeRecord : lifeRecords){
             dtos.getWeightList().add(DayWeight.builder()
-                    .weight(weight.getWeight())
-                    .date(weight.getRecordedAt()).build());
+                    .weight(lifeRecord.getWeight())
+                    .date(lifeRecord.getRecordedAt()).build());
         }
 
         return dtos;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public SleepingDashboardDto getSleeping(Long petId, Long userId, LocalDate date) {
         Pet pet = petService.getPet(petId);
         if(!pet.getUser().getUserId().equals(userId)) throw new UserException(UserErrorCode.USER_ACCESS_DENIED);
 
-        List<Sleeping> sleepings = sleepingService.getSleepingList(pet, date);
+        List<LifeRecord> lifeRecords = lifeRecordService.getSleepingLifeRecordList(pet, date);
+        if (lifeRecords.isEmpty()) return new SleepingDashboardDto(new ArrayList<>());
+
         SleepingDashboardDto dtos = new SleepingDashboardDto(new ArrayList<>());
 
-        for(Sleeping sleeping: sleepings){
+        for(LifeRecord sleeping: lifeRecords){
             dtos.getSleepingList().add(DaySleeping.builder()
                             .sleep(sleeping.getSleepingTime())
                             .date(sleeping.getRecordedAt()).build());
         }
 
         return dtos;
+    }
+
+    @Transactional(readOnly = true)
+    public String getNote(Long petId, Long userId, LocalDate date) {
+        Pet pet = petService.getPet(petId);
+        if(!pet.getUser().getUserId().equals(userId)) throw new UserException(UserErrorCode.USER_ACCESS_DENIED);
+
+        Optional<Long> lifeRecordId = lifeRecordService.findLifeRecordId(petId, date);
+        if (lifeRecordId.isEmpty()) return "";
+
+        return lifeRecordService.getLifeRecord(lifeRecordId.get()).getContent();
+    }
+
+    public Map<LocalDate, Double> calculateDailyFeeding(Map<LocalDate, List<Feeding>> feedingList) {
+        Map<LocalDate, Double> feedingMap = new HashMap<>();
+
+        for (Map.Entry<LocalDate, List<Feeding>> entry : feedingList.entrySet()) {
+            LocalDate date = entry.getKey();
+            List<Feeding> feedings = entry.getValue();
+
+            if (feedings == null || feedings.isEmpty()) {
+                continue;
+            }
+
+            double amount = feedings.stream()
+                    .mapToDouble(Feeding::getAmount)
+                    .sum();
+
+            feedingMap.put(date, amount);
+        }
+
+        return feedingMap;
     }
 }

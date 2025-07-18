@@ -3,17 +3,13 @@ package com.grepp.teamnotfound.app.controller.api.dashboard;
 import com.grepp.teamnotfound.app.controller.api.dashboard.payload.*;
 import com.grepp.teamnotfound.app.model.dashboard.DashboardService;
 import com.grepp.teamnotfound.app.model.dashboard.dto.*;
-import com.grepp.teamnotfound.app.model.note.dto.NoteDto;
 import com.grepp.teamnotfound.app.model.pet.dto.PetDto;
-import com.grepp.teamnotfound.app.model.structured_data.dto.SleepingDto;
-import com.grepp.teamnotfound.app.model.structured_data.dto.WeightDto;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -65,8 +61,8 @@ public class DashboardApiController {
             @RequestParam Long userId,
             @RequestParam LocalDate date
     ){
-        NoteDto noteDto = dashboardService.getNote(petId, userId, date);
-        NoteResponse response = modelMapper.map(noteDto, NoteResponse.class);
+        String note = dashboardService.getNote(petId, userId, date);
+        NoteResponse response = NoteResponse.builder().content(note).date(date).build();
         return ResponseEntity.ok(response);
     }
 

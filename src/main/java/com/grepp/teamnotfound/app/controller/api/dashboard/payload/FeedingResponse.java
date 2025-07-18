@@ -1,6 +1,6 @@
 package com.grepp.teamnotfound.app.controller.api.dashboard.payload;
 
-import com.grepp.teamnotfound.app.model.structured_data.FeedUnit;
+import com.grepp.teamnotfound.app.model.structured_data.code.FeedUnit;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

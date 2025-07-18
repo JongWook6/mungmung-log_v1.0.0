@@ -1,14 +1,17 @@
 package com.grepp.teamnotfound.app.model.structured_data;
 
 import com.grepp.teamnotfound.app.model.life_record.entity.LifeRecord;
-import com.grepp.teamnotfound.app.controller.api.life_record.payload.WalkingData;
-import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.structured_data.dto.WalkingDto;
 import com.grepp.teamnotfound.app.model.structured_data.entity.Walking;
 import com.grepp.teamnotfound.app.model.structured_data.repository.WalkingRepository;
+
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,7 +63,19 @@ public class WalkingService {
         walkingRepository.delete(lifeRecordId);
     }
 
-    public List<Walking> getWalkingListDays(Pet pet, LocalDate date) {
-        return walkingRepository.findAllByPetAndRecordedAtBetween(pet, date.minusDays(9), date).orElse(new ArrayList<>());
+    public Map<LocalDate, List<Walking>> getWalkingList(Map<Long, LocalDate> lifeRecordIds) {
+        List<Long> ids = new ArrayList<>(lifeRecordIds.keySet());
+        List<Walking> walkings = walkingRepository.findAllByLifeRecord_LifeRecordIdIn(ids);
+
+        // 기록일 별로 정리
+        Map<LocalDate, List<Walking>> result = new HashMap<>();
+        for (Walking walking : walkings) {
+            Long lifeRecordId = walking.getLifeRecord().getLifeRecordId();
+            LocalDate recordedDate = lifeRecordIds.get(lifeRecordId);
+
+            result.computeIfAbsent(recordedDate, k -> new ArrayList<>()).add(walking);
+        }
+
+        return result;
     }
 }
