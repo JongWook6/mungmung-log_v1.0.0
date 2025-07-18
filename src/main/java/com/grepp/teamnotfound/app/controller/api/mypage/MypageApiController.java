@@ -66,15 +66,16 @@ public class MypageApiController {
      * 펫 관련 API
      **/
 
-    @PostMapping("/v2/pets")
+    @PostMapping(value = "/v2/pets", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> createPet(
-        @RequestBody @Valid PetWriteRequest request,
+        @RequestPart("request") PetWriteRequest request,
+        @RequestPart(value = "images", required = false) List<MultipartFile> images,
         @AuthenticationPrincipal Principal principal
     ) {
         Long userId = principal.getUserId();
 
-        return ResponseEntity.ok(petService.create(userId, request));
+        return ResponseEntity.ok(petService.create(userId, request, images));
     }
 
     @GetMapping("/v1/pets/{petId}")
@@ -86,13 +87,14 @@ public class MypageApiController {
         return ResponseEntity.ok(petDto);
     }
 
-    @PutMapping("/v2/pets/{petId}")
+    @PutMapping(value = "/v2/pets/{petId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> updatePet(
         @PathVariable(name = "petId") Long petId,
-        @RequestBody @Valid PetWriteRequest request
+        @RequestPart("request") PetWriteRequest request,
+        @RequestPart(value = "images", required = false) List<MultipartFile> images
     ) {
-        return ResponseEntity.ok(petService.update(petId, request));
+        return ResponseEntity.ok(petService.update(petId, request, images));
     }
 
     @DeleteMapping("/v2/pets/{petId}")
