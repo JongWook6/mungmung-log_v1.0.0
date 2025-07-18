@@ -33,8 +33,6 @@ public class ScheduleApiController {
             @RequestParam Long userId,
             @RequestParam LocalDate date
             ){
-        //todo 요청한 유저가 맞는지 검증로직
-
         List<ScheduleDto> schedules = scheduleService.getCalendar(userId, date);
 
         return ResponseEntity.ok(Map.of("data", schedules));
