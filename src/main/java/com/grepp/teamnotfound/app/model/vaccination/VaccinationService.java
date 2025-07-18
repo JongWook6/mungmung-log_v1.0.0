@@ -4,6 +4,9 @@ package com.grepp.teamnotfound.app.model.vaccination;
 import com.grepp.teamnotfound.app.controller.api.mypage.payload.VaccineWriteRequest;
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.pet.repository.PetRepository;
+import com.grepp.teamnotfound.app.model.schedule.ScheduleService;
+import com.grepp.teamnotfound.app.model.schedule.code.ScheduleCycle;
+import com.grepp.teamnotfound.app.model.schedule.dto.ScheduleCreateRequestDto;
 import com.grepp.teamnotfound.app.model.vaccination.code.VaccineName;
 import com.grepp.teamnotfound.app.model.vaccination.code.VaccineType;
 import com.grepp.teamnotfound.app.model.vaccination.dto.VaccinationDto;
@@ -13,7 +16,9 @@ import com.grepp.teamnotfound.app.model.vaccination.repository.VaccinationReposi
 import com.grepp.teamnotfound.app.model.vaccination.repository.VaccineRepository;
 import com.grepp.teamnotfound.infra.error.exception.BusinessException;
 import com.grepp.teamnotfound.infra.error.exception.PetException;
+import com.grepp.teamnotfound.infra.error.exception.UserException;
 import com.grepp.teamnotfound.infra.error.exception.code.PetErrorCode;
+import com.grepp.teamnotfound.infra.error.exception.code.UserErrorCode;
 import com.grepp.teamnotfound.infra.error.exception.code.VaccinationErrorCode;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -38,6 +43,7 @@ public class VaccinationService {
     private final VaccinationRepository vaccinationRepository;
     private final VaccineRepository vaccineRepository;
     private final PetRepository petRepository;
+    private final ScheduleService scheduleService;
 
     ModelMapper modelMapper = new ModelMapper();
 
@@ -167,5 +173,56 @@ public class VaccinationService {
     @Transactional
     public void softDelete(Long petId) {
         vaccinationRepository.softDeleteAll(petId, OffsetDateTime.now());
+    }
+
+    @Transactional
+    public void createVaccinationSchedule(Long petId, Long userId){
+        Pet pet = petRepository.findById(petId)
+                .orElseThrow(() -> new PetException(PetErrorCode.PET_NOT_FOUND));
+        if(!pet.getUser().getUserId().equals(userId)) throw new UserException(UserErrorCode.USER_ACCESS_DENIED);
+
+        List<Vaccination> vaccinationDtos = vaccinationRepository.findByPet(petId);
+
+        for(Vaccination dto: vaccinationDtos) {
+
+            Vaccine vaccine = vaccineRepository.findById(dto.getVaccine().getVaccineId())
+                    .orElseThrow(() -> new BusinessException(VaccinationErrorCode.VACCINE_NOT_FOUND));
+
+            // 각 백신에 맞는 일정 등록 로직
+            if (dto.getVaccineType().equals(VaccineType.BOOSTER)) {
+                // 보강 접종(1년 단위)
+                ScheduleCreateRequestDto scheduleDto = ScheduleCreateRequestDto.builder()
+                        .userId(pet.getUser().getUserId())
+                        .petId(pet.getPetId())
+                        .name(vaccine.getName() + " 다음 접종일")
+                        .date(dto.getVaccineAt().plusMonths(vaccine.getAdditionalCycle()))
+                        .cycle(ScheduleCycle.YEAR)
+                        .cycleEnd(dto.getVaccineAt().plusYears(31))
+                        .build();
+                scheduleService.createSchedule(scheduleDto);
+
+            } else if (dto.getCount() <= vaccine.getBoosterCount()) {
+                // 추가 접종(2주 단위)
+                LocalDate cycleEndDate = dto.getVaccineAt().plusWeeks((long) (vaccine.getBoosterCount() - dto.getCount()) * vaccine.getBoosterCycle());
+                ScheduleCreateRequestDto scheduleDto = ScheduleCreateRequestDto.builder()
+                        .userId(pet.getUser().getUserId())
+                        .petId(pet.getPetId()).name(vaccine.getName() + " 다음 접종일")
+                        .date(dto.getVaccineAt().plusWeeks(vaccine.getBoosterCycle()))
+                        .cycle(ScheduleCycle.TWO_WEEK)
+                        .cycleEnd(cycleEndDate)
+                        .build();
+                scheduleService.createSchedule(scheduleDto);
+
+                // 보강 접종 완료 후 추가 접종(1년 단위)
+                ScheduleCreateRequestDto scheduleDto2 = ScheduleCreateRequestDto.builder()
+                        .userId(pet.getUser().getUserId())
+                        .petId(pet.getPetId()).name(vaccine.getName() + " 다음 접종일")
+                        .date(cycleEndDate.plusYears(1))
+                        .cycle(ScheduleCycle.YEAR)
+                        .cycleEnd(cycleEndDate.plusYears(31))
+                        .build();
+                scheduleService.createSchedule(scheduleDto2);
+            }
+        }
     }
 }
