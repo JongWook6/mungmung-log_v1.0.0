@@ -41,6 +41,12 @@ public class ScheduleNoti extends BaseEntity {
     @Column(nullable = false)
     private String content;
 
+    @Column
+    private Boolean isRead = false;
+
+    @Column(nullable = false)
+    private LocalDate notiDate;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

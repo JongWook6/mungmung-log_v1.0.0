@@ -45,6 +45,9 @@ public class ServiceNoti extends BaseEntity {
     @Column(nullable = false)
     private String content;
 
+    @Column
+    private Boolean isRead = false;
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private NotiType notificationType;

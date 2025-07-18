@@ -1,10 +1,14 @@
 package com.grepp.teamnotfound.app.controller.api.notification;
 
+import com.grepp.teamnotfound.app.model.auth.domain.Principal;
 import com.grepp.teamnotfound.app.model.notification.NotificationService;
-import com.grepp.teamnotfound.app.model.notification.code.NotiTarget;
+import com.grepp.teamnotfound.app.model.notification.code.NotiType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,27 +24,42 @@ public class NotificationApiController {
 
     private final NotificationService notificationService;
 
-    @GetMapping("/v1/users/{userId}")
+    /**
+     * 알림 조회 관련
+     **/
+//    @GetMapping("/v1/setting")
+//    @PreAuthorize("isAuthenticated()")
+//    public ResponseEntity<?> getNotification(
+//        @AuthenticationPrincipal Principal principal
+//    ) {
+//        Long userId = principal.getUserId();
+//
+//        return ResponseEntity.ok(notificationService.getUserNoti(userId));
+//    }
+
+    /**
+    * 알림 설정 관련
+    **/
+    @GetMapping("/v1/setting")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getUserNotificationSetting(
-        @PathVariable("userId") Long userId
+        @AuthenticationPrincipal Principal principal
     ) {
+        Long userId = principal.getUserId();
+
         return ResponseEntity.ok(notificationService.getUserSetting(userId));
     }
 
-    @PatchMapping("/v1/users/{userId}/setting")
+    @PatchMapping("/v1/setting")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> changeNotificationSetting(
-        @PathVariable("userId") Long userId,
-        @RequestParam("target") NotiTarget target
+        @RequestParam("target") NotiTar target,
+        @AuthenticationPrincipal Principal principal
     ) {
+        Long userId = principal.getUserId();
+
         return ResponseEntity.ok(notificationService.changeNotiSetting(userId, target));
     }
-//
-//    @PatchMapping("/v1/{notiId}/read")
-//    public ResponseEntity<?> readNotification(
-//        @PathVariable("notiId") Long notiId
-//    ) {
-//
-//    }
 
     /**
      * 알림 읽기 관련
