@@ -1,12 +1,15 @@
 package com.grepp.teamnotfound.app.controller.api.dashboard;
 
 import com.grepp.teamnotfound.app.controller.api.dashboard.payload.*;
+import com.grepp.teamnotfound.app.model.auth.domain.Principal;
 import com.grepp.teamnotfound.app.model.dashboard.DashboardService;
 import com.grepp.teamnotfound.app.model.dashboard.dto.*;
 import com.grepp.teamnotfound.app.model.pet.dto.PetDto;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -15,6 +18,7 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(value = "api/dashboard")
+@PreAuthorize("isAuthenticated()")
 public class DashboardApiController {
 
     private final DashboardService dashboardService;
@@ -23,22 +27,22 @@ public class DashboardApiController {
     @GetMapping("/{petId}/recommend")
     public ResponseEntity<?> getDashboardRecommend(
             @PathVariable Long petId,
-            @RequestParam Long userId,
-            @RequestParam LocalDate date
-            ){
-        String recommend = dashboardService.getRecommend(petId, userId, date);
+            @RequestParam LocalDate date,
+            @AuthenticationPrincipal Principal principal
+    ){
+        String recommend = dashboardService.getRecommend(petId, principal.getUserId(), date);
 
         return ResponseEntity.ok(Map.of("recommend", recommend));
     }
 
-    // 프로필에 견종 추가
     @GetMapping("/{petId}/dog-profile")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getDashboardProfile(
             @PathVariable Long petId,
-            @RequestParam Long userId,
-            @RequestParam LocalDate date
+            @RequestParam LocalDate date,
+            @AuthenticationPrincipal Principal principal
     ){
-        PetDto petDto = dashboardService.getProfile(petId, userId);
+        PetDto petDto = dashboardService.getProfile(petId, principal.getUserId());
         ProfileResponse response = modelMapper.map(petDto, ProfileResponse.class);
 
         return ResponseEntity.ok(response);
@@ -47,10 +51,10 @@ public class DashboardApiController {
     @GetMapping("/{petId}/feeding")
     public ResponseEntity<?> getDashboardFeeding(
             @PathVariable Long petId,
-            @RequestParam Long userId,
-            @RequestParam LocalDate date
+            @RequestParam LocalDate date,
+            @AuthenticationPrincipal Principal principal
     ){
-        FeedingDashboardDto feedingDashboardDto = dashboardService.getFeeding(petId, userId, date);
+        FeedingDashboardDto feedingDashboardDto = dashboardService.getFeeding(petId, principal.getUserId(), date);
         FeedingResponse response = modelMapper.map(feedingDashboardDto, FeedingResponse.class);
         return ResponseEntity.ok(response);
     }
@@ -58,10 +62,10 @@ public class DashboardApiController {
     @GetMapping("/{petId}/note")
     public ResponseEntity<?> getDashboardNote(
             @PathVariable Long petId,
-            @RequestParam Long userId,
-            @RequestParam LocalDate date
+            @RequestParam LocalDate date,
+            @AuthenticationPrincipal Principal principal
     ){
-        String note = dashboardService.getNote(petId, userId, date);
+        String note = dashboardService.getNote(petId, principal.getUserId(), date);
         NoteResponse response = NoteResponse.builder().content(note).date(date).build();
         return ResponseEntity.ok(response);
     }
@@ -70,10 +74,10 @@ public class DashboardApiController {
     @GetMapping("/{petId}/walking")
     public ResponseEntity<?> getDashboardWalking(
             @PathVariable Long petId,
-            @RequestParam Long userId,
-            @RequestParam LocalDate date
+            @RequestParam LocalDate date,
+            @AuthenticationPrincipal Principal principal
     ){
-        WalkingDashboardDto walkingDtos = dashboardService.getWalking(petId, userId, date);
+        WalkingDashboardDto walkingDtos = dashboardService.getWalking(petId, principal.getUserId(), date);
         WalkingResponse response = modelMapper.map(walkingDtos, WalkingResponse.class);
         return ResponseEntity.ok(response);
     }
@@ -82,10 +86,10 @@ public class DashboardApiController {
     @GetMapping("/{petId}/weight")
     public ResponseEntity<?> getDashboardWeight(
             @PathVariable Long petId,
-            @RequestParam Long userId,
-            @RequestParam LocalDate date
+            @RequestParam LocalDate date,
+            @AuthenticationPrincipal Principal principal
     ){
-        WeightDashboardDto weightDashboardDto = dashboardService.getWeight(petId, userId, date);
+        WeightDashboardDto weightDashboardDto = dashboardService.getWeight(petId, principal.getUserId(), date);
         WeightResponse response = modelMapper.map(weightDashboardDto, WeightResponse.class);
         return ResponseEntity.ok(response);
     }
@@ -94,10 +98,10 @@ public class DashboardApiController {
     @GetMapping("/{petId}/sleeping")
     public ResponseEntity<?> getDashboardSleeping(
             @PathVariable Long petId,
-            @RequestParam Long userId,
-            @RequestParam LocalDate date
+            @RequestParam LocalDate date,
+            @AuthenticationPrincipal Principal principal
     ){
-        SleepingDashboardDto sleepingDtos = dashboardService.getSleeping(petId, userId, date);
+        SleepingDashboardDto sleepingDtos = dashboardService.getSleeping(petId, principal.getUserId(), date);
         SleepingResponse response = modelMapper.map(sleepingDtos, SleepingResponse.class);
         return ResponseEntity.ok(response);
     }
