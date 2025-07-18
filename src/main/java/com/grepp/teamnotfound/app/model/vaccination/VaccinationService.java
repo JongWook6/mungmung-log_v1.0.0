@@ -189,24 +189,24 @@ public class VaccinationService {
                     .orElseThrow(() -> new BusinessException(VaccinationErrorCode.VACCINE_NOT_FOUND));
 
             // 각 백신에 맞는 일정 등록 로직
-            if (dto.getVaccineType().equals(VaccineType.BOOSTER)) {
+            if (dto.getVaccineType().equals(VaccineType.ADDITIONAL)) {
                 // 보강 접종(1년 단위)
                 ScheduleCreateRequestDto scheduleDto = ScheduleCreateRequestDto.builder()
                         .userId(pet.getUser().getUserId())
                         .petId(pet.getPetId())
-                        .name(vaccine.getName() + " 다음 접종일")
+                        .name(vaccine.getName() + " 보강 접종일")
                         .date(dto.getVaccineAt().plusMonths(vaccine.getAdditionalCycle()))
                         .cycle(ScheduleCycle.YEAR)
                         .cycleEnd(dto.getVaccineAt().plusYears(31))
                         .build();
                 scheduleService.createSchedule(scheduleDto);
 
-            } else if (dto.getCount() <= vaccine.getBoosterCount()) {
+            } else if (dto.getCount() <= vaccine.getBoosterCount() + 1) {
                 // 추가 접종(2주 단위)
-                LocalDate cycleEndDate = dto.getVaccineAt().plusWeeks((long) (vaccine.getBoosterCount() - dto.getCount()) * vaccine.getBoosterCycle());
+                LocalDate cycleEndDate = dto.getVaccineAt().plusWeeks((long) (vaccine.getBoosterCount() + 1 - dto.getCount()) * vaccine.getBoosterCycle() + 1);
                 ScheduleCreateRequestDto scheduleDto = ScheduleCreateRequestDto.builder()
                         .userId(pet.getUser().getUserId())
-                        .petId(pet.getPetId()).name(vaccine.getName() + " 다음 접종일")
+                        .petId(pet.getPetId()).name(vaccine.getName() + " 추가 접종일")
                         .date(dto.getVaccineAt().plusWeeks(vaccine.getBoosterCycle()))
                         .cycle(ScheduleCycle.TWO_WEEK)
                         .cycleEnd(cycleEndDate)
@@ -216,7 +216,7 @@ public class VaccinationService {
                 // 보강 접종 완료 후 추가 접종(1년 단위)
                 ScheduleCreateRequestDto scheduleDto2 = ScheduleCreateRequestDto.builder()
                         .userId(pet.getUser().getUserId())
-                        .petId(pet.getPetId()).name(vaccine.getName() + " 다음 접종일")
+                        .petId(pet.getPetId()).name(vaccine.getName() + " 보강 접종일")
                         .date(cycleEndDate.plusYears(1))
                         .cycle(ScheduleCycle.YEAR)
                         .cycleEnd(cycleEndDate.plusYears(31))
