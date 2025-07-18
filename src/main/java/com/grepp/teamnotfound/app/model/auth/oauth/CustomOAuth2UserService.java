@@ -31,6 +31,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
 
+        // TODO RequestURI : 프론트가 전송해야 하는 경로 공유
+        // naver : /login/oauth2/code/naver
+        // google : /login/oauth2/code/google
+
         // 리소스가 제공하는 유저 정보
         OAuth2User oAuth2User = super.loadUser(userRequest);
 
@@ -79,6 +83,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         OAuth2UserDto userDto = OAuth2UserDto.builder()
                 .email(user.getEmail())
                 .name(user.getName())
+                .userId(user.getUserId())
                 .role("ROLE_USER")
                 .build();
 

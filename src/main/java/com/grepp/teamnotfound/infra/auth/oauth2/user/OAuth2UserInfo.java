@@ -7,12 +7,13 @@ public interface OAuth2UserInfo {
 
     // 제공자가 발급하는 id
     String getProviderId();
-    // 제공자(naver, google, ...)
+    // 제공자(naver, google, ...) -> User Entity의 provider
     String getProvider();
-    // 사용자 실명
+    // 사용자 실명 -> User Entity의 name
     String getName();
-    // 사용자 이메일
+    // 사용자 이메일 -> User Entity의 email
     String getEmail();
+
 
     static OAuth2UserInfo create(String path, OAuth2User user) {
         if(path.equals("/login/oauth2/code/naver"))
@@ -21,8 +22,7 @@ public interface OAuth2UserInfo {
         if(path.equals("/login/oauth2/code/google"))
             return new GoogleOAuth2UserInfo(user.getAttributes());
 
-        //TODO 확인 필요
-        return null;
+        throw new IllegalArgumentException("부적합한 경로 요청 : " + path);
     }
 
 }

@@ -9,5 +9,6 @@ public class OAuth2UserDto {
 
     private String name;
     private String email;
+    private Long userId;
     private String role;
 }
