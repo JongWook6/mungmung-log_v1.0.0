@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -72,7 +73,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             user = optionalUser.get();
         } else {
             log.info("2️⃣-3️⃣ 기존에 존재하는 다른 공급자 email - oAuth2UserInfo.getEmail: {}", oAuth2UserInfo.getEmail());
-            throw new OAuth2AuthenticationException("다른 provider로 가입된 이메일: " + oAuth2UserInfo.getEmail());
+            // TODO 커스텀 에러 필요
+            OAuth2Error error = new OAuth2Error("INVALID_PROVIDER", "다른 provider로 가입된 이메일", null);
+            throw new OAuth2AuthenticationException(error, "다른 provider로 가입된 이메일: " + oAuth2UserInfo.getEmail());
         }
 
         // 인증 객체 생성을 위한 dto
