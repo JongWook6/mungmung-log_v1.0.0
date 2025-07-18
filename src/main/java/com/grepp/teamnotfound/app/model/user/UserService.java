@@ -94,19 +94,37 @@ public class UserService {
         mailService.sendVerificationEmail(email);
     }
 
+    @Transactional(readOnly = true)
     public void validateEmailDuplication(String email) {
         userRepository.findByEmail(email).ifPresent(user -> {
             throw new BusinessException(UserErrorCode.USER_EMAIL_ALREADY_EXISTS);
         });
     }
 
+    @Transactional(readOnly = true)
     public void validateNicknameDuplication(String nickname) {
         userRepository.findByNickname(nickname).ifPresent(user -> {
             throw new BusinessException(UserErrorCode.USER_NICKNAME_ALREADY_EXISTS);
         });
     }
 
+    @Transactional(readOnly = true)
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
+    }
+
+    @Transactional(readOnly = true)
+    public String getRequiredUserNickname(Long userId) {
+        return userRepository.findNicknameByUserId(userId);
+    }
+
+    public String getProfileImgPath(Long userId) {
+        String profileImgPath = null;
+        Optional<UserImg> optionalUserImg = userImgRepository.findByUser_UserIdAndDeletedAtIsNull(userId);
+        if (optionalUserImg.isPresent()) {
+            UserImg userImg = optionalUserImg.get();
+            profileImgPath = userImg.getSavePath() + userImg.getRenamedName();
+        }
+        return profileImgPath;
     }
 }

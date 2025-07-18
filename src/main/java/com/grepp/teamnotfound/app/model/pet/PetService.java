@@ -80,8 +80,8 @@ public class PetService {
     }
 
     @Transactional
-    public Long create(PetWriteRequest request) {
-        User user = userRepository.findById(request.getUserId())
+    public Pet create(Long userId, PetWriteRequest request) {
+        User user = userRepository.findById(userId)
             .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
 
         if (request.getMetday().isBefore(request.getBirthday())) {
@@ -90,17 +90,16 @@ public class PetService {
 
         Pet pet = new Pet();
 
-        modelMapper.getConfiguration().setPropertyCondition(ctx -> !ctx.getMapping().getLastDestinationProperty().getName().equals("petId"));
         modelMapper.map(request, pet);
         pet.setUser(user);
 
         petRepository.save(pet);
 
-        return pet.getPetId();
+        return pet;
     }
 
     @Transactional
-    public Long update(Long petId, PetWriteRequest request) {
+    public PetDto update(Long petId, PetWriteRequest request) {
         Pet pet = petRepository.findById(petId)
             .orElseThrow(() -> new BusinessException(PetErrorCode.PET_NOT_FOUND));
 
@@ -110,10 +109,11 @@ public class PetService {
 
         modelMapper.map(request, pet);
         pet.setUpdatedAt(OffsetDateTime.now());
+        pet.setUser(pet.getUser());
 
         petRepository.save(pet);
 
-        return pet.getPetId();
+        return PetDto.fromEntity(pet);
     }
 
     @Transactional
