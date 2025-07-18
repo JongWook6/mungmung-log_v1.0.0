@@ -101,4 +101,31 @@ public class NotificationService {
         return dto;
     }
 
+    @Transactional
+    public void deleteNoti(Long notiId, NotiType type) {
+        if (type == NotiType.SCHEDULE) {
+            ScheduleNoti scheduleNoti = scheduleNotiRepository.findById(notiId)
+                .orElseThrow(() -> new BusinessException(NotificationErrorCode.NOTIFICATION_NOT_FOUND));
+
+            scheduleNoti.setDeletedAt(OffsetDateTime.now());
+
+        } else if (SERVICE_TYPES.contains(type)) {
+            ServiceNoti serviceNoti = serviceNotiRepository.findById(notiId)
+                .orElseThrow(() -> new BusinessException(NotificationErrorCode.NOTIFICATION_NOT_FOUND));
+
+            serviceNoti.setDeletedAt(OffsetDateTime.now());
+
+        } else {
+            throw new BusinessException(NotificationErrorCode.NOTIFICATION_NOT_FOUND);
+        }
+    }
+
+    @Transactional
+    public void deleteAllNoti(Long userId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+
+        scheduleNotiRepository.deleteAllByUser(user.getUserId());
+        serviceNotiRepository.deleteAllByUser(user.getUserId());
+    }
 }

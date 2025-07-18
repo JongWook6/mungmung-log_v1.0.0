@@ -41,4 +41,28 @@ public class NotificationApiController {
 //    ) {
 //
 //    }
+    /**
+     * 알림 삭제 관련
+     **/
+    @DeleteMapping("/v1/notifications/{notiId}/{type}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> deleteNotification(
+        @PathVariable("notiId") Long notiId,
+        @PathVariable("type") NotiType type
+    ) {
+        notificationService.deleteNoti(notiId, type);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/v1")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> deleteAllNotification(
+        @AuthenticationPrincipal Principal principal
+    ) {
+        Long userId = principal.getUserId();
+
+        notificationService.deleteAllNoti(userId);
+
+        return ResponseEntity.ok().build();
+    }
 }
