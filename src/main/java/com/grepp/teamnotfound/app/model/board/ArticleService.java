@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -54,6 +55,7 @@ public class ArticleService {
     private final ArticleImgRepository articleImgRepository;
     private final ArticleLikeRepository articleLikeRepository;
     private final ReplyRepository replyRepository;
+    private final RedisLikeService redisLikeService;
 
     @Transactional
     public ArticleListResponse getArticles(ArticleListRequest request) {
@@ -249,6 +251,60 @@ public class ArticleService {
         articleLikeRepository.delete(result.get());
         Integer totalCount = articleLikeRepository.countByArticle_ArticleId(articleId);
         return new LikeResponse(articleId, totalCount, false);
+    }
+
+    @Transactional
+    public LikeResponse likeWithRedis(Long articleId, Long userId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));
+        Article article = articleRepository.findById(articleId)
+            .orElseThrow(() -> new BoardException(BoardErrorCode.ARTICLE_NOT_FOUND));
+
+        redisLikeService.addLikeRequest(articleId, userId);
+        redisLikeService.removeUnlikeRequestIfExist(articleId, userId); // 충돌 방지
+        redisLikeService.setUserLikedStatus(articleId, userId, true);
+
+        Integer totalCount = getArticleLikeCount(articleId);
+        boolean isLiked = redisLikeService.isUserLiked(articleId, userId);
+
+        return new LikeResponse(articleId, totalCount, isLiked);
+    }
+
+    @Transactional
+    public LikeResponse unlikeWithRedis(Long articleId, Long userId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));
+        Article article = articleRepository.findById(articleId)
+            .orElseThrow(() -> new BoardException(BoardErrorCode.ARTICLE_NOT_FOUND));
+
+
+        redisLikeService.addUnlikeRequest(articleId, userId);
+        redisLikeService.removeLikeRequestIfExist(articleId, userId); // 충돌 방지
+        redisLikeService.setUserLikedStatus(articleId, userId, false);
+
+        Integer totalCount = getArticleLikeCount(articleId);
+        boolean isLiked = redisLikeService.isUserLiked(articleId, userId);
+
+        return new LikeResponse(articleId, totalCount, isLiked);
+    }
+
+    private Integer getArticleLikeCount(Long articleId) {
+        // NOTE 게시글 좋아요 수는 게시글 리스트 조회, 상세 조회에서 모두 표시하는데 전부 이 메서드를 사용?
+        // 옵션 1: Redis 에 별도로 좋아요 카운트를 저장하고 INCR/DECR 로 관리 (더 실시간에 가까움)
+        // String articleCountKey = "article:likes_total_count:" + articleId;
+        // Long count = redisTemplate.opsForValue().increment(articleCountKey, 0); // 현재 값 조회
+        // return count != null ? count.intValue() : 0;
+
+        Integer dbCount = articleLikeRepository.countByArticle_ArticleId(articleId);
+        Set<Object> currentLikeRequests = redisLikeService.getLikeRequests(articleId);
+        Set<Object> currentUnlikeRequests = redisLikeService.getUnlikeRequests(articleId);
+
+        // 현재 Redis 에 쌓여있는 요청수
+        int redisPendingLikes = currentLikeRequests != null ? currentLikeRequests.size() : 0;
+        int redisPendingUnlikes = currentUnlikeRequests != null ? currentUnlikeRequests.size() : 0;
+
+        // DB 에 아직 반영되지 않은 Redis 요청까지 합산하여 반환
+        return dbCount + redisPendingLikes - redisPendingUnlikes;
     }
 
     @Transactional(readOnly = true)
