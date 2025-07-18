@@ -12,7 +12,6 @@ import com.grepp.teamnotfound.app.model.auth.token.repository.TokenBlackListRepo
 import com.grepp.teamnotfound.app.model.user.UserService;
 import com.grepp.teamnotfound.app.model.user.entity.User;
 import com.grepp.teamnotfound.infra.auth.token.JwtProvider;
-import com.grepp.teamnotfound.infra.auth.token.code.GrantType;
 import com.grepp.teamnotfound.infra.error.exception.AuthException;
 import com.grepp.teamnotfound.infra.error.exception.code.AuthErrorCode;
 import com.grepp.teamnotfound.infra.error.exception.code.UserErrorCode;

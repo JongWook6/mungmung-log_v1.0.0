@@ -11,6 +11,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -43,12 +44,12 @@ public class SecurityConfig {
     private final AuthExceptionFilter authExceptionFilter;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final RequestMatcherHolder requestMatcherHolder;
-    private final OAuth2SuccessHandler oAuth2SuccessHandler;
-    private final OAuth2FailureHandler oAuth2FailureHandler;
+
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final ApplicationContext applicationContext;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, LogoutFilter logoutFilter) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         RequestMatcher permitAllMatcher = requestMatcherHolder.getRequestMatchersByMinRole(null);
 
@@ -60,9 +61,8 @@ public class SecurityConfig {
                 .oauth2Login(oauth ->
                         oauth.userInfoEndpoint((userInfoEndpointConfig)
                                         -> userInfoEndpointConfig.userService(customOAuth2UserService))
-                                .successHandler(oAuth2SuccessHandler)
-                                .failureHandler(oAuth2FailureHandler)
-
+                                .successHandler(applicationContext.getBean(OAuth2SuccessHandler.class))
+                                .failureHandler(applicationContext.getBean(OAuth2FailureHandler.class))
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(
@@ -72,7 +72,7 @@ public class SecurityConfig {
                                 .anyRequest().authenticated()
                 )
 
-                .addFilterBefore(logoutFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(applicationContext.getBean(LogoutFilter.class), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(authExceptionFilter, JwtAuthenticationFilter.class);
 
