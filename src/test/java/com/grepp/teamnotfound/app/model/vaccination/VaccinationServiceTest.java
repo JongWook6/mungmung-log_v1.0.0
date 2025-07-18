@@ -25,8 +25,8 @@ class VaccinationServiceTest {
 
         vaccinationService.savePetVaccinations(10001L, List.of(VaccineWriteRequest.builder()
                 .vaccineAt(LocalDate.now())
-                .vaccineType(VaccineType.FIRST)
-                .count(1).name(VaccineName.DHPPL).build(),
+                .vaccineType(VaccineType.BOOSTER)
+                .count(3).name(VaccineName.DHPPL).build(),
                 VaccineWriteRequest.builder()
                         .vaccineType(VaccineType.ADDITIONAL)
                         .name(VaccineName.CORONAVIRUS)
