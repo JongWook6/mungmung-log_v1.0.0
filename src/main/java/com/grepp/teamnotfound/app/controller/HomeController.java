@@ -12,6 +12,11 @@ public class HomeController {
         return "home/index";
     }
 
+    @GetMapping("/social/login")
+    public String socialLoginTest() {
+        return "home/login";
+    }
+
     @GetMapping("/user/login")
     public String userLoginTest() {
         return "home/index";
