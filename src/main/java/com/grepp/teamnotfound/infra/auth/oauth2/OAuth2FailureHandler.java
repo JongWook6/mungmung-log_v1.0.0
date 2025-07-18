@@ -42,7 +42,7 @@ public class OAuth2FailureHandler extends SimpleUrlAuthenticationFailureHandler 
         }
 
         // TODO error 페이지
-        String redirectUrl = "/login-error?error=" + URLEncoder.encode(errorMessage, StandardCharsets.UTF_8);
+        String redirectUrl = "/error/login?error=" + URLEncoder.encode(errorMessage, StandardCharsets.UTF_8);
 
         getRedirectStrategy().sendRedirect(request, response, redirectUrl);
     }

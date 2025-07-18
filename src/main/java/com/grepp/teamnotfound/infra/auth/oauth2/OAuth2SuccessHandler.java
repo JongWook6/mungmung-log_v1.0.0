@@ -50,10 +50,10 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         if(isAdmin){
             log.info("3️⃣ 관리자 로그인: {}", customOAuth2User.getUsername());
             // TODO 관리자 로그인 후 메인화면(실재 화면 경로)
-            getRedirectStrategy().sendRedirect(request,response,"/admin");
+            getRedirectStrategy().sendRedirect(request,response,"/admin/login");
         } else {
             log.info("3️⃣ User 회원 로그인: {}", customOAuth2User.getUsername());
             // TODO 회원 로그인 후 메인화면(실재 화면 경로)
-            getRedirectStrategy().sendRedirect(request,response,"/");
+            getRedirectStrategy().sendRedirect(request,response,"/user/login");
         }    }
 }

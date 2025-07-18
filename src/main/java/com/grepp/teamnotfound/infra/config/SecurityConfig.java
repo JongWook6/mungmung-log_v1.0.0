@@ -47,31 +47,6 @@ public class SecurityConfig {
     private final OAuth2FailureHandler oAuth2FailureHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
 
-//    @Bean
-//    public AuthenticationSuccessHandler successHandler(){
-//        return new AuthenticationSuccessHandler() {
-//            @Override
-//            public void onAuthenticationSuccess(HttpServletRequest request,
-//                                                HttpServletResponse response, Authentication authentication)
-//                    throws IOException, ServletException {
-//
-//                boolean isAdmin = authentication.getAuthorities()
-//                        .stream()
-//                        .anyMatch(authority ->
-//                                authority.getAuthority().equals("ROLE_ADMIN"));
-//
-//                if(isAdmin){
-//                    // TODO 관리자 로그인 후 메인화면(실재 화면 경로)
-//                    response.sendRedirect("/");
-//                    return;
-//                }
-//
-//                // TODO 회원 로그인 후 메인화면(실재 화면 경로)
-//                response.sendRedirect("/");
-//            }
-//        };
-//    }
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, LogoutFilter logoutFilter) throws Exception {
 
