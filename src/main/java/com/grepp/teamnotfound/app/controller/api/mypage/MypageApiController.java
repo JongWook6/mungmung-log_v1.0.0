@@ -3,8 +3,12 @@ package com.grepp.teamnotfound.app.controller.api.mypage;
 
 import com.grepp.teamnotfound.app.controller.api.mypage.payload.PetWriteRequest;
 import com.grepp.teamnotfound.app.controller.api.mypage.payload.VaccineWriteRequest;
+import com.grepp.teamnotfound.app.controller.api.profile.payload.ProfilePetResponse;
+import com.grepp.teamnotfound.app.model.auth.domain.Principal;
 import com.grepp.teamnotfound.app.model.pet.PetService;
 import com.grepp.teamnotfound.app.model.pet.dto.PetDto;
+import com.grepp.teamnotfound.app.model.user.UserService;
+import com.grepp.teamnotfound.app.model.user.dto.UserDto;
 import com.grepp.teamnotfound.app.model.vaccination.VaccinationService;
 import com.grepp.teamnotfound.app.model.vaccination.dto.VaccinationDto;
 import jakarta.validation.Valid;
@@ -12,6 +16,8 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -29,21 +35,50 @@ import org.springframework.web.bind.annotation.RestController;
 public class MypageApiController {
 
     private final PetService petService;
+    private final UserService userService;
     private final VaccinationService vaccinationService;
+
+    /**
+     * 나 & 내 펫 정보 반환
+     **/
+    @GetMapping("/v1/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<UserDto> getUser(
+        @AuthenticationPrincipal Principal principal
+    ) {
+        Long userId = principal.getUserId();
+
+        return ResponseEntity.ok(userService.findByUserId(userId));
+    }
+
+    @GetMapping("/v1/pets")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<ProfilePetResponse>> getUserPets(
+        @AuthenticationPrincipal Principal principal
+    ) {
+        Long userId = principal.getUserId();
+
+        List<ProfilePetResponse> response = petService.findByUserId(userId);
+        return ResponseEntity.ok(response);
+    }
 
     /**
      * 펫 관련 API
      **/
 
     @PostMapping("/v2/pets")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> createPet(
-        @RequestBody @Valid PetWriteRequest request
+        @RequestBody @Valid PetWriteRequest request,
+        @AuthenticationPrincipal Principal principal
     ) {
-        petService.create(request);
-        return ResponseEntity.ok().build();
+        Long userId = principal.getUserId();
+
+        return ResponseEntity.ok(petService.create(userId, request));
     }
 
     @GetMapping("/v1/pets/{petId}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<PetDto> getPet(
         @PathVariable(name = "petId") Long petId
     ) {
@@ -52,15 +87,16 @@ public class MypageApiController {
     }
 
     @PutMapping("/v2/pets/{petId}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> updatePet(
         @PathVariable(name = "petId") Long petId,
         @RequestBody @Valid PetWriteRequest request
     ) {
-        petService.update(petId, request);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(petService.update(petId, request));
     }
 
     @DeleteMapping("/v2/pets/{petId}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> deletePet(
         @PathVariable(name = "petId") Long petId
     ) {
@@ -75,6 +111,7 @@ public class MypageApiController {
      **/
 
     @PostMapping("/v1/pets/{petId}/vaccination")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> createVaccination(
         @PathVariable(name = "petId") Long petId,
         @RequestBody @Valid List<VaccineWriteRequest> requests
@@ -84,6 +121,7 @@ public class MypageApiController {
     }
 
     @GetMapping("/v1/pets/{petId}/vaccination")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<VaccinationDto>> getVaccination(
         @PathVariable(name = "petId") Long petId
     ) {
@@ -92,6 +130,7 @@ public class MypageApiController {
     }
 
     @PatchMapping("/v1/pets/{petId}/vaccination")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> updateVaccination(
         @PathVariable(name = "petId") Long petId,
         @RequestBody @Valid List<VaccineWriteRequest> requests

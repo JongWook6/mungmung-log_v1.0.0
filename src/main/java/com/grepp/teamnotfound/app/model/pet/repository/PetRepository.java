@@ -11,7 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface PetRepository extends JpaRepository<Pet, Long> {
 
-    @Query("SELECT p FROM Pet p WHERE p.user.userId = :userId AND p.deletedAt IS NULL")
+    @Query("SELECT p FROM Pet p WHERE p.user.userId = :userId AND p.deletedAt IS NULL ORDER BY p.petId")
     List<Pet> findAllByUser(Long userId);
 
     @Modifying(clearAutomatically=true, flushAutomatically=true)
