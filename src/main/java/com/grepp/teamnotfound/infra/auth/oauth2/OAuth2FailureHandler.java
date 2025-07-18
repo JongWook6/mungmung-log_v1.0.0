@@ -10,36 +10,40 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class OAuth2FailureHandler extends SimpleUrlAuthenticationFailureHandler {
-
-    private final JwtProvider jwtProvider;
-    private final RefreshTokenService refreshTokenService;
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
                                         AuthenticationException exception) throws IOException, ServletException {
 
-        String requestAccessToken = jwtProvider.resolveToken(request, TokenType.ACCESS_TOKEN);
-        if (requestAccessToken == null) {
-            return;
+        log.error("3️⃣ 로그인 실패 : {}", exception.getMessage(), exception);
+
+        String errorMessage;
+        if (exception.getMessage().contains("다른 provider로 가입된 이메일")) {
+            errorMessage = "이미 다른 계정으로 가입된 이메일입니다.";
+        } else if (exception.getMessage().contains("지원하지 않는 OAuth2 provider")) {
+            errorMessage = "지원하지 않는 소셜 로그인입니다.";
+        }
+        else {
+            errorMessage = "소셜 로그인에 실패했습니다.";
         }
 
-        Claims claims = jwtProvider.parseClaims(requestAccessToken);
-        refreshTokenService.deleteByAccessTokenId(claims.getId());
+        // TODO error 페이지
+        String redirectUrl = "/login-error?error=" + URLEncoder.encode(errorMessage, StandardCharsets.UTF_8);
 
-        ResponseCookie expiredAccessToken = TokenCookieFactory.createExpiredToken(TokenType.ACCESS_TOKEN);
-        ResponseCookie expiredRefreshToken = TokenCookieFactory.createExpiredToken(TokenType.REFRESH_TOKEN);
-        response.addHeader("Set-Cookie", expiredAccessToken.toString());
-        response.addHeader("Set-Cookie", expiredRefreshToken.toString());
-        getRedirectStrategy().sendRedirect(request, response, "/");
+        getRedirectStrategy().sendRedirect(request, response, redirectUrl);
     }
 }
