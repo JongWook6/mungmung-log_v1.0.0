@@ -8,7 +8,7 @@ public class ReplyDto {
 
     private Long replyId;
 
-    private Long boardId;
+    private Long articleId;
 
     private Long userId;
 

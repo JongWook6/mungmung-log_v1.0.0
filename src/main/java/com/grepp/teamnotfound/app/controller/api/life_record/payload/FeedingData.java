@@ -1,11 +1,9 @@
 package com.grepp.teamnotfound.app.controller.api.life_record.payload;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.grepp.teamnotfound.app.model.structured_data.FeedUnit;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
+import com.grepp.teamnotfound.app.model.structured_data.code.FeedUnit;
+import java.time.LocalDateTime;
 import lombok.Builder;
-import lombok.Data;
 import lombok.Getter;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -13,10 +11,8 @@ import lombok.Getter;
 @Builder
 public class FeedingData {
 
-    private Long feedingId;
     private Double amount;
-    private OffsetDateTime mealtime;
+    private LocalDateTime mealtime;
     private FeedUnit unit;
-    private LocalDate recordedAt;
 
 }

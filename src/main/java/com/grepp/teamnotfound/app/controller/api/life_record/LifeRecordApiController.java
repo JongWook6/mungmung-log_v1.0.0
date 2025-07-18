@@ -1,34 +1,21 @@
 package com.grepp.teamnotfound.app.controller.api.life_record;
 
-import com.grepp.teamnotfound.app.controller.api.life_record.payload.FeedingData;
 import com.grepp.teamnotfound.app.controller.api.life_record.payload.LifeRecordListResponse;
 import com.grepp.teamnotfound.app.controller.api.life_record.payload.LifeRecordData;
-import com.grepp.teamnotfound.app.controller.api.life_record.payload.NoteData;
-import com.grepp.teamnotfound.app.controller.api.life_record.payload.SleepingData;
-import com.grepp.teamnotfound.app.controller.api.life_record.payload.WalkingData;
-import com.grepp.teamnotfound.app.controller.api.life_record.payload.WeightData;
-import com.grepp.teamnotfound.app.model.note.NoteService;
-import com.grepp.teamnotfound.app.model.note.dto.NoteDto;
+import com.grepp.teamnotfound.app.model.life_record.LifeRecordService;
+import com.grepp.teamnotfound.app.model.life_record.dto.LifeRecordDto;
 import com.grepp.teamnotfound.app.model.pet.PetService;
-import com.grepp.teamnotfound.app.model.pet.entity.Pet;
-import com.grepp.teamnotfound.app.model.structured_data.FeedUnit;
-import com.grepp.teamnotfound.app.model.structured_data.FeedingService;
-import com.grepp.teamnotfound.app.model.structured_data.SleepingService;
-import com.grepp.teamnotfound.app.model.structured_data.WalkingService;
-import com.grepp.teamnotfound.app.model.structured_data.WeightService;
-import com.grepp.teamnotfound.app.model.structured_data.dto.FeedingDto;
-import com.grepp.teamnotfound.app.model.structured_data.dto.SleepingDto;
-import com.grepp.teamnotfound.app.model.structured_data.dto.WalkingDto;
-import com.grepp.teamnotfound.app.model.structured_data.dto.WeightDto;
+import io.swagger.v3.oas.annotations.Operation;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,18 +27,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(value = "api/v1/life-record")
+@RequestMapping(value = "api/life-record")
 public class LifeRecordApiController {
 
     private final PetService petService;
-    private final SleepingService sleepingService;
-    private final WeightService weightService;
-    private final NoteService noteService;
-    private final WalkingService walkingService;
-    private final FeedingService feedingService;
+    private final LifeRecordService lifeRecordService;
 
-    // 보호자의 반려견 생활기록 리스트 조회
-    @GetMapping("/{userId}")
+    @Operation(summary = "생활기록 리스트 조회")
+    @GetMapping("/v1/users/{userId}")
     public ResponseEntity<Map<String, List<LifeRecordListResponse>>> getLifeRecordList(
             @PathVariable Long userId,
             @RequestParam(required = false) Long petId,
@@ -79,8 +62,8 @@ public class LifeRecordApiController {
         return ResponseEntity.ok(Map.of("data", list));
     }
 
-    // 보호자의 반려견 목록 조회 (특정 반려견 생활기록만 보기 위하여 필요)
-    @GetMapping("/{userId}/pet-list")
+    @Operation(summary = "보호자의 반려견 목록 조회") // 특정 반려견 생활기록만 보기 위하여 필요
+    @GetMapping("/v1/users/{userId}/pet-list")
     public ResponseEntity<Map<String, List<Map<Long, String>>>> getPetList(
             @PathVariable Long userId
     ){
@@ -99,165 +82,66 @@ public class LifeRecordApiController {
         return ResponseEntity.ok(Map.of("data",list));
     }
 
-    // 생활기록 상세정보 조회
-    @GetMapping("/{petId}/{date}")
+    @Operation(summary = "생활기록 상세정보 조회")
+    @GetMapping("/v2/detail/{lifeRecordId}")
     public ResponseEntity<Map<String, LifeRecordData>> getLifeRecordDetail(
-        @PathVariable Long petId,
-        @PathVariable LocalDate date
+            @PathVariable Long lifeRecordId
     ){
-        // 상세정보 조회 Service
-         LifeRecordData lifeRecord = findLifeRecord(petId, date);
+        LifeRecordData lifeRecord = lifeRecordService.getLifeRecord(lifeRecordId);
 
-         return ResponseEntity.ok(Map.of("data", lifeRecord));
+        return ResponseEntity.ok(Map.of("data", lifeRecord));
     }
 
-
-    // 날짜, 애완동물 기준으로 기존 생활기록 데이터 있는지 체크
-    @GetMapping("/{petId}/{date}/check")
-    public ResponseEntity<Map<String, LifeRecordData>> checkLifeRecord(
+    @Operation(summary = "기존 생활기록 데이터 존재 여부 체크")
+    @GetMapping("/v2/pets/{petId}/check")
+    public ResponseEntity<?> checkLifeRecord(
             @PathVariable Long petId,
-            @PathVariable LocalDate date
+            @RequestParam LocalDate date
     ){
         // 기존 데이터가 있으면 기존 데이터 반환
-        if(noteService.existsLifeRecord(petId, date)){
-            LifeRecordData lifeRecord = findLifeRecord(petId, date);
+        Optional<Long> lifeRecordIdOptional = lifeRecordService.findLifeRecordId(petId, date);
+
+        if (lifeRecordIdOptional.isPresent()) {
+            Long lifeRecordId = lifeRecordIdOptional.get();
+            LifeRecordData lifeRecord = lifeRecordService.getLifeRecord(lifeRecordId);
 
             return ResponseEntity.ok(Map.of("data", lifeRecord));
         }
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("데이터 등록 가능");
     }
 
-    // 생활기록 등록
-    @PostMapping
-    public ResponseEntity<Map<String, LifeRecordData>> registLifeRecord(
+    @Operation(summary = "생활기록 등록")
+    @PostMapping("/v2/create")
+    public ResponseEntity<Map<String, Long>> registLifeRecord(
             @RequestBody LifeRecordData data
     ){
-        Pet pet = petService.getPet(data.getPetId());
+        LifeRecordDto dto = LifeRecordDto.toDto(data);
+        Long lifeRecordId = lifeRecordService.createLifeRecord(dto);
 
-        // 관찰노트 등록
-        NoteDto noteDto = NoteDto.builder()
-                .content(data.getNote().getContent())
-                .recordedAt(data.getRecordAt())
-                .pet(pet).build();
-        noteService.createNote(noteDto);
-
-        // 수면 등록
-        SleepingDto sleepingDto = SleepingDto.builder()
-                .sleepingTime(data.getSleepTime().getSleepTime())
-                .recordedAt(data.getRecordAt())
-                .pet(pet).build();
-        sleepingService.createSleeping(sleepingDto);
-
-        // 몸무게 등록
-        WeightDto weightDto = WeightDto.builder()
-                .weight(data.getWeight().getWeight())
-                .recordedAt(data.getRecordAt())
-                .pet(pet).build();
-        weightService.createWeight(weightDto);
-
-        // 산책 등록
-        data.getWalkingList().forEach(walking -> {
-            WalkingDto walkingDto = WalkingDto.builder()
-                    .startedAt(walking.getStartedAt())
-                    .endedAt(walking.getEndedAt())
-                    .pace(walking.getPace())
-                    .recordedAt(walking.getRecordedAt())
-                    .pet(pet).build();
-            walkingService.createWalking(walkingDto);
-        });
-
-        // 식사 등록
-        data.getFeedingList().forEach(feeding -> {
-            FeedingDto feedingDto = FeedingDto.builder()
-                    .mealTime(feeding.getMealtime())
-                    .amount(feeding.getAmount())
-                    .unit(feeding.getUnit())
-                    .recordedAt(feeding.getRecordedAt())
-                    .pet(pet).build();
-            feedingService.createFeeding(feedingDto);
-        });
-
-        return ResponseEntity.ok(Map.of("data", data));
+        return ResponseEntity.ok(Map.of("lifeRecordId", lifeRecordId));
     }
 
-    // 생활기록 수정
-    @PatchMapping
-    public ResponseEntity<Map<String, LifeRecordData>> modifyLifeRecord(
+    @Operation(summary = "생활기록 수정")
+    @PatchMapping("/v2/{lifeRecordId}/update")
+    public ResponseEntity<Map<String, Long>> modifyLifeRecord(
+            @PathVariable Long lifeRecordId,
             @RequestBody LifeRecordData data
     ){
-        Pet pet = petService.getPet(data.getPetId());
+        LifeRecordDto dto = LifeRecordDto.toDto(data);
+        lifeRecordService.updateLifeRecord(lifeRecordId, dto);
 
-        // 관찰기록이 수정됐을 경우
-        if(data.getNote() != null) noteService.updateNote(data.getNote());
-
-        // 수면기록이 수정됐을 경우
-        if(data.getSleepTime() != null) sleepingService.updateSleeping(data.getSleepTime());
-
-        // 몸무게가 수정됐을 경우
-        if(data.getWeight() != null) weightService.updateWeight(data.getWeight());
-
-        // 산책이 수정됐을 경우
-        if(data.getWalkingList() != null) walkingService.updateWalkingList(data.getWalkingList());
-
-        // 식사가 수정됐을 경우
-        if(data.getFeedingList() != null) feedingService.updateFeedingList(data.getFeedingList());
-
-        return ResponseEntity.ok(Map.of("data", data));
+        return ResponseEntity.ok(Map.of("lifeRecordId", lifeRecordId));
     }
-    // 생활기록 삭제
-    @PatchMapping("{date}/{petId}/delete")
+
+    @Operation(summary = "생활기록 삭제")
+    @DeleteMapping("/v2/{lifeRecordId}/delete")
     public ResponseEntity<String> deleteLifeRecord(
-            @PathVariable Long petId,
-            @PathVariable LocalDate date
+            @PathVariable Long lifeRecordId
     ){
-        Pet pet = petService.getPet(petId);
-        // 관찰노드 삭제
-        noteService.deleteNote(pet, date);
-
-        // 수면 삭제
-        sleepingService.deleteSleeping(pet, date);
-
-        // 몸무게 삭제
-        weightService.deleteWeight(pet, date);
-
-        // 산책 삭제
-        walkingService.deleteWalkingList(pet, date);
-
-        // 식사 삭제
-        feedingService.deleteFeedingList(pet, date);
+        lifeRecordService.deleteLifeRecord(lifeRecordId);
 
         return ResponseEntity.ok("삭제 성공");
     }
 
-    // 생활기록 데이터 조회 및 합치기
-    private LifeRecordData findLifeRecord(Long petId, LocalDate date){
-        Pet pet = petService.getPet(petId);
-        // 관찰노드 조회
-        NoteData note = noteService.getNote(pet, date);
-
-        // 수면 조회
-        SleepingData sleeping = sleepingService.getSleeping(pet, date);
-
-        // 몸무게 조회
-        WeightData weight = weightService.getWeight(pet, date);
-
-        // 산책 조회
-        List<WalkingData> walkingList = walkingService.getWalkingList(pet, date);
-
-        // 식사 조회
-        List<FeedingData> feedingList = feedingService.getFeedingList(pet, date);
-
-        // 전체 데이터 합치기
-        LifeRecordData lifeRecord = new LifeRecordData();
-        lifeRecord.setPetId(petId);
-        lifeRecord.setRecordAt(date);
-        lifeRecord.setNote(note);
-        lifeRecord.setSleepTime(sleeping);
-        lifeRecord.setWeight(weight);
-        lifeRecord.setWalkingList(walkingList);
-        lifeRecord.setFeedingList(feedingList);
-
-        return lifeRecord;
-    }
 }

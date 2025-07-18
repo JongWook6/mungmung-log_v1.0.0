@@ -25,9 +25,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Arrays;
 import java.util.Collections;
 
-import static org.springframework.http.HttpMethod.GET;
-import static org.springframework.http.HttpMethod.POST;
-
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -36,14 +33,12 @@ public class SecurityConfig {
 
     private final AuthExceptionFilter authExceptionFilter;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final LogoutFilter logoutFilter;
     private final RequestMatcherHolder requestMatcherHolder;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, LogoutFilter logoutFilter) throws Exception {
 
         RequestMatcher permitAllMatcher = requestMatcherHolder.getRequestMatchersByMinRole(null);
-        RequestMatcher adminMatcher = requestMatcherHolder.getRequestMatchersByMinRole("ADMIN");
 
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -60,15 +55,6 @@ public class SecurityConfig {
                         authorize -> authorize
 
                                 .requestMatchers(permitAllMatcher).permitAll()
-                                .requestMatchers(adminMatcher).hasRole("ADMIN")
-
-                                //.requestMatchers(GET, "/", "/error", "/favicon.ico").permitAll()
-                                //.requestMatchers(POST, "/api/auth/v1/register/**","/api/auth/v1/login",
-                                //        "/api/auth/v1/admin/register", "/api/auth/v1/admin/login").permitAll()
-//                                .requestMatchers(POST, "/api/v1/auth/logout").permitAll()
-
-                                //.requestMatchers(GET, "/**").permitAll()
-                                //.requestMatchers(GET, "/swagger-ui", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll() // 프리플라이트 허용
                                 .anyRequest().authenticated()
                 )
@@ -91,7 +77,7 @@ public class SecurityConfig {
         corsConfig.setAllowedOriginPatterns(Arrays.asList(
                 // TODO 프론트 서버로 수정 필요
                 "http://localhost:3000",
-                "https://mungnote-172598302113.asia-northeast3.run.app"
+                "https://mungdiary-172598302113.asia-northeast3.run.app"
         ));
         corsConfig.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         corsConfig.setAllowedHeaders(Collections.singletonList("*"));

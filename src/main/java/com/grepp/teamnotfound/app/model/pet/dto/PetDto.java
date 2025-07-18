@@ -5,9 +5,7 @@ import com.grepp.teamnotfound.app.model.pet.code.PetType;
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.pet.entity.PetImg;
 import com.grepp.teamnotfound.app.model.user.entity.User;
-import com.grepp.teamnotfound.app.model.vaccination.dto.VaccinationDto;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -24,7 +22,6 @@ public class PetDto {
     private LocalDate birthday;
     private LocalDate metday;
     private String name;
-    private Integer age;
     private PetType breed;
     private PetSize size;
     private Double weight;
@@ -32,16 +29,14 @@ public class PetDto {
     private Boolean isNeutered;
     private Long user;
     private PetImgDto image;
-    private List<VaccinationDto> vaccinations;
 
-    public static PetDto fromEntity(Pet pet, List<VaccinationDto> vaccinationDtos) {
+    public static PetDto fromEntity(Pet pet) {
         PetDto dto = new PetDto();
         dto.setPetId(pet.getPetId());
         dto.setRegistNumber(pet.getRegistNumber());
         dto.setBirthday(pet.getBirthday());
         dto.setMetday(pet.getMetday());
         dto.setName(pet.getName());
-        dto.setAge(pet.getAge());
         dto.setBreed(pet.getBreed());
         dto.setSize(pet.getSize());
         dto.setWeight(pet.getWeight());
@@ -52,7 +47,6 @@ public class PetDto {
         dto.setImage(
             image != null ? PetImgDto.fromEntity(image) : null
         );
-        dto.setVaccinations(vaccinationDtos);
 
         return dto;
     }

@@ -1,7 +1,6 @@
 package com.grepp.teamnotfound.app.model.structured_data.dto;
 
-import com.grepp.teamnotfound.app.model.pet.entity.Pet;
-import java.time.LocalDate;
+import com.grepp.teamnotfound.app.model.structured_data.entity.Walking;
 import java.time.OffsetDateTime;
 import lombok.Builder;
 import lombok.Data;
@@ -12,16 +11,16 @@ public class WalkingDto {
 
     private Long walkingId;
 
-    private OffsetDateTime startedAt;
-
-    private OffsetDateTime endedAt;
-
+    private OffsetDateTime startTime;
+    private OffsetDateTime endTime;
     private Integer pace;
 
-    private LocalDate recordedAt;
+    public Walking toEntity(){
+        Walking walking = new Walking();
+        walking.setStartTime(this.startTime);
+        walking.setEndTime(this.endTime);
+        walking.setPace(this.pace);
 
-    private Pet pet;
-
-    private OffsetDateTime createdAt = OffsetDateTime.now();
-
+        return walking;
+    }
 }

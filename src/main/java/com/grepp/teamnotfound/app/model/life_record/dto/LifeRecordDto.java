@@ -1,33 +1,55 @@
 package com.grepp.teamnotfound.app.model.life_record.dto;
 
-import com.grepp.teamnotfound.app.model.note.dto.NoteDto;
+import com.grepp.teamnotfound.app.controller.api.life_record.payload.LifeRecordData;
 import com.grepp.teamnotfound.app.model.structured_data.dto.FeedingDto;
-import com.grepp.teamnotfound.app.model.structured_data.dto.SleepingDto;
 import com.grepp.teamnotfound.app.model.structured_data.dto.WalkingDto;
-import com.grepp.teamnotfound.app.model.structured_data.dto.WeightDto;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.List;
-import lombok.Data;
+import lombok.Builder;
+import lombok.Getter;
 
-@Data
+@Getter
+@Builder
 public class LifeRecordDto {
 
+    private Long lifeRecordId;
     private Long petId;
     private LocalDate recordAt;
 
-    // 관찰노트
-    private NoteDto note;
+    private String content;
+    private Double weight;
+    private Integer sleepTime;
 
-    // 수면시간
-    private SleepingDto sleepTime;
-    // 몸무게
-    private WeightDto weight;
-
-    // 산책
     private List<WalkingDto> walkingList;
-
-    // 식사량
     private List<FeedingDto> feedingList;
+
+    public static LifeRecordDto toDto(LifeRecordData data) {
+        ZoneId seoulZoneId = ZoneId.of("Asia/Seoul");
+
+        List<WalkingDto> walkingDtos = data.getWalkingList().stream()
+                .map(walkingData -> WalkingDto.builder()
+                        .startTime(walkingData.getStartTime().atZone(seoulZoneId).toOffsetDateTime())
+                        .endTime(walkingData.getEndTime().atZone(seoulZoneId).toOffsetDateTime())
+                        .pace(walkingData.getPace())
+                        .build()).toList();
+
+        List<FeedingDto> feedingDtos = data.getFeedingList().stream()
+                .map(feedingData -> FeedingDto.builder()
+                        .mealTime(feedingData.getMealtime().atZone(seoulZoneId).toOffsetDateTime())
+                        .amount(feedingData.getAmount())
+                        .unit(feedingData.getUnit())
+                        .build()).toList();
+
+        return LifeRecordDto.builder()
+                .petId(data.getPetId())
+                .recordAt(data.getRecordAt())
+                .content(data.getContent())
+                .sleepTime(data.getSleepTime())
+                .weight(data.getWeight())
+                .walkingList(walkingDtos)
+                .feedingList(feedingDtos)
+                .build();
+    }
 
 }

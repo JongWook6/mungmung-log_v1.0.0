@@ -2,21 +2,23 @@ package com.grepp.teamnotfound.app.controller.api.life_record.payload;
 
 import java.time.LocalDate;
 import java.util.List;
-import lombok.Data;
+import lombok.Builder;
+import lombok.Getter;
 
-@Data
+@Getter
+@Builder
 public class LifeRecordData {
+
+    private Long lifeRecordId;
 
     private Long petId;
     private LocalDate recordAt;
 
-    // 관찰노트
-    private NoteData note;
+    private String content;
 
-    // 수면시간
-    private SleepingData sleepTime;
-    // 몸무게
-    private WeightData weight;
+    private Integer sleepTime;
+
+    private Double weight;
 
     // 산책
     private List<WalkingData> walkingList;

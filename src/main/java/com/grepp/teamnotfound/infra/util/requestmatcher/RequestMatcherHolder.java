@@ -29,13 +29,8 @@ public class RequestMatcherHolder {
             new RequestInfo(null, "/favicon.ico", null),
 
             // 2. auth 로그인/회원가입
-            new RequestInfo(POST, "/api/auth/v1/register/**", null),
-            new RequestInfo(POST,"/api/auth/v1/login", null),
-            new RequestInfo(POST, "/api/auth/v1/admin/register", null),
-            new RequestInfo(POST, "/api/auth/v1/admin/login", null),
-
-            // 3. admin
-            new RequestInfo(null, "/api/admin/**", "ADMIN"),
+            new RequestInfo(POST,"/api/auth/**", null),
+            new RequestInfo(GET,"/api/auth/**", null),
 
             // 4. swagger
             new RequestInfo(null, "/swagger-ui.html", null),
@@ -46,7 +41,13 @@ public class RequestMatcherHolder {
 
             // 5. 기타 개발용 open page
             // GET /**
-            new RequestInfo(GET, "/**", null)
+            new RequestInfo(GET, "/", null),
+            new RequestInfo(GET, "/api/community/**", null),
+//            new RequestInfo(GET, "/api/life-record/**", null),
+//            new RequestInfo(GET, "/api/mypage/**", null),
+            new RequestInfo(GET, "/api/profile/**", null)
+//            new RequestInfo(GET, "/api/vaccines/**", null),
+//            new RequestInfo(GET, "/api/v1/dashboard/**", null)
     );
 
     // 캐싱 맵

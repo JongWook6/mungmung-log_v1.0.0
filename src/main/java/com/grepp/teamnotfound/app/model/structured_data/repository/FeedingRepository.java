@@ -1,16 +1,16 @@
 package com.grepp.teamnotfound.app.model.structured_data.repository;
 
-import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.structured_data.entity.Feeding;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 
 public interface FeedingRepository extends JpaRepository<Feeding, Long> {
 
-    List<Feeding> findAllByPetAndRecordedAt(Pet pet, LocalDate recordedAt);
+    @Modifying(clearAutomatically=true, flushAutomatically=true)
+    @Query("UPDATE Feeding f SET f.deletedAt = CURRENT_TIMESTAMP WHERE f.lifeRecord.lifeRecordId = :lifeRecordId AND f.deletedAt IS NULL")
+    void delete(@Param("lifeRecordId")  Long lifeRecordId);
 
-    Optional<Feeding> findByFeedingId(Long feedingId);
 }

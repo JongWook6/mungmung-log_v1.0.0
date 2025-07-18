@@ -1,15 +1,13 @@
 package com.grepp.teamnotfound.app.model.pet;
 
-import com.grepp.teamnotfound.app.controller.api.mypage.payload.PetCreateRequest;
-import com.grepp.teamnotfound.app.controller.api.mypage.payload.PetEditRequest;
+import com.grepp.teamnotfound.app.controller.api.mypage.payload.PetWriteRequest;
+import com.grepp.teamnotfound.app.controller.api.profile.payload.ProfilePetResponse;
 import com.grepp.teamnotfound.app.model.pet.dto.PetDto;
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.pet.repository.PetRepository;
 import com.grepp.teamnotfound.app.model.user.entity.User;
 import com.grepp.teamnotfound.app.model.user.repository.UserRepository;
 import com.grepp.teamnotfound.app.model.vaccination.VaccinationService;
-import com.grepp.teamnotfound.app.model.vaccination.dto.VaccinationDto;
-import com.grepp.teamnotfound.app.model.vaccination.repository.VaccinationRepository;
 import com.grepp.teamnotfound.infra.error.exception.BusinessException;
 import com.grepp.teamnotfound.infra.error.exception.PetException;
 import com.grepp.teamnotfound.infra.error.exception.code.PetErrorCode;
@@ -18,7 +16,9 @@ import com.grepp.teamnotfound.util.NotFoundException;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.Period;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -33,7 +33,6 @@ public class PetService {
 
     private final PetRepository petRepository;
     private final UserRepository userRepository;
-    private final VaccinationRepository vaccinationRepository;
 
     private final VaccinationService vaccinationService;
 
@@ -48,75 +47,82 @@ public class PetService {
     public List<PetDto> findAll() {
         List<Pet> pets = petRepository.findAll();
 
+        if (pets.isEmpty()) {
+            throw new BusinessException(PetErrorCode.PET_NOT_FOUND);
+        }
+
         return pets.stream()
-            .map(pet -> {
-                List<VaccinationDto> vaccinations = vaccinationRepository.findAllByPetEquals(pet).stream()
-                    .map(VaccinationDto::fromEntity)
-                    .toList();
-                return PetDto.fromEntity(pet, vaccinations);
-            })
-            .toList();
+            .map(PetDto::fromEntity)
+            .collect(Collectors.toList());
     }
 
-    public List<PetDto> findByUserId(Long userId) {
+    public List<ProfilePetResponse> findByUserId(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(NotFoundException::new);
-        List<Pet> pets = petRepository.findAllByUser(user);
+        List<Pet> pets = petRepository.findAllByUser(user.getUserId());
 
         return pets.stream()
             .map(pet -> {
-                List<VaccinationDto> vaccinations = vaccinationRepository.findAllByPetEquals(pet).stream()
-                    .map(VaccinationDto::fromEntity)
-                    .toList();
-                return PetDto.fromEntity(pet, vaccinations);
+                ProfilePetResponse dto = modelMapper.map(pet, ProfilePetResponse.class);
+                dto.setPetId(pet.getPetId());
+                dto.setDays((int) ChronoUnit.DAYS.between(pet.getMetday(), LocalDate.now()) + 1);
+                dto.setAge(calculateAge(pet.getBirthday()));
+
+                return dto;
             })
-            .toList();
+            .collect(Collectors.toList());
     }
 
     public PetDto findOne(Long petId) {
-        return petRepository.findById(petId)
-                .map(pet -> {
-                    List<VaccinationDto> vaccinations = vaccinationRepository.findAllByPetEquals(pet).stream()
-                        .map(VaccinationDto::fromEntity)
-                        .toList();
-                    return PetDto.fromEntity(pet, vaccinations);
-                })
-                .orElseThrow(NotFoundException::new);
+        Pet pet = petRepository.findById(petId)
+            .orElseThrow(() -> new BusinessException(PetErrorCode.PET_NOT_FOUND));
+
+        return PetDto.fromEntity(pet);
     }
 
     @Transactional
-    public Long create(PetCreateRequest request) {
-        User user = userRepository.findById(request.getUser())
+    public Pet create(Long userId, PetWriteRequest request) {
+        User user = userRepository.findById(userId)
             .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
 
-        Pet pet = modelMapper.map(request, Pet.class);
-        pet.setAge(calculateAge(request.getBirthday()));
+        if (request.getMetday().isBefore(request.getBirthday())) {
+            throw new BusinessException(PetErrorCode.PET_INVALID_DATES);
+        }
+
+        Pet pet = new Pet();
+
+        modelMapper.map(request, pet);
         pet.setUser(user);
 
         petRepository.save(pet);
 
-        vaccinationService.savePetVaccinations(pet, request.getVaccinations());
-
-        return pet.getPetId();
+        return pet;
     }
 
     @Transactional
-    public Long update(Long petId, PetEditRequest request) {
+    public PetDto update(Long petId, PetWriteRequest request) {
         Pet pet = petRepository.findById(petId)
             .orElseThrow(() -> new BusinessException(PetErrorCode.PET_NOT_FOUND));
 
+        if (request.getMetday().isBefore(request.getBirthday())) {
+            throw new BusinessException(PetErrorCode.PET_INVALID_DATES);
+        }
+
         modelMapper.map(request, pet);
-        pet.setAge(calculateAge(request.getBirthday()));
         pet.setUpdatedAt(OffsetDateTime.now());
+        pet.setUser(pet.getUser());
 
-        vaccinationService.softDelete(petId);
-        vaccinationService.savePetVaccinations(pet, request.getVaccinations());
+        petRepository.save(pet);
 
-        return pet.getPetId();
+        return PetDto.fromEntity(pet);
     }
 
     @Transactional
     public void delete(Long petId) {
-        petRepository.softDelete(petId, OffsetDateTime.now());
+        Integer updated = petRepository.softDelete(petId, OffsetDateTime.now());
+        if (updated == 0) {
+            throw new BusinessException(PetErrorCode.PET_NOT_FOUND);
+        }
+
         vaccinationService.softDelete(petId);
     }
 
