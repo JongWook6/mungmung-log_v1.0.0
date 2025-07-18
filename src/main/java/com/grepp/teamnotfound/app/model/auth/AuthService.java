@@ -103,13 +103,7 @@ public class AuthService {
         AccessTokenDto accessToken = jwtProvider.generateAccessToken(userId);
         RefreshToken refreshToken = refreshTokenService.saveWithAtId(accessToken.getId());
 
-        return TokenDto.builder()
-                .accessToken(accessToken.getToken())
-                .refreshToken(refreshToken.getToken())
-                .grantType(GrantType.BEARER)
-                .atExpiresIn(jwtProvider.getAtExpiration())
-                .rtExpiresIn(jwtProvider.getRtExpiration())
-                .build();
+        return TokenDto.of(accessToken.getToken(), refreshToken.getToken(), jwtProvider);
     }
 
     @Transactional
