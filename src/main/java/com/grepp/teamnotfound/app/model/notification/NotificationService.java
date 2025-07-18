@@ -3,19 +3,26 @@ package com.grepp.teamnotfound.app.model.notification;
 import com.grepp.teamnotfound.app.model.notification.code.NotiTarget;
 import com.grepp.teamnotfound.app.model.notification.code.NotiType;
 import com.grepp.teamnotfound.app.model.notification.dto.NotiBasicDto;
+import com.grepp.teamnotfound.app.model.notification.dto.NotiReadDto;
 import com.grepp.teamnotfound.app.model.notification.dto.NotiScheduleCreateDto;
 import com.grepp.teamnotfound.app.model.notification.dto.NotiServiceCreateDto;
 import com.grepp.teamnotfound.app.model.notification.dto.NotiUserSettingDto;
 import com.grepp.teamnotfound.app.model.notification.entity.NotiManagement;
+import com.grepp.teamnotfound.app.model.notification.entity.ScheduleNoti;
+import com.grepp.teamnotfound.app.model.notification.entity.ServiceNoti;
 import com.grepp.teamnotfound.app.model.notification.handler.ScheduleNotiHandlerImpl;
 import com.grepp.teamnotfound.app.model.notification.handler.ServiceNotiHandlerImpl;
 import com.grepp.teamnotfound.app.model.notification.repository.NotiManagementRepository;
+import com.grepp.teamnotfound.app.model.notification.repository.ScheduleNotiRepository;
+import com.grepp.teamnotfound.app.model.notification.repository.ServiceNotiRepository;
 import com.grepp.teamnotfound.app.model.user.entity.User;
 import com.grepp.teamnotfound.app.model.user.repository.UserRepository;
 import com.grepp.teamnotfound.infra.error.exception.BusinessException;
 import com.grepp.teamnotfound.infra.error.exception.code.NotificationErrorCode;
 import com.grepp.teamnotfound.infra.error.exception.code.UserErrorCode;
 import java.time.OffsetDateTime;
+import java.util.EnumSet;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -30,10 +37,18 @@ public class NotificationService {
 
     private final UserRepository userRepository;
     private final NotiManagementRepository notiManagementRepository;
+    private final ScheduleNotiRepository scheduleNotiRepository;
+    private final ServiceNotiRepository serviceNotiRepository;
     private final ScheduleNotiHandlerImpl scheduleNotiHandlerImpl;
     private final ServiceNotiHandlerImpl serviceNotiHandlerImpl;
 
     ModelMapper modelMapper = new ModelMapper();
+
+//    public List<NotiUserDto> getUserNoti(Long userId) {
+//        User user = userRepository.findById(userId).orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+//
+//
+//    }
 
     public NotiUserSettingDto getUserSetting(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
@@ -100,6 +115,47 @@ public class NotificationService {
         NotiUserSettingDto dto = modelMapper.map(noti, NotiUserSettingDto.class);
         return dto;
     }
+
+    private static final Set<NotiType> SERVICE_TYPES = EnumSet.of(
+        NotiType.LIKE,
+        NotiType.COMMENT,
+        NotiType.RECOMMEND,
+        NotiType.REPORT_SUCCESS,
+        NotiType.REPORT_FAIL,
+        NotiType.REPORTED
+    );
+
+    @Transactional
+    public NotiReadDto readNoti(Long notiId, NotiType type) {
+        NotiReadDto dto = new NotiReadDto();
+
+        if (type == NotiType.SCHEDULE) {
+            ScheduleNoti scheduleNoti = scheduleNotiRepository.findById(notiId)
+                .orElseThrow(() -> new BusinessException(NotificationErrorCode.NOTIFICATION_NOT_FOUND));
+
+            scheduleNoti.setIsRead(true);
+            scheduleNoti.setUpdatedAt(OffsetDateTime.now());
+
+            dto.setType(NotiType.SCHEDULE);
+            dto.setTargetId(scheduleNoti.getSchedule().getScheduleId());
+
+        } else if (SERVICE_TYPES.contains(type)) {
+            ServiceNoti serviceNoti = serviceNotiRepository.findById(notiId)
+                .orElseThrow(() -> new BusinessException(NotificationErrorCode.NOTIFICATION_NOT_FOUND));
+
+            serviceNoti.setIsRead(true);
+            serviceNoti.setUpdatedAt(OffsetDateTime.now());
+
+            dto.setType(serviceNoti.getNotificationType());
+            dto.setTargetId(serviceNoti.getTargetId());
+
+        } else {
+            throw new BusinessException(NotificationErrorCode.NOTIFICATION_NOT_FOUND);
+        }
+
+        return dto;
+    }
+
 
     @Transactional
     public void deleteNoti(Long notiId, NotiType type) {

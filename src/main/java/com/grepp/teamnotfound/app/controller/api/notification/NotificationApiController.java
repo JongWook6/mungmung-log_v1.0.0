@@ -41,6 +41,18 @@ public class NotificationApiController {
 //    ) {
 //
 //    }
+
+    /**
+     * 알림 읽기 관련
+     **/
+    @PatchMapping("/v1/notifications/{notiId}/{type}")
+    public ResponseEntity<?> readNotification(
+        @PathVariable("notiId") Long notiId,
+        @PathVariable("type") NotiType type
+    ) {
+        return ResponseEntity.ok(notificationService.readNoti(notiId, type));
+    }
+
     /**
      * 알림 삭제 관련
      **/
