@@ -1,14 +1,20 @@
 package com.grepp.teamnotfound.app.controller.api.reply;
 
+import com.grepp.teamnotfound.app.controller.api.reply.payload.ReplyDetailResponse;
+import com.grepp.teamnotfound.app.controller.api.reply.payload.ReplyListRequest;
 import com.grepp.teamnotfound.app.controller.api.reply.payload.ReplyListResponse;
 import com.grepp.teamnotfound.app.controller.api.reply.payload.ReplyRequest;
-import com.grepp.teamnotfound.app.model.reply.dto.ReplyListDto;
+import com.grepp.teamnotfound.app.model.auth.domain.Principal;
+import com.grepp.teamnotfound.app.model.reply.ReplyService;
+import com.grepp.teamnotfound.infra.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
-import java.time.OffsetDateTime;
+import jakarta.validation.Valid;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -23,54 +29,54 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/api/community/articles/{articleId}/replies", produces = MediaType.APPLICATION_JSON_VALUE)
 public class ReplyApiController {
 
+    private final ReplyService replyService;
+
     @GetMapping("/v1")
     @Operation(summary = "특정 게시글의 댓글 리스트 조회")
-    public ResponseEntity<ReplyListResponse> getAllReplies(
-        @PathVariable int articleId
+    public ResponseEntity<?> getAllReplies(
+        @PathVariable Long articleId,
+        @ModelAttribute @Valid ReplyListRequest request
     ) {
-        ReplyListResponse response = new ReplyListResponse();
-
-        for (int i = 1; i <= 3; i++) {
-            ReplyListDto dto = ReplyListDto.builder()
-                .replyId(Integer.toUnsignedLong(i))
-                .articleId((long) 1000 + i)
-                .nickname("유저 " + i)
-                .content(i + "번째 댓글입니다.")
-                .isReported(i % 2 == 0)
-                .date(OffsetDateTime.now())
-                .build();
-
-            response.getData().add(dto);
-        }
-        return ResponseEntity.ok(response);
+        ReplyListResponse response = replyService.getReplies(articleId, request.getPage(), request.getSize());
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @PostMapping("/v1")
     @Operation(summary = "댓글 작성")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> createReply(
-        @PathVariable int articleId,
-        @ModelAttribute ReplyRequest request
+        @PathVariable Long articleId,
+        @ModelAttribute ReplyRequest request,
+        @AuthenticationPrincipal Principal principal
     ) {
-        return ResponseEntity.ok(Map.of("data", Map.of( "replyId", 5, "msg", "댓글이 정상적으로 등록되었습니다.")));
+        ReplyDetailResponse response = replyService.createReply(request, articleId, principal.getUserId());
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @PatchMapping("/v1/{replyId}")
     @Operation(summary = "댓글 수정")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> updateReply(
         @PathVariable Long articleId,
         @PathVariable Long replyId,
-        @ModelAttribute ReplyRequest request
-
+        @ModelAttribute ReplyRequest request,
+        @AuthenticationPrincipal Principal principal
     ) {
-        return ResponseEntity.ok(Map.of("data", Map.of("msg", "댓글이 정상적으로 수정되었습니다.")));
+        ReplyDetailResponse response = replyService.updateReply(request, articleId, replyId, principal.getUserId());
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @DeleteMapping("/v1/{replyId}")
     @Operation(summary = "댓글 삭제")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> deleteReply(
         @PathVariable Long articleId,
-        @PathVariable Long replyId
+        @PathVariable Long replyId,
+        @AuthenticationPrincipal Principal principal
     ) {
-        return ResponseEntity.ok(Map.of("data", Map.of("msg", "댓글이 정상적으로 삭제되었습니다.")));
+        replyService.deleteReply(articleId, replyId, principal.getUserId());
+        return ResponseEntity.ok(ApiResponse.success(Map.of("result", "댓글이 정상적으로 삭제되었습니다.")));
     }
+
+    // TODO 댓글 신고기능
 }

@@ -17,7 +17,6 @@ public class PetWriteRequest {
     private Double weight;
     private Boolean sex;
     private Boolean isNeutered;
-    private Long userId;
     private PetImgDto image;
 }
 

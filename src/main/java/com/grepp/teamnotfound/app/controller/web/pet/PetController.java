@@ -1,6 +1,7 @@
 package com.grepp.teamnotfound.app.controller.web.pet;
 
 import com.grepp.teamnotfound.app.controller.api.mypage.payload.PetWriteRequest;
+import com.grepp.teamnotfound.app.model.auth.domain.Principal;
 import com.grepp.teamnotfound.app.model.pet.PetService;
 import com.grepp.teamnotfound.app.model.pet.dto.PetDto;
 import com.grepp.teamnotfound.app.model.user.entity.User;
@@ -12,6 +13,8 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -53,15 +56,20 @@ public class PetController {
     }
 
     @PostMapping("/add")
+    @PreAuthorize("isAuthenticated()")
     public String add(
         @ModelAttribute("pet") @Valid PetWriteRequest request,
         BindingResult bindingResult,
-        RedirectAttributes redirectAttributes
+        RedirectAttributes redirectAttributes,
+        @AuthenticationPrincipal Principal principal
     ) {
         if (bindingResult.hasErrors()) {
             return "pet/add";
         }
-        petService.create(request);
+
+        Long userId = principal.getUserId();
+
+        petService.create(userId, request);
         redirectAttributes.addFlashAttribute(WebUtils.MSG_SUCCESS, WebUtils.getMessage("pet.create.success"));
         return "redirect:/pets";
     }

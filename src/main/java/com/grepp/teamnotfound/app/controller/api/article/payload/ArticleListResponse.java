@@ -4,14 +4,16 @@ import com.grepp.teamnotfound.app.model.board.dto.ArticleListDto;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class ArticleListResponse {
 
-    private List<ArticleListDto> data = new ArrayList<>();
+    private List<ArticleListDto> articleList;
     private PageInfo pageInfo;
 }
