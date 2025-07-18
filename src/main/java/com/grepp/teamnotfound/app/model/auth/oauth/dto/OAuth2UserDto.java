@@ -8,6 +8,6 @@ import lombok.Getter;
 public class OAuth2UserDto {
 
     private String name;
-    private String username;
+    private String email;
     private String role;
 }

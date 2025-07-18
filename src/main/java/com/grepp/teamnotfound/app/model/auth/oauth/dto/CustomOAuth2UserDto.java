@@ -1,5 +1,6 @@
 package com.grepp.teamnotfound.app.model.auth.oauth.dto;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
@@ -7,13 +8,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
-public class CustomOAuth2User implements OAuth2User {
+@RequiredArgsConstructor
+public class CustomOAuth2UserDto implements OAuth2User {
 
     private final OAuth2UserDto userDto;
-
-    public CustomOAuth2User(OAuth2UserDto userDto) {
-        this.userDto = userDto;
-    }
 
     // 구글과 네이버의 반환이 달라서 사용 x
     @Override
@@ -43,8 +41,9 @@ public class CustomOAuth2User implements OAuth2User {
         return userDto.getName();
     }
 
+    // 구분값 email
     public String getUsername() {
 
-        return userDto.getUsername();
+        return userDto.getEmail();
     }
 }
