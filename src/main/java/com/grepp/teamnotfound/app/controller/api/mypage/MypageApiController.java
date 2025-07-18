@@ -8,13 +8,13 @@ import com.grepp.teamnotfound.app.model.auth.domain.Principal;
 import com.grepp.teamnotfound.app.model.pet.PetService;
 import com.grepp.teamnotfound.app.model.pet.dto.PetDto;
 import com.grepp.teamnotfound.app.model.user.UserService;
-import com.grepp.teamnotfound.app.model.user.dto.UserDto;
 import com.grepp.teamnotfound.app.model.vaccination.VaccinationService;
 import com.grepp.teamnotfound.app.model.vaccination.dto.VaccinationDto;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -26,7 +26,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @RestController
@@ -43,7 +45,7 @@ public class MypageApiController {
      **/
     @GetMapping("/v1/me")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<UserDto> getUser(
+    public ResponseEntity<?> getUser(
         @AuthenticationPrincipal Principal principal
     ) {
         Long userId = principal.getUserId();
@@ -53,7 +55,7 @@ public class MypageApiController {
 
     @GetMapping("/v1/pets")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<ProfilePetResponse>> getUserPets(
+    public ResponseEntity<List<?>> getUserPets(
         @AuthenticationPrincipal Principal principal
     ) {
         Long userId = principal.getUserId();
