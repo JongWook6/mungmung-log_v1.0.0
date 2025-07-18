@@ -6,6 +6,7 @@ import com.grepp.teamnotfound.app.model.auth.oauth.dto.OAuth2UserDto;
 import com.grepp.teamnotfound.app.model.user.entity.User;
 import com.grepp.teamnotfound.app.model.user.repository.UserRepository;
 import com.grepp.teamnotfound.infra.auth.oauth2.user.GoogleOAuth2UserInfo;
+import com.grepp.teamnotfound.infra.auth.oauth2.user.KakaoOAuth2UserInfo;
 import com.grepp.teamnotfound.infra.auth.oauth2.user.NaverOAuth2UserInfo;
 import com.grepp.teamnotfound.infra.auth.oauth2.user.OAuth2UserInfo;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +47,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         } else if (registrationId.equals("google")) {
             oAuth2UserInfo = new GoogleOAuth2UserInfo(oAuth2User.getAttributes());
+        }else if(registrationId.equals("kakao")){
+            oAuth2UserInfo = new KakaoOAuth2UserInfo(oAuth2User.getAttributes());
 
         } else {
             throw new IllegalArgumentException("지원하지 않는 OAuth2 provider : " + userRequest.getClientRegistration().getProviderDetails());
