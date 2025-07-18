@@ -45,6 +45,7 @@ public class SecurityConfig {
     private final RequestMatcherHolder requestMatcherHolder;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final OAuth2FailureHandler oAuth2FailureHandler;
+    private final CustomOAuth2UserService customOAuth2UserService;
 
     @Bean
     public AuthenticationSuccessHandler successHandler(){
@@ -82,7 +83,9 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .oauth2Login(oauth ->
-                        oauth.successHandler(oAuth2SuccessHandler)
+                        oauth.userInfoEndpoint((userInfoEndpointConfig)
+                                        -> userInfoEndpointConfig.userService(customOAuth2UserService))
+                                .successHandler(oAuth2SuccessHandler)
                                 .failureHandler(oAuth2FailureHandler)
 
                 )
