@@ -17,7 +17,6 @@ public class KakaoOAuth2UserInfo implements OAuth2UserInfo{
         this.attributesProfile = (Map<String, Object>) attributesAccount.get("profile");
     }
 
-    //TODO 받는 값 재정의 필요
     @Override
     public String getProviderId() {
         return attributes.get("id").toString();
@@ -30,7 +29,8 @@ public class KakaoOAuth2UserInfo implements OAuth2UserInfo{
 
     @Override
     public String getEmail() {
-        return attributesProfile.get("nickname").toString();
+        // 카카오 email 제공 X 이슈로 id 값으로 식별
+        return attributes.get("id").toString();
     }
 
     @Override

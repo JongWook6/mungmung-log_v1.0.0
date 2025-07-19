@@ -42,18 +42,10 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         response.addHeader("Set-Cookie", accessTokenCookie.toString());
         response.addHeader("Set-Cookie", refreshTokenCookie.toString());
-        boolean isAdmin = authentication.getAuthorities()
-                .stream()
-                .anyMatch(authority ->
-                        authority.getAuthority().equals("ROLE_ADMIN"));
 
-        if(isAdmin){
-            log.info("3️⃣ 관리자 로그인: {}", customOAuth2User.getUsername());
-            // TODO 관리자 로그인 후 메인화면(실재 화면 경로)
-            getRedirectStrategy().sendRedirect(request,response,"/admin/login");
-        } else {
-            log.info("3️⃣ User 회원 로그인: {}", customOAuth2User.getUsername());
-            // TODO 회원 로그인 후 메인화면(실재 화면 경로)
-            getRedirectStrategy().sendRedirect(request,response,"/user/login");
-        }    }
+        log.info("3️⃣ User 회원 로그인: {}", customOAuth2User.getUsername());
+
+        // TODO 회원 로그인 후 메인화면(실재 화면 경로)
+        getRedirectStrategy().sendRedirect(request, response, "/user/login");
+    }
 }

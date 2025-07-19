@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Random;
 
 @Transactional
 @Service
@@ -30,6 +31,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
 
+    @Transactional
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
 
@@ -44,7 +46,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         // 각 provider별 Info 객체 제작
         if (registrationId.equals("naver")) {
             oAuth2UserInfo = new NaverOAuth2UserInfo(oAuth2User.getAttributes());
-
         } else if (registrationId.equals("google")) {
             oAuth2UserInfo = new GoogleOAuth2UserInfo(oAuth2User.getAttributes());
         }else if(registrationId.equals("kakao")){
@@ -60,36 +61,72 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         User user;
         if (optionalUser.isEmpty()) {
             log.info("2️⃣-1️⃣ 신규 생성되는 유저 email - oAuth2UserInfo.getEmail: {}", oAuth2UserInfo.getEmail());
+
+            String tempNickname = generateUniqueNickname();
+
             user = User.builder()
                     .email(oAuth2UserInfo.getEmail())
                     .name(oAuth2UserInfo.getName())
-                    // TODO nickname 받는 로직 재설계 필요
-                    .nickname(oAuth2UserInfo.getName())
+                    .nickname(tempNickname)
                     .role(Role.ROLE_USER)
                     .provider(oAuth2UserInfo.getProvider())
                     .build();
 
             userRepository.save(user);
 
+            // 인증 객체 생성을 위한 dto
+            OAuth2UserDto userDto = OAuth2UserDto.builder()
+                    .email(user.getEmail())
+                    .name(user.getName())
+                    .userId(user.getUserId())
+                    .role("ROLE_USER")
+                    .build();
+
+            return new CustomOAuth2UserDto(userDto);
+
         } else if (Objects.equals(optionalUser.get().getProvider(), oAuth2UserInfo.getProvider())) {
             log.info("2️⃣-2️⃣ 기존에 존재하는 동일 공급자 email - oAuth2UserInfo.getEmail: {}", oAuth2UserInfo.getEmail());
             user = optionalUser.get();
+
+            // 인증 객체 생성을 위한 dto
+            OAuth2UserDto userDto = OAuth2UserDto.builder()
+                    .email(user.getEmail())
+                    .name(user.getName())
+                    .userId(user.getUserId())
+                    .role("ROLE_USER")
+                    .build();
+
+            return new CustomOAuth2UserDto(userDto);
+
         } else {
             log.info("2️⃣-3️⃣ 기존에 존재하는 다른 공급자 email - oAuth2UserInfo.getEmail: {}", oAuth2UserInfo.getEmail());
             // TODO 커스텀 에러 필요
             OAuth2Error error = new OAuth2Error("INVALID_PROVIDER", "다른 provider로 가입된 이메일", null);
             throw new OAuth2AuthenticationException(error, "다른 provider로 가입된 이메일: " + oAuth2UserInfo.getEmail());
         }
+    }
 
-        // 인증 객체 생성을 위한 dto
-        OAuth2UserDto userDto = OAuth2UserDto.builder()
-                .email(user.getEmail())
-                .name(user.getName())
-                .userId(user.getUserId())
-                .role("ROLE_USER")
-                .build();
+    private String generateUniqueNickname() {
+        String nickname;
+        do {
+            nickname = generateNickname();
+        } while (userRepository.existsByNickname(nickname));
+        return nickname;
+    }
 
-        return new CustomOAuth2UserDto(userDto);
+    private String generateNickname() {
 
+        String[] adjs = {"용감한", "귀여운", "활발한", "똑똑한", "총명한", "느긋한", "멋있는"};
+        String[] dogs = {"푸들", "말티즈", "비숑", "포메라니안", "진돗개", "치와와", "웰시코기",
+                "요크셔테리어", "시바견", "리트리버", "보더콜리", "불독", "시츄", "닥스훈트",
+                "허스키", "도베르만", "슈나우저", "댕댕이"};
+
+        Random random = new Random();
+
+        String adj = adjs[random.nextInt(adjs.length)];
+        String dog = dogs[random.nextInt(dogs.length)];
+        int num = random.nextInt(10000);
+
+        return adj+dog+num;
     }
 }
