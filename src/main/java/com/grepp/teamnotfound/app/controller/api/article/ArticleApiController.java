@@ -133,7 +133,7 @@ public class ArticleApiController {
     public ResponseEntity<?> getLikeCount(
         @PathVariable Long articleId
     ) {
-        Integer likeCount = articleService.getLikeCount(articleId);
+        Integer likeCount = articleService.getActualLikeCount(articleId);
         return ResponseEntity.ok(ApiResponse.success(Map.of("likes", likeCount)));
     }
 
