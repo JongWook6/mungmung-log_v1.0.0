@@ -41,7 +41,7 @@ public class OAuth2FailureHandler extends SimpleUrlAuthenticationFailureHandler 
             errorMessage = "소셜 로그인에 실패했습니다.";
         }
 
-        // TODO error 페이지
+        // TODO error 페이지(실재 화면 경로)
         String redirectUrl = "/error/login?error=" + URLEncoder.encode(errorMessage, StandardCharsets.UTF_8);
 
         getRedirectStrategy().sendRedirect(request, response, redirectUrl);

@@ -100,7 +100,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         } else {
             log.info("2️⃣-3️⃣ 기존에 존재하는 다른 공급자 email - oAuth2UserInfo.getEmail: {}", oAuth2UserInfo.getEmail());
-            // TODO 커스텀 에러 필요
             OAuth2Error error = new OAuth2Error("INVALID_PROVIDER", "다른 provider로 가입된 이메일", null);
             throw new OAuth2AuthenticationException(error, "다른 provider로 가입된 이메일: " + oAuth2UserInfo.getEmail());
         }
