@@ -154,6 +154,18 @@ public class UserService {
         return passwordEncoder.matches(request.getPassword(), user.getPassword());
     }
 
+    @Transactional
+    public void deleteUser(Long userId) {
+        User user = userRepository.findByUserId(userId)
+            .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+
+        user.setDeletedAt(OffsetDateTime.now());
+        userRepository.save(user);
+
+        userImgRepository.softDeleteUserImg(user.getUserId());
+    }
+
+
     public String getProfileImgPath(Long userId) {
         String profileImgPath = null;
         Optional<UserImg> optionalUserImg = userImgRepository.findByUser_UserIdAndDeletedAtIsNull(userId);

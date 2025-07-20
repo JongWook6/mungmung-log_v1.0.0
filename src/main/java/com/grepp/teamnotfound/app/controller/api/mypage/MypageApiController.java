@@ -172,4 +172,14 @@ public class MypageApiController {
         return ResponseEntity.ok(userService.matchPassword(userId, request));
     }
 
+    @DeleteMapping("/v1/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> deleteUser(
+        @AuthenticationPrincipal Principal principal
+    ) {
+        Long userId = principal.getUserId();
+        userService.deleteUser(userId);
+        return ResponseEntity.noContent().build();
+    }
+
 }
