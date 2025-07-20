@@ -8,6 +8,7 @@ import com.grepp.teamnotfound.app.model.schedule.ScheduleService;
 import com.grepp.teamnotfound.app.model.schedule.code.ScheduleCycle;
 import com.grepp.teamnotfound.app.model.schedule.dto.ScheduleCreateRequestDto;
 import com.grepp.teamnotfound.app.model.vaccination.code.VaccineName;
+import com.grepp.teamnotfound.app.model.vaccination.code.VaccineSchedule;
 import com.grepp.teamnotfound.app.model.vaccination.code.VaccineType;
 import com.grepp.teamnotfound.app.model.vaccination.dto.VaccinationDto;
 import com.grepp.teamnotfound.app.model.vaccination.entity.Vaccination;
@@ -199,7 +200,7 @@ public class VaccinationService {
                 ScheduleCreateRequestDto scheduleDto = ScheduleCreateRequestDto.builder()
                         .userId(pet.getUser().getUserId())
                         .petId(pet.getPetId())
-                        .name(vaccine.getName() + " 보강_접종일")
+                        .name(vaccine.getName() + VaccineSchedule.ADDITIONAL.getWords())
                         .date(dto.getVaccineAt().plusMonths(vaccine.getAdditionalCycle()))
                         .cycle(ScheduleCycle.YEAR)
                         .cycleEnd(dto.getVaccineAt().plusYears(31))
@@ -211,7 +212,7 @@ public class VaccinationService {
                 LocalDate cycleEndDate = dto.getVaccineAt().plusWeeks((long) (vaccine.getBoosterCount() + 1 - dto.getCount()) * vaccine.getBoosterCycle() + 1);
                 ScheduleCreateRequestDto scheduleDto = ScheduleCreateRequestDto.builder()
                         .userId(pet.getUser().getUserId())
-                        .petId(pet.getPetId()).name(vaccine.getName() + " 추가_접종일")
+                        .petId(pet.getPetId()).name(vaccine.getName() + VaccineSchedule.BOOSTER.getWords())
                         .date(dto.getVaccineAt().plusWeeks(vaccine.getBoosterCycle()))
                         .cycle(ScheduleCycle.TWO_WEEK)
                         .cycleEnd(cycleEndDate)
@@ -221,7 +222,7 @@ public class VaccinationService {
                 // 보강 접종 완료 후 추가 접종(1년 단위)
                 ScheduleCreateRequestDto scheduleDto2 = ScheduleCreateRequestDto.builder()
                         .userId(pet.getUser().getUserId())
-                        .petId(pet.getPetId()).name(vaccine.getName() + " 보강_접종일")
+                        .petId(pet.getPetId()).name(vaccine.getName() + VaccineSchedule.ADDITIONAL.getWords())
                         .date(cycleEndDate.plusYears(1))
                         .cycle(ScheduleCycle.YEAR)
                         .cycleEnd(cycleEndDate.plusYears(31))
