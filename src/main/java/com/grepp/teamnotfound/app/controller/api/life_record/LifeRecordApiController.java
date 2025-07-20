@@ -1,9 +1,9 @@
 package com.grepp.teamnotfound.app.controller.api.life_record;
 
-import com.grepp.teamnotfound.app.controller.api.article.payload.PageInfo;
 import com.grepp.teamnotfound.app.controller.api.life_record.payload.LifeRecordListRequest;
 import com.grepp.teamnotfound.app.controller.api.life_record.payload.LifeRecordListResponse;
 import com.grepp.teamnotfound.app.controller.api.life_record.payload.LifeRecordData;
+import com.grepp.teamnotfound.app.controller.api.life_record.payload.PageInfo;
 import com.grepp.teamnotfound.app.model.auth.domain.Principal;
 import com.grepp.teamnotfound.app.model.life_record.LifeRecordService;
 import com.grepp.teamnotfound.app.model.life_record.dto.LifeRecordDto;

@@ -21,7 +21,7 @@ public class LifeRecordListDto {
 
     public LifeRecordListDto(LifeRecord lifeRecord){
         this.lifeRecordId = lifeRecord.getLifeRecordId();
-        this.pet = LifeRecordListPetDto.petInfoDto(lifeRecord.getPet().getPetImg());
+        this.pet = LifeRecordListPetDto.petInfoDto(lifeRecord.getPet().getImages().getFirst());
         this.recordAt = lifeRecord.getRecordedAt();
         this.weight = lifeRecord.getWeight();
         // 생활기록의 총 산책시간 계산

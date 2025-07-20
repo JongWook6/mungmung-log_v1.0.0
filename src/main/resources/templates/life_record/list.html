@@ -1,0 +1,54 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+  <title>[[#{lifeRecord.list.headline}]]</title>
+</head>
+<body>
+<div layout:fragment="content">
+  <div class="d-flex flex-wrap mb-4">
+    <h1 class="flex-grow-1">[[#{lifeRecord.list.headline}]]</h1>
+    <div>
+      <a th:href="@{/lifeRecords/add}" class="btn btn-primary ms-2">[[#{lifeRecord.list.createNew}]]</a>
+    </div>
+  </div>
+  <div th:if="${lifeRecords.empty}">[[#{lifeRecord.list.empty}]]</div>
+  <div th:if="${!lifeRecords.empty}" class="table-responsive">
+    <table class="table table-striped table-hover align-middle">
+      <thead>
+      <tr>
+        <th scope="col">[[#{lifeRecord.lifeRecordId.label}]]</th>
+        <th scope="col">[[#{lifeRecord.recordAt.label}]]</th>
+        <th scope="col">[[#{lifeRecord.pet.label}]]</th>
+        <th scope="col">[[#{lifeRecord.content.label}]]</th>
+        <th scope="col">[[#{lifeRecord.weight.label}]]</th>
+        <th scope="col">[[#{lifeRecord.sleepTime.label}]]</th>
+        <th scope="col">[[#{lifeRecord.walkingList.label}]]</th>
+        <th scope="col">[[#{lifeRecord.feedingList.label}]]</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="lifeRecord : ${lifeRecords}">
+        <td>[[${lifeRecord.lifeRecordId}]]</td>
+        <td>[[${lifeRecord.recordAt}]]</td>
+        <td>[[${lifeRecord.petId}]]</td>
+        <td>[[${lifeRecord.content}]]</td>
+        <td>[[${lifeRecord.weight}]]</td>
+        <td>[[${lifeRecord.sleepTime}]]</td>
+        <td>[[${#lists.size(lifeRecord.walkingList)}]]</td>
+        <td>[[${#lists.size(lifeRecord.feedingList)}]]</td>
+        <td>
+          <div class="float-end text-nowrap">
+            <form th:action="@{/lifeRecords/delete/{id}(id=${lifeRecord.lifeRecordId})}"
+                  th:data-confirm-message="#{delete.confirm}" method="post" class="js-submit-confirm d-inline">
+              <button type="submit" class="btn btn-sm btn-secondary">[[#{lifeRecord.list.delete}]]</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</body>
+</html>
