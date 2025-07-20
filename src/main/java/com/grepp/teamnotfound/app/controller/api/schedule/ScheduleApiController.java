@@ -7,7 +7,6 @@ import com.grepp.teamnotfound.app.model.schedule.ScheduleService;
 import com.grepp.teamnotfound.app.model.schedule.dto.ScheduleCreateRequestDto;
 import com.grepp.teamnotfound.app.model.schedule.dto.ScheduleDto;
 import com.grepp.teamnotfound.app.model.schedule.dto.ScheduleEditRequestDto;
-import com.grepp.teamnotfound.app.model.schedule.entity.Schedule;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -18,13 +17,12 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping(value = "/api/v1/dashboard", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/api/dashboard/v2", produces = MediaType.APPLICATION_JSON_VALUE)
 @PreAuthorize("isAuthenticated()")
 public class ScheduleApiController {
 
@@ -70,7 +68,7 @@ public class ScheduleApiController {
         return ResponseEntity.ok(HttpStatus.ACCEPTED);
     }
 
-    @PatchMapping("/calendar/delete")
+    @DeleteMapping("/calendar/delete")
     public ResponseEntity<?> DeleteSchedule(
             @AuthenticationPrincipal Principal principal,
             @RequestParam Long scheduleId,
