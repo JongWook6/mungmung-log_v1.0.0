@@ -22,24 +22,24 @@ public class ProfileApiController {
     private final UserService userService;
     private final PetService petService;
 
-    @GetMapping("/v1/{userId}")
+    @GetMapping("/v1/users/{userId}")
     public ResponseEntity<UserDto> getUser(
-        @PathVariable(name = "userId") Long userId
+        @PathVariable Long userId
     ) {
         return ResponseEntity.ok(userService.findByUserId(userId));
     }
 
-    @GetMapping("/v1/pet/{userId}")
+    @GetMapping("/v1/users/{userId}/pet")
     public ResponseEntity<List<ProfilePetResponse>> getUserPets(
-        @PathVariable(name = "userId") Long userId
+        @PathVariable Long userId
     ) {
         List<ProfilePetResponse> response = petService.findByUserId(userId);
         return ResponseEntity.ok(response);
     }
 
-//    @GetMapping("/v1/board/{userId}")
+//    @GetMapping("/v1/board")
 //    public ResponseEntity<PetDto> getUserBoard(
-//        @PathVariable(name = "userId") Long userId
+//        @AuthenticationPrincipal Principal principal
 //    ) {
 //        return ResponseEntity.ok(petService.findOne(userId));
 //    }

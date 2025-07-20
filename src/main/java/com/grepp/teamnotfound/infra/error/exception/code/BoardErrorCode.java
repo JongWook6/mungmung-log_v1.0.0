@@ -22,8 +22,12 @@ public enum BoardErrorCode implements BaseErrorCode {
     BOARD_CONFLICT(HttpStatus.BAD_REQUEST.value(), "BOARD_010", "기존 게시글이 작성된 게시판과 일치하지 않습니다."),
 
     ARTICLE_ACCESS_DENIED(HttpStatus.FORBIDDEN.value(), "BOARD_011", "해당 게시글에 대한 접근 권한이 없습니다."),
-    ARTICLE_FORBIDDEN(HttpStatus.FORBIDDEN.value(), "BOARD_012", "해당 게시글에 대한 수정/삭제 권한이 없습니다.");
+    ARTICLE_FORBIDDEN(HttpStatus.FORBIDDEN.value(), "BOARD_012", "해당 게시글에 대한 수정/삭제 권한이 없습니다."),
 
+    REPLY_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "BOARD_013", "존재하지 않는 댓글입니다."),
+    REPLY_DELETED(HttpStatus.NOT_FOUND.value(), "BOARD_014", "삭제된 댓글입니다."),
+    REPLY_REPORTED(HttpStatus.NOT_FOUND.value(), "BOARD_015", "관리자가 숨김 처리한 댓글입니다."),
+    REPLY_FORBIDDEN(HttpStatus.FORBIDDEN.value(), "BOARD_016", "해당 댓글에 대한 수정/삭제 권한이 없습니다.");
 
     private final int status;
     private final String code;

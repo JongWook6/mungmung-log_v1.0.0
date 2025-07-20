@@ -20,8 +20,8 @@ import com.grepp.teamnotfound.infra.error.exception.code.LifeRecordErrorCode;
 import com.grepp.teamnotfound.infra.error.exception.code.PetErrorCode;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -137,6 +137,34 @@ public class LifeRecordService {
     @Transactional(readOnly = true)
     public Page<LifeRecordListDto> searchLifeRecords(Long userId, LifeRecordListRequest request, Pageable pageable) {
         return lifeRecordRepository.search(userId, request, pageable);
+    } 
+  
+    public List<LifeRecord> getSleepingLifeRecordList(Pet pet, LocalDate date){
+        return lifeRecordRepository.findTop10ByPetAndDeletedAtNullAndRecordedAtBeforeAndSleepingTimeIsNotNullOrderByRecordedAtDesc(pet, date);
+
+    }
+
+    public List<LifeRecord> getWeightLifeRecordList(Pet pet, LocalDate date) {
+        return lifeRecordRepository.findTop10ByPetAndDeletedAtNullAndRecordedAtBeforeAndWeightIsNotNullOrderByRecordedAtDesc(pet, date);
+    }
+
+    public Map<Long, LocalDate> get7LifeRecordList(Pet pet, LocalDate date) {
+        List<LifeRecord> lifeRecords = lifeRecordRepository.findByPetAndDeletedAtNullAndRecordedAtBetweenOrderByRecordedAtDesc(pet, date.minusWeeks(1), date);
+        Map<Long, LocalDate> mapList = new HashMap<>();
+        for (LifeRecord lifeRecord : lifeRecords){
+            mapList.put(lifeRecord.getLifeRecordId(), lifeRecord.getRecordedAt());
+        }
+        return mapList;
+    }
+
+    public Map<Long, LocalDate> get9LifeRecordList(Pet pet, LocalDate date) {
+        List<LifeRecord> lifeRecords = lifeRecordRepository.findByPetAndDeletedAtNullAndRecordedAtBetweenOrderByRecordedAtDesc(pet, date.minusDays(9), date);
+
+        Map<Long, LocalDate> mapList = new HashMap<>();
+        for (LifeRecord lifeRecord : lifeRecords){
+            mapList.put(lifeRecord.getLifeRecordId(), lifeRecord.getRecordedAt());
+        }
+        return mapList;
     }
 
     /*

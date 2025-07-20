@@ -1,8 +1,12 @@
 package com.grepp.teamnotfound.app.model.life_record.repository;
 
+import com.grepp.teamnotfound.app.controller.api.life_record.payload.LifeRecordData;
 import com.grepp.teamnotfound.app.model.life_record.entity.LifeRecord;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
+
+import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,4 +21,9 @@ public interface LifeRecordRepository extends JpaRepository<LifeRecord, Long>, L
     @Query("SELECT l.lifeRecordId FROM LifeRecord l WHERE l.pet.petId = :petId AND l.recordedAt = :recordAt AND l.deletedAt IS NULL")
     Optional<Long> findLifeRecordId(@Param("petId") Long petId, @Param("recordAt") LocalDate recordAt);
 
+    List<LifeRecord> findTop10ByPetAndDeletedAtNullAndRecordedAtBeforeAndSleepingTimeIsNotNullOrderByRecordedAtDesc(Pet pet, LocalDate date);
+
+    List<LifeRecord> findTop10ByPetAndDeletedAtNullAndRecordedAtBeforeAndWeightIsNotNullOrderByRecordedAtDesc(Pet pet, LocalDate date);
+
+    List<LifeRecord> findByPetAndDeletedAtNullAndRecordedAtBetweenOrderByRecordedAtDesc(Pet pet, LocalDate date, LocalDate localDate);
 }
