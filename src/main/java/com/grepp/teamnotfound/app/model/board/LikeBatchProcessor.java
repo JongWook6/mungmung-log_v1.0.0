@@ -83,11 +83,12 @@ public class LikeBatchProcessor {
     }
 
     // 1분마다 실행
-    @Scheduled(fixedDelay = 300000)
+    @Scheduled(fixedDelay = 60000)
     @Transactional
     public void processLikeBatch2() {
         log.info("Processing likes batch...");
 
+        // 요청이 들어온 articleId 리스트
         Set<Long> changedArticleIds = redisLikeService.getAllChangedArticleIdsAndClear();
 
         if (changedArticleIds.isEmpty()) {
@@ -99,6 +100,7 @@ public class LikeBatchProcessor {
             Set<Object> likeRequests = redisLikeService.getAllLikeRequestsAndClear(articleId);
             Set<Object> unlikeRequests = redisLikeService.getAllUnlikeRequestsAndClear(articleId);
 
+            // 요청 송신자 userId 리스트
             List<Long> usersToLike = likeRequests.stream()
                 .map(object -> Long.valueOf(object.toString()))
                 .toList();
@@ -130,6 +132,10 @@ public class LikeBatchProcessor {
                 List<ArticleLike> likesToDelete = articleLikeRepository.findAllByArticleIdAndUserIds(articleId, usersToUnlike);
                 articleLikeRepository.deleteAllInBatch(likesToDelete);
             }
+
+            // DB 에 최종 반영된 좋아요 수를 가져와 Redis 캐시를 업데이트하여 정합성 유지
+            Integer finalDbLikeCount = articleLikeRepository.countByArticle_ArticleId(articleId);
+            redisLikeService.setArticleLikesCount(articleId, finalDbLikeCount.longValue());
         }
 
         log.info("Likes batch processing finished for {} articles.", changedArticleIds.size());

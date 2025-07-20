@@ -21,6 +21,8 @@ public class RedisLikeService {
 
     // 배치 대상 article
     private static final String BATCH_ARTICLE_IDS_KEY = "batch:article:ids";
+    // 게시글 총 좋아요 수 카운터 키
+    private static final String ARTICLE_LIKES_TOTAL_COUNT_KEY = "article:likes_total_count:";
 
     public void addLikeRequest(Long articleId, Long userId) {
         String likeKey = "article:like:" + articleId;
@@ -69,23 +71,12 @@ public class RedisLikeService {
         }
     }
 
-    // 사용자가 특정 게시글을 좋아요 했는지 Redis 에서 확인
+    // 사용자가 최근에 해당 게시글을 좋아요 했는지 Redis 에서 확인
     public boolean isUserLikedInRedis(Long articleId, Long userId) {
         String userLikeStatusKey = "user:liked_status:" + userId + ":" + articleId;
         return Boolean.TRUE.equals(redisTemplate.hasKey(userLikeStatusKey));
     }
 
-    // 특정 게시글의 좋아요 요청 유저 ID 목록 (Batch 처리용)
-    public Set<Object> getLikeRequests(Long articleId) {
-        String key = "article:like:" + articleId;
-        return redisTemplate.opsForSet().members(key);
-    }
-
-    // 특정 게시글의 좋아요 취소 요청 유저 ID 목록 (Batch 처리용)
-    public Set<Object> getUnlikeRequests(Long articleId) {
-        String key = "article:unlike:" + articleId;
-        return redisTemplate.opsForSet().members(key);
-    }
 
     /**
      * Batch 처리용
@@ -174,5 +165,37 @@ public class RedisLikeService {
             return (Set<Object>) results.getFirst();
         }
         return Collections.emptySet();
+    }
+
+    // Redis 에서 좋아요 카운트 가져오기
+    public Long getArticleLikesCount(Long articleId) {
+        String key = ARTICLE_LIKES_TOTAL_COUNT_KEY + articleId;
+        Object count = redisTemplate.opsForValue().get(key);
+        if (count instanceof Integer) {
+            // RedisTemplate 이 Integer 로 저장할 수도 있음
+            return ((Integer) count).longValue();
+        } else if (count instanceof Long) {
+            return (Long) count;
+        }
+        return null; // 캐시 부재
+    }
+
+    // Redis 에 좋아요 카운트 설정
+    public void setArticleLikesCount(Long articleId, Long count) {
+        String key = ARTICLE_LIKES_TOTAL_COUNT_KEY + articleId;
+        redisTemplate.opsForValue().set(key, count);
+        redisTemplate.expire(key, 1, TimeUnit.DAYS);
+    }
+
+    // 좋아요 카운터 1 증가
+    public void incrementArticleLikesCount(Long articleId) {
+        String key = ARTICLE_LIKES_TOTAL_COUNT_KEY + articleId;
+        redisTemplate.opsForValue().increment(key, 1);
+    }
+
+    // 좋아요 카운터 1 감소
+    public void decrementArticleLikesCount(Long articleId) {
+        String key = ARTICLE_LIKES_TOTAL_COUNT_KEY + articleId;
+        redisTemplate.opsForValue().increment(key, -1);
     }
 }

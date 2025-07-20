@@ -120,6 +120,10 @@ public class ArticleService {
 
         ArticleDetailResponse response = articleRepository.findDetailById(articleId, userId);
 
+        // Redis 카운터 캐시 값으로 덮어씀
+        Integer redisLikeCount = getArticleLikeCount(articleId);
+        response.setLikes(redisLikeCount);
+
         articleRepository.plusViewById(articleId);
         response.setViews(response.getViews() + 1);
 
@@ -270,9 +274,9 @@ public class ArticleService {
 
         redisLikeService.addLikeRequest(articleId, userId);
         redisLikeService.setUserLikedStatus(articleId, userId, true);
+        redisLikeService.incrementArticleLikesCount(articleId); // 게시글 총 좋아요 카운터 증가
 
         Integer totalCount = getArticleLikeCount(articleId);
-        // NOTE 굳이 한 번 더 레디스에서 확인해야 할 필요?
         boolean isLiked = redisLikeService.isUserLikedInRedis(articleId, userId);
 
         return new LikeResponse(articleId, totalCount, isLiked);
@@ -295,9 +299,9 @@ public class ArticleService {
 
         redisLikeService.addUnlikeRequest(articleId, userId);
         redisLikeService.setUserLikedStatus(articleId, userId, false);
+        redisLikeService.decrementArticleLikesCount(articleId);
 
         Integer totalCount = getArticleLikeCount(articleId);
-        // NOTE 굳이 한 번 더 레디스에서 확인해야 할 필요?
         boolean isLiked = redisLikeService.isUserLikedInRedis(articleId, userId);
 
         return new LikeResponse(articleId, totalCount, isLiked);
@@ -305,37 +309,48 @@ public class ArticleService {
 
     private Integer getArticleLikeCount(Long articleId) {
         // NOTE 게시글 좋아요 수는 게시글 리스트 조회, 상세 조회에서 모두 표시하는데 전부 이 메서드를 사용?
+        Long count = redisLikeService.getArticleLikesCount(articleId);
 
-        Integer dbLikeCount = articleLikeRepository.countByArticle_ArticleId(articleId);
-        Set<Object> currentLikeRequests = redisLikeService.getLikeRequests(articleId);
-        Set<Object> currentUnlikeRequests = redisLikeService.getUnlikeRequests(articleId);
+        if (count == null) {
+            Integer dbLikeCount = articleLikeRepository.countByArticle_ArticleId(articleId);
+            count = dbLikeCount.longValue();
 
-        long pendingLikes = 0;
-        // 실제로 처리할 좋아요 요청만 카운트
-        if (currentLikeRequests != null) {
-            pendingLikes = currentLikeRequests.stream()
-                .map(Object::toString)
-                .filter(userIdStr ->
-                    !articleLikeRepository.existsByArticle_ArticleIdAndUser_UserId(articleId,
-                        Long.valueOf(userIdStr))
-                )
-                .count();
+            // 캐시 저장
+            redisLikeService.setArticleLikesCount(articleId, count);
         }
 
-        long pendingUnlikes = 0;
-        // 실제로 처리할 좋아요 취소 요청만 카운트
-        if (currentUnlikeRequests != null) {
-            pendingUnlikes = currentUnlikeRequests.stream()
-                .map(Object::toString)
-                .filter(userIdStr ->
-                    articleLikeRepository.existsByArticle_ArticleIdAndUser_UserId(articleId,
-                        Long.valueOf(userIdStr))
-                )
-                .count();
-        }
+        return count.intValue();
 
-        // DB 에 아직 반영되지 않은 Redis 요청까지 합산하여 반환
-        return (int) (dbLikeCount + pendingLikes - pendingUnlikes);
+
+//        Set<Object> currentLikeRequests = redisLikeService.getLikeRequests(articleId);
+//        Set<Object> currentUnlikeRequests = redisLikeService.getUnlikeRequests(articleId);
+//
+//        long pendingLikes = 0;
+//        // 실제로 처리할 좋아요 요청만 카운트
+//        if (currentLikeRequests != null) {
+//            pendingLikes = currentLikeRequests.stream()
+//                .map(Object::toString)
+//                .filter(userIdStr ->
+//                    !articleLikeRepository.existsByArticle_ArticleIdAndUser_UserId(articleId,
+//                        Long.valueOf(userIdStr))
+//                )
+//                .count();
+//        }
+//
+//        long pendingUnlikes = 0;
+//        // 실제로 처리할 좋아요 취소 요청만 카운트
+//        if (currentUnlikeRequests != null) {
+//            pendingUnlikes = currentUnlikeRequests.stream()
+//                .map(Object::toString)
+//                .filter(userIdStr ->
+//                    articleLikeRepository.existsByArticle_ArticleIdAndUser_UserId(articleId,
+//                        Long.valueOf(userIdStr))
+//                )
+//                .count();
+//        }
+//
+//        // DB 에 아직 반영되지 않은 Redis 요청까지 합산하여 반환
+//        return (int) (dbLikeCount + pendingLikes - pendingUnlikes);
     }
 
     @Transactional(readOnly = true)

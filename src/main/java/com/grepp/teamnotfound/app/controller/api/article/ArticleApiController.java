@@ -103,7 +103,10 @@ public class ArticleApiController {
         @AuthenticationPrincipal Principal principal
     ) {
 //        LikeResponse response = articleService.likeArticle(articleId, principal.getUserId());
+        long before = System.currentTimeMillis();
         LikeResponse response = articleService.likeWithRedis(articleId, principal.getUserId());
+        long after = System.currentTimeMillis();
+        System.out.println(after - before);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

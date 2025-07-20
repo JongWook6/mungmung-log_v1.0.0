@@ -47,7 +47,7 @@ public class RequestMatcherHolder {
             // 5. 기타 개발용 open page
             // GET /**
             new RequestInfo(GET, "/", null),
-            new RequestInfo(GET, "/api/community/**", null),
+//            new RequestInfo(GET, "/api/community/**", null),
 //            new RequestInfo(GET, "/api/life-record/**", null),
 //            new RequestInfo(GET, "/api/mypage/**", null),
             new RequestInfo(GET, "/api/profile/**", null)
