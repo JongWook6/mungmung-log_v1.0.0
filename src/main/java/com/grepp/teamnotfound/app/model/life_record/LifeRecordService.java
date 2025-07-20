@@ -138,4 +138,16 @@ public class LifeRecordService {
     public Page<LifeRecordListDto> searchLifeRecords(Long userId, LifeRecordListRequest request, Pageable pageable) {
         return lifeRecordRepository.search(userId, request, pageable);
     }
+
+    /*
+    * Bootify용 Service
+    */
+
+    @Transactional(readOnly = true)
+    public List<LifeRecordData> findAll() {
+        return lifeRecordRepository.findAll().stream()
+                .filter(lifeRecord -> lifeRecord.getDeletedAt() == null)
+                .map(lifeRecord -> getLifeRecord(lifeRecord.getLifeRecordId()))
+                .toList();
+    }
 }
