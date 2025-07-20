@@ -72,10 +72,11 @@ public class MypageApiController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> createPet(
         @RequestPart("request") PetWriteRequest request,
-        @RequestPart(value = "images", required = false) List<MultipartFile> images,
+        @RequestPart(value = "image", required = false) MultipartFile image,
         @AuthenticationPrincipal Principal principal
     ) {
         Long userId = principal.getUserId();
+        List<MultipartFile> images = (image != null) ? List.of(image) : List.of();
 
         return ResponseEntity.ok(petService.create(userId, request, images));
     }
@@ -94,8 +95,9 @@ public class MypageApiController {
     public ResponseEntity<?> updatePet(
         @PathVariable(name = "petId") Long petId,
         @RequestPart("request") PetWriteRequest request,
-        @RequestPart(value = "images", required = false) List<MultipartFile> images
+        @RequestPart(value = "image", required = false) MultipartFile image
     ) {
+        List<MultipartFile> images = (image != null) ? List.of(image) : List.of();
         return ResponseEntity.ok(petService.update(petId, request, images));
     }
 
