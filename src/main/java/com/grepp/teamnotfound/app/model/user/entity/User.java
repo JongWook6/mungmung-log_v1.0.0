@@ -59,9 +59,7 @@ public class User extends BaseEntity {
     private Role role;
 
     @Setter
-    @Column(
-//            nullable = false,
-            length = 200)
+    @Column(length = 200)
     private String password;
 
     @Column(length = 20)
