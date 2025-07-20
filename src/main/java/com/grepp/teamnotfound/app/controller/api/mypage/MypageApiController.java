@@ -68,7 +68,6 @@ public class MypageApiController {
      * 펫 관련 API
      **/
 
-    @PostMapping(value = "/v2/pets", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PostMapping(value = "/v3/pets", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> createPet(
@@ -90,7 +89,6 @@ public class MypageApiController {
         return ResponseEntity.ok(petDto);
     }
 
-    @PutMapping(value = "/v2/pets/{petId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PutMapping(value = "/v3/pets/{petId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> updatePet(
