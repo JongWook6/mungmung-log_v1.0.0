@@ -65,10 +65,10 @@ public class ScheduleService {
 
     // 일정 등록(생성)
     @Transactional
-    public void createSchedule(ScheduleCreateRequestDto request){
+    public void createSchedule(Long userId, ScheduleCreateRequestDto request){
         // petId, userId 존재 검증
         Pet pet = petRepository.findById(request.getPetId()).orElseThrow(() -> new PetException(PetErrorCode.PET_NOT_FOUND));
-        User user = userRepository.findById(request.getUserId()).orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
         if (request.getCycle().equals(ScheduleCycle.NONE)) {
             Schedule schedule = Schedule.builder()
                     .name(request.getName())
@@ -80,7 +80,7 @@ public class ScheduleService {
                     .user(user).build();
             scheduleRepository.save(schedule);
         }else{
-            for(LocalDate date = request.getDate(); date.isBefore(request.getCycleEnd()); date = date.plusDays(request.getCycle().getDays(request.getDate()))){
+            for(LocalDate date = request.getDate(); date.isBefore(request.getCycleEnd()); date = date.plusDays(request.getCycle().getDays(date))){
                 Schedule schedule = Schedule.builder()
                         .name(request.getName())
                         .scheduleDate(date)
@@ -97,10 +97,10 @@ public class ScheduleService {
 
     // 일정 수정
     @Transactional
-    public void editSchedule(ScheduleEditRequestDto request){
+    public void editSchedule(Long userId, ScheduleEditRequestDto request){
         // petId, userId 존재 여부 검증
         Pet pet = petRepository.findById(request.getPetId()).orElseThrow(() -> new PetException(PetErrorCode.PET_NOT_FOUND));
-        User user = userRepository.findById(request.getUserId()).orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
         // 일정 존재 여부 검증
         Schedule schedule = scheduleRepository.findById(request.getScheduleId()).orElseThrow(() -> new ScheduleException(ScheduleErrorCode.SCHEDULE_NOT_FOUND));
@@ -129,7 +129,7 @@ public class ScheduleService {
                 date = date.plusDays(request.getCycle().getDays(date));
             }
             // 부족한 일정 추가 생성
-            for(;date.isBefore(request.getCycleEnd()); date = date.plusDays(request.getCycle().getDays(request.getDate()))){
+            for(;date.isBefore(request.getCycleEnd()); date = date.plusDays(request.getCycle().getDays(date))){
                 Schedule addSchedule = Schedule.builder()
                         .name(request.getName())
                         .scheduleDate(date)
@@ -146,7 +146,24 @@ public class ScheduleService {
             schedule.setName(request.getName());
             schedule.setScheduleDate(request.getDate());
             schedule.setUpdatedAt(OffsetDateTime.now());
+            schedule.setCycle(request.getCycle());
             scheduleRepository.save(schedule);
+            if (!request.getCycle().equals(ScheduleCycle.NONE)) {
+                List<Schedule> schedules = scheduleRepository.findByNameAndCycleAndCycleEnd(schedule.getName(), schedule.getCycle(), schedule.getCycleEnd());
+                LocalDate date = request.getDate();
+                for(;date.isBefore(request.getCycleEnd()); date = date.plusDays(request.getCycle().getDays(date))){
+                    Schedule addSchedule = Schedule.builder()
+                            .name(request.getName())
+                            .scheduleDate(date)
+                            .cycle(request.getCycle())
+                            .cycleEnd(request.getCycleEnd())
+                            .isDone(false)
+                            .pet(pet)
+                            .user(user).build();
+                    schedules.add(addSchedule);
+                }
+                scheduleRepository.saveAll(schedules);
+            }
         }
     }
 
@@ -169,8 +186,10 @@ public class ScheduleService {
         }
     }
 
-    public void checkIsDone(Long petId, Long scheduleId) {
+    public void checkIsDone(Long userId, Long scheduleId) {
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(() -> new ScheduleException(ScheduleErrorCode.SCHEDULE_NOT_FOUND));
+        if (!schedule.getUser().getUserId().equals(userId)) throw new UserException(UserErrorCode.USER_ACCESS_DENIED);
+
         schedule.setIsDone(!schedule.getIsDone());
         scheduleRepository.save(schedule);
     }
