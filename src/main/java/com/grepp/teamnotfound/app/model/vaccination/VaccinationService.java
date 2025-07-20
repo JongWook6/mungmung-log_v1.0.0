@@ -195,7 +195,7 @@ public class VaccinationService {
             scheduleService.deleteVaccinationSchedule(pet, vaccine.getName().name() + " 추가_접종일");
 
             // 각 백신에 맞는 일정 등록 로직
-            if (dto.getVaccineType().equals(VaccineType.ADDITIONAL)) {
+            if (VaccineType.ADDITIONAL.equals(dto.getVaccineType())) {
                 // 보강 접종(1년 단위)
                 ScheduleCreateRequestDto scheduleDto = ScheduleCreateRequestDto.builder()
                         .userId(pet.getUser().getUserId())
