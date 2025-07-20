@@ -69,6 +69,7 @@ public class MypageApiController {
      **/
 
     @PostMapping(value = "/v2/pets", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/v3/pets", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> createPet(
         @RequestPart("request") PetWriteRequest request,
@@ -90,6 +91,7 @@ public class MypageApiController {
     }
 
     @PutMapping(value = "/v2/pets/{petId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value = "/v3/pets/{petId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> updatePet(
         @PathVariable(name = "petId") Long petId,
