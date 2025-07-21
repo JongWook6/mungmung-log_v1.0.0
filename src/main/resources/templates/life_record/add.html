@@ -1,0 +1,38 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+  <title>[[#{lifeRecord.add.headline}]]</title>
+</head>
+<body>
+<div layout:fragment="content">
+  <div class="d-flex flex-wrap mb-4">
+    <h1 class="flex-grow-1">[[#{lifeRecord.add.headline}]]</h1>
+    <div>
+      <a th:href="@{/lifeRecords}" class="btn btn-secondary">[[#{lifeRecord.add.back}]]</a>
+    </div>
+  </div>
+  <div th:replace="~{fragments/forms::globalErrors('lifeRecord')}" />
+  <form th:action="@{/lifeRecords/add}" th:object="${lifeRecord}" method="post" novalidate>
+
+    <div th:replace="~{fragments/forms::inputRow(object='lifeRecord', field='recordAt', required=true, inputClass='js-datepicker')}" />
+    <div th:replace="~{fragments/forms::inputRow(object='lifeRecord', field='petId', type='number', required=true)}" />
+
+    <div class="row mb-3">
+      <label for="content" class="col-md-2 col-form-label">[[#{lifeRecord.content.label}]]<span class="text-danger">*</span></label>
+      <div class="col-md-10">
+        <textarea id="content" th:field="*{content}" rows="5" class="form-control" th:errorclass="is-invalid" required="required"></textarea>
+        <div th:if="${#fields.hasErrors('content')}" class="invalid-feedback" th:errors="*{content}">
+          Error message
+        </div>
+      </div>
+    </div>
+
+    <div th:replace="~{fragments/forms::inputRow(object='lifeRecord', field='weight', type='number')}" />
+    <div th:replace="~{fragments/forms::inputRow(object='lifeRecord', field='sleepTime', type='number')}" />
+
+    <input type="submit" th:value="#{lifeRecord.add.headline}" class="btn btn-primary mt-4" />
+  </form>
+</div>
+</body>
+</html>
