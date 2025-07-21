@@ -47,9 +47,10 @@ public class ProfileApiController {
     @GetMapping("/v1/users/{userId}/board/{type}")
     public ResponseEntity<?> getUserBoard(
         @PathVariable Long userId,
-        @PathVariable(name = "type") ProfileBoardType type,
         @ModelAttribute @Valid UserProfileArticleRequest request
     ) {
+        ProfileBoardType type = ProfileBoardType.WRITE;
+
         UserProfileArticleResponse response = articleService.getUsersArticles(userId, type, request);
         return ResponseEntity.ok(response);
     }
