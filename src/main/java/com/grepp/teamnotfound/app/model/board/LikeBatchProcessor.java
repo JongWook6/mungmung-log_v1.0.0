@@ -26,66 +26,9 @@ public class LikeBatchProcessor {
     private final UserRepository userRepository;
 
     // 1분마다 실행
-//    @Scheduled(fixedDelay = 60000)
-//    @Scheduled(fixedDelay = 300000)
-//    @Transactional
-    public void processLikeBatch() {
-        log.info("Processing likes batch...");
-
-        Set<Long> changedArticleIds = redisLikeService.getAllChangedArticleIdsAndClear();
-
-        if (changedArticleIds.isEmpty()) {
-            log.info("No changed article found. Skipping batch processing.");
-            return;
-        }
-
-        for (Long articleId : changedArticleIds) {
-            Set<Object> likeRequests = redisLikeService.getAllLikeRequestsAndClear(articleId);
-            Set<Object> unlikeRequests = redisLikeService.getAllUnlikeRequestsAndClear(articleId);
-
-            // 좋아요 요청 처리
-            if (likeRequests != null && !likeRequests.isEmpty()) {
-                List<Long> usersToLike = likeRequests.stream()
-                    .map(object -> Long.valueOf(object.toString()))
-                    .toList();
-
-                for (Long userId : usersToLike) {
-                    // DB 에 해당 좋아요가 없는 경우만 추가
-                    if (!articleLikeRepository.existsByArticle_ArticleIdAndUser_UserId(articleId, userId)) {
-                        articleLikeRepository.save(
-                            // getReferenceById 는 단순한 관계설정을 위한 엔티티 호출(DB에 접근하지 않음)
-                            ArticleLike.builder()
-                                .article(articleRepository.getReferenceById(articleId))
-                                .user(userRepository.getReferenceById(userId))
-                                .createdAt(OffsetDateTime.now())
-                                .build()
-                        );
-                    }
-                }
-            }
-
-            // 좋아요 취소 요청 처리
-            if (unlikeRequests != null && !unlikeRequests.isEmpty()) {
-                List<Long> usersToUnlike = unlikeRequests.stream()
-                    .map(object -> Long.valueOf(object.toString()))
-                    .toList();
-
-                for (Long userId : usersToUnlike) {
-                    // DB 에 해당 좋아요가 있는 경우만 삭제
-                    articleLikeRepository
-                        .findByArticle_ArticleIdAndUser_UserId(articleId, userId)
-                        .ifPresent(articleLikeRepository::delete);
-                }
-            }
-        }
-
-        log.info("Likes batch processing finished for {} articles.", changedArticleIds.size());
-    }
-
-    // 1분마다 실행
     @Scheduled(fixedDelay = 60000)
     @Transactional
-    public void processLikeBatch2() {
+    public void processLikeBatch() {
         log.info("Processing likes batch...");
 
         // 요청이 들어온 articleId 리스트

@@ -23,7 +23,7 @@ public class SwaggerConfig {
                         .version("v1.0.0"))
                 // todo 배포할 때만 허용...
                 .servers(List.of(
-//                        new Server().url("https://mungdiary-172598302113.asia-northeast3.run.app/")
+                        new Server().url("https://mungdiary-172598302113.asia-northeast3.run.app/")
                 ))
                 .components(
                         new Components()

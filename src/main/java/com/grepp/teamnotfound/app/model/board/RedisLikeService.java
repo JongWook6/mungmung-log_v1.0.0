@@ -35,9 +35,8 @@ public class RedisLikeService {
             return;
         }
         redisTemplate.opsForSet().add(likeKey,userId);
-        redisTemplate.expire(likeKey, 5, TimeUnit.MINUTES); // 5분 후 만료
+        redisTemplate.expire(likeKey, 5, TimeUnit.MINUTES);
 
-        // 요청 받은 article id 저장
         redisTemplate.opsForSet().add(BATCH_ARTICLE_IDS_KEY, articleId);
     }
 
@@ -53,13 +52,12 @@ public class RedisLikeService {
         }
 
         redisTemplate.opsForSet().add(unlikeKey, userId);
-        redisTemplate.expire(unlikeKey, 5, TimeUnit.MINUTES); // 5분 후 만료
+        redisTemplate.expire(unlikeKey, 5, TimeUnit.MINUTES);
 
-        // 요청 받은 article id 저장
         redisTemplate.opsForSet().add(BATCH_ARTICLE_IDS_KEY, articleId);
     }
 
-    // 사용자별 특정 게시글 좋아요 상태를 Redis 에 저장
+    // 사용자의 좋아요 상태를 Redis 에 저장
     // 배치처리 전 DB에 다녀오지 않기 위함
     public void setUserLikedStatus(Long articleId, Long userId, boolean liked) {
         String userLikedKey = "user:liked_status:" + userId + ":" + articleId;
@@ -71,7 +69,7 @@ public class RedisLikeService {
         }
     }
 
-    // 사용자가 최근에 해당 게시글을 좋아요 했는지 Redis 에서 확인
+    // 사용자의 좋아요 상태를 Redis 에서 확인
     public boolean isUserLikedInRedis(Long articleId, Long userId) {
         String userLikeStatusKey = "user:liked_status:" + userId + ":" + articleId;
         return Boolean.TRUE.equals(redisTemplate.hasKey(userLikeStatusKey));
@@ -80,7 +78,7 @@ public class RedisLikeService {
 
     /**
      * Batch 처리용
-     * 트랜잭션으로 관리하기 위해 SessionCallback 사용
+     * (요청조회 + 요청삭제)를 하나의 트랜잭션으로 관리하기 위해 SessionCallback 사용
      * */
 
     // 좋아요/취소 요청을 받은 articleId 반환
@@ -115,7 +113,6 @@ public class RedisLikeService {
     public Set<Object> getAllLikeRequestsAndClear(Long articleId) {
         String sourceKey = "article:like:" + articleId;
 
-        // Redis 트랜잭션을 사용하여 (요청 조회 + 삭제)를 원자적으로 처리
         List<Object> results = redisTemplate.execute(new SessionCallback<List<Object>>() {
             @Override
             public <K, V> List<Object> execute(RedisOperations<K, V> operations) throws DataAccessException {
@@ -167,12 +164,17 @@ public class RedisLikeService {
         return Collections.emptySet();
     }
 
+    /**
+     * 게시글별 좋아요 수 캐시용
+     * 좋아요/좋아요 취소 요청 시 최종 좋아요 수를 계산하기 위한 IO를 줄이기 위함
+     * */
+
     // Redis 에서 좋아요 카운트 가져오기
     public Long getArticleLikesCount(Long articleId) {
         String key = ARTICLE_LIKES_TOTAL_COUNT_KEY + articleId;
         Object count = redisTemplate.opsForValue().get(key);
         if (count instanceof Integer) {
-            // RedisTemplate 이 Integer 로 저장할 수도 있음
+            // RedisTemplate 이 Integer 로 저장할 수도 있기 때문
             return ((Integer) count).longValue();
         } else if (count instanceof Long) {
             return (Long) count;
@@ -187,13 +189,11 @@ public class RedisLikeService {
         redisTemplate.expire(key, 1, TimeUnit.DAYS);
     }
 
-    // 좋아요 카운터 1 증가
     public void incrementArticleLikesCount(Long articleId) {
         String key = ARTICLE_LIKES_TOTAL_COUNT_KEY + articleId;
         redisTemplate.opsForValue().increment(key, 1);
     }
 
-    // 좋아요 카운터 1 감소
     public void decrementArticleLikesCount(Long articleId) {
         String key = ARTICLE_LIKES_TOTAL_COUNT_KEY + articleId;
         redisTemplate.opsForValue().increment(key, -1);

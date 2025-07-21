@@ -307,8 +307,9 @@ public class ArticleService {
         return new LikeResponse(articleId, totalCount, isLiked);
     }
 
+    // 캐시에서 좋아요 수 먼저 조회
     private Integer getArticleLikeCount(Long articleId) {
-        // NOTE 게시글 좋아요 수는 게시글 리스트 조회, 상세 조회에서 모두 표시하는데 전부 이 메서드를 사용?
+        // NOTE 게시글 리스트 조회에서도 실시간 좋아요 수가 필요할까?
         Long count = redisLikeService.getArticleLikesCount(articleId);
 
         if (count == null) {
@@ -320,39 +321,9 @@ public class ArticleService {
         }
 
         return count.intValue();
-
-
-//        Set<Object> currentLikeRequests = redisLikeService.getLikeRequests(articleId);
-//        Set<Object> currentUnlikeRequests = redisLikeService.getUnlikeRequests(articleId);
-//
-//        long pendingLikes = 0;
-//        // 실제로 처리할 좋아요 요청만 카운트
-//        if (currentLikeRequests != null) {
-//            pendingLikes = currentLikeRequests.stream()
-//                .map(Object::toString)
-//                .filter(userIdStr ->
-//                    !articleLikeRepository.existsByArticle_ArticleIdAndUser_UserId(articleId,
-//                        Long.valueOf(userIdStr))
-//                )
-//                .count();
-//        }
-//
-//        long pendingUnlikes = 0;
-//        // 실제로 처리할 좋아요 취소 요청만 카운트
-//        if (currentUnlikeRequests != null) {
-//            pendingUnlikes = currentUnlikeRequests.stream()
-//                .map(Object::toString)
-//                .filter(userIdStr ->
-//                    articleLikeRepository.existsByArticle_ArticleIdAndUser_UserId(articleId,
-//                        Long.valueOf(userIdStr))
-//                )
-//                .count();
-//        }
-//
-//        // DB 에 아직 반영되지 않은 Redis 요청까지 합산하여 반환
-//        return (int) (dbLikeCount + pendingLikes - pendingUnlikes);
     }
 
+    // DB 에서 댓글 수 조회
     @Transactional(readOnly = true)
     public Integer getReplyCount(Long articleId) {
         articleRepository.findById(articleId)
@@ -362,6 +333,7 @@ public class ArticleService {
             articleId);
     }
 
+    // DB 에서 좋아요 수 조회
     @Transactional(readOnly = true)
     public Integer getActualLikeCount(Long articleId) {
         articleRepository.findById(articleId)
