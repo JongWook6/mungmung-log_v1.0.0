@@ -82,5 +82,5 @@ public class Pet extends BaseEntity {
 
     @OneToMany(mappedBy = "pet", cascade = CascadeType.ALL)
     @Where(clause = "deleted_at IS NULL")
-    private List<PetImg> PetImg = new ArrayList<>();
+    private List<PetImg> images = new ArrayList<>();
 }
