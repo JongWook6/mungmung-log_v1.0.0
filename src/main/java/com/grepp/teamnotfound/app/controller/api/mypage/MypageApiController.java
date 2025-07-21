@@ -14,6 +14,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -143,5 +144,15 @@ public class MypageApiController {
     ) {
         vaccinationService.savePetVaccinations(petId, requests);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/v1/pets/{petId}/vaccination-schedule")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> createVaccineSchedule(
+            @PathVariable(name = "petId") Long petId,
+            @AuthenticationPrincipal Principal principal
+    ){
+        vaccinationService.createVaccinationSchedule(petId, principal.getUserId());
+        return ResponseEntity.ok(HttpStatus.CREATED);
     }
 }
