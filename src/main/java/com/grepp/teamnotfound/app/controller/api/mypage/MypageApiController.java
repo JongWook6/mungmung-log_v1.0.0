@@ -1,7 +1,9 @@
 package com.grepp.teamnotfound.app.controller.api.mypage;
 
 
+import com.grepp.teamnotfound.app.controller.api.mypage.payload.PasswordRequestDto;
 import com.grepp.teamnotfound.app.controller.api.mypage.payload.PetWriteRequest;
+import com.grepp.teamnotfound.app.controller.api.mypage.payload.UserWriteRequest;
 import com.grepp.teamnotfound.app.controller.api.mypage.payload.VaccineWriteRequest;
 import com.grepp.teamnotfound.app.controller.api.profile.payload.ProfilePetResponse;
 import com.grepp.teamnotfound.app.model.auth.domain.Principal;
@@ -65,10 +67,10 @@ public class MypageApiController {
         return ResponseEntity.ok(response);
     }
 
+
     /**
      * 펫 관련 API
      **/
-
     @PostMapping(value = "/v3/pets", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> createPet(
@@ -116,7 +118,6 @@ public class MypageApiController {
     /**
      * 펫의 백신 관련 API
      **/
-
     @PostMapping("/v1/pets/{petId}/vaccination")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> createVaccination(
@@ -155,4 +156,41 @@ public class MypageApiController {
         vaccinationService.createVaccinationSchedule(petId, principal.getUserId());
         return ResponseEntity.ok(HttpStatus.CREATED);
     }
+
+    /**
+     * 내 정보 수정
+     **/
+    @PatchMapping(value = "/v1/me", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> updateUser(
+        @Valid @RequestPart("request") UserWriteRequest request,
+        @RequestPart(value = "image", required = false) MultipartFile image,
+        @AuthenticationPrincipal Principal principal
+    ) {
+        Long userId = principal.getUserId();
+        List<MultipartFile> images = (image != null) ? List.of(image) : List.of();
+
+        return ResponseEntity.ok(userService.updateUser(userId, request, images));
+    }
+
+    @PostMapping("/v1/me/password")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> matchUserPassword(
+        @RequestBody PasswordRequestDto request,
+        @AuthenticationPrincipal Principal principal
+    ) {
+        Long userId = principal.getUserId();
+        return ResponseEntity.ok(userService.matchPassword(userId, request));
+    }
+
+    @DeleteMapping("/v1/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> deleteUser(
+        @AuthenticationPrincipal Principal principal
+    ) {
+        Long userId = principal.getUserId();
+        userService.deleteUser(userId);
+        return ResponseEntity.noContent().build();
+    }
+
 }

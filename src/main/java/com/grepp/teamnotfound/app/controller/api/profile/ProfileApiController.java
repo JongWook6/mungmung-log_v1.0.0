@@ -3,7 +3,6 @@ package com.grepp.teamnotfound.app.controller.api.profile;
 import com.grepp.teamnotfound.app.controller.api.profile.payload.ProfilePetResponse;
 import com.grepp.teamnotfound.app.model.pet.PetService;
 import com.grepp.teamnotfound.app.model.user.UserService;
-import com.grepp.teamnotfound.app.model.user.dto.UserDto;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,14 +22,14 @@ public class ProfileApiController {
     private final PetService petService;
 
     @GetMapping("/v1/users/{userId}")
-    public ResponseEntity<UserDto> getUser(
+    public ResponseEntity<?> getUser(
         @PathVariable Long userId
     ) {
         return ResponseEntity.ok(userService.findByUserId(userId));
     }
 
     @GetMapping("/v1/users/{userId}/pet")
-    public ResponseEntity<List<ProfilePetResponse>> getUserPets(
+    public ResponseEntity<List<?>> getUserPets(
         @PathVariable Long userId
     ) {
         List<ProfilePetResponse> response = petService.findByUserId(userId);
