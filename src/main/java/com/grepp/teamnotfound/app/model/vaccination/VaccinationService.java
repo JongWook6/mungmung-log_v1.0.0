@@ -197,36 +197,33 @@ public class VaccinationService {
             if (VaccineType.ADDITIONAL.equals(dto.getVaccineType())) {
                 // 보강 접종(1년 단위)
                 ScheduleCreateRequestDto scheduleDto = ScheduleCreateRequestDto.builder()
-                        .userId(pet.getUser().getUserId())
                         .petId(pet.getPetId())
                         .name(vaccine.getName() + VaccineSchedule.ADDITIONAL.getWords())
                         .date(dto.getVaccineAt().plusMonths(vaccine.getAdditionalCycle()))
                         .cycle(ScheduleCycle.YEAR)
                         .cycleEnd(dto.getVaccineAt().plusYears(31))
                         .build();
-                scheduleService.createSchedule(scheduleDto);
+                scheduleService.createSchedule(userId, scheduleDto);
 
             } else if (dto.getCount() <= vaccine.getBoosterCount() + 1) {
                 // 추가 접종(2주 단위)
                 LocalDate cycleEndDate = dto.getVaccineAt().plusWeeks((long) (vaccine.getBoosterCount() + 1 - dto.getCount()) * vaccine.getBoosterCycle() + 1);
                 ScheduleCreateRequestDto scheduleDto = ScheduleCreateRequestDto.builder()
-                        .userId(pet.getUser().getUserId())
                         .petId(pet.getPetId()).name(vaccine.getName() + VaccineSchedule.BOOSTER.getWords())
                         .date(dto.getVaccineAt().plusWeeks(vaccine.getBoosterCycle()))
                         .cycle(ScheduleCycle.TWO_WEEK)
                         .cycleEnd(cycleEndDate)
                         .build();
-                scheduleService.createSchedule(scheduleDto);
+                scheduleService.createSchedule(userId, scheduleDto);
 
                 // 보강 접종 완료 후 추가 접종(1년 단위)
                 ScheduleCreateRequestDto scheduleDto2 = ScheduleCreateRequestDto.builder()
-                        .userId(pet.getUser().getUserId())
                         .petId(pet.getPetId()).name(vaccine.getName() + VaccineSchedule.ADDITIONAL.getWords())
                         .date(cycleEndDate.plusYears(1))
                         .cycle(ScheduleCycle.YEAR)
                         .cycleEnd(cycleEndDate.plusYears(31))
                         .build();
-                scheduleService.createSchedule(scheduleDto2);
+                scheduleService.createSchedule(userId, scheduleDto2);
             }
         }
     }
