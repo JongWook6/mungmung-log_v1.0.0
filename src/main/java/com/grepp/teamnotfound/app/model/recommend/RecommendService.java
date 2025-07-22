@@ -17,4 +17,8 @@ public class RecommendService {
     public Recommend matchDailyRecommend(Pet pet, LocalDate date) {
         return null;
     }
+
+    @Transactional(readOnly = true)
+    public String getRecommend(Pet pet) {
+    }
 }
