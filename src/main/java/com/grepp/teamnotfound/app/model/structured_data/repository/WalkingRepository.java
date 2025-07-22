@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 
 public interface WalkingRepository extends JpaRepository<Walking, Long> {
 
@@ -13,4 +15,5 @@ public interface WalkingRepository extends JpaRepository<Walking, Long> {
     @Query("UPDATE Walking w SET w.deletedAt = CURRENT_TIMESTAMP WHERE w.lifeRecord.lifeRecordId = :lifeRecordId AND w.deletedAt IS NULL")
     void delete(@Param("lifeRecordId") Long lifeRecordId);
 
+    List<Walking> findAllByLifeRecord_LifeRecordIdIn(List<Long> ids);
 }
