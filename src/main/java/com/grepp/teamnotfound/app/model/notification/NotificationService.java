@@ -160,16 +160,12 @@ public class NotificationService {
     @Transactional
     public void deleteNoti(Long notiId, NotiType type) {
         if (type == NotiType.SCHEDULE) {
-            ScheduleNoti scheduleNoti = scheduleNotiRepository.findById(notiId)
-                .orElseThrow(() -> new BusinessException(NotificationErrorCode.NOTIFICATION_NOT_FOUND));
 
-            scheduleNoti.setDeletedAt(OffsetDateTime.now());
+            scheduleNotiRepository.deleteOne(notiId);
 
         } else if (SERVICE_TYPES.contains(type)) {
-            ServiceNoti serviceNoti = serviceNotiRepository.findById(notiId)
-                .orElseThrow(() -> new BusinessException(NotificationErrorCode.NOTIFICATION_NOT_FOUND));
 
-            serviceNoti.setDeletedAt(OffsetDateTime.now());
+            serviceNotiRepository.deleteOne(notiId);
 
         } else {
             throw new BusinessException(NotificationErrorCode.NOTIFICATION_NOT_FOUND);
