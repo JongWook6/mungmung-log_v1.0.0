@@ -342,10 +342,6 @@ public class ArticleService {
         return articleRepository.countByArticleIdAndDeletedAtIsNullAndReportedAtIsNull(articleId);
     }
 
-    public int countArticles(OffsetDateTime monthStart, OffsetDateTime monthEnd) {
-        return articleRepository.countArticlesBetween(monthStart, monthEnd);
-    }
-
     @Transactional
     public UserProfileArticleResponse getUsersArticles(
         Long userId,

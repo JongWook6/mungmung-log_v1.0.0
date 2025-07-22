@@ -1,16 +1,14 @@
 package com.grepp.teamnotfound.app.controller.api.admin;
 
 import com.grepp.teamnotfound.app.controller.api.admin.code.StatsUnit;
-import com.grepp.teamnotfound.app.controller.api.admin.payload.ArticlesStatsResponse;
-import com.grepp.teamnotfound.app.controller.api.admin.payload.ReportDetailResponse;
-import com.grepp.teamnotfound.app.controller.api.admin.payload.UserCountResponse;
-import com.grepp.teamnotfound.app.controller.api.admin.payload.UserStatsResponse;
+import com.grepp.teamnotfound.app.controller.api.admin.payload.*;
 import com.grepp.teamnotfound.app.model.board.dto.MonthlyArticlesStatsDto;
 import com.grepp.teamnotfound.app.model.board.dto.YearlyArticlesStatsDto;
 import com.grepp.teamnotfound.app.model.report.ReportService;
 import com.grepp.teamnotfound.app.model.report.dto.ReportDetailDto;
 import com.grepp.teamnotfound.app.model.user.AdminService;
 import com.grepp.teamnotfound.app.model.user.dto.*;
+import com.grepp.teamnotfound.infra.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -105,6 +103,39 @@ public class AdminController {
 
         return ResponseEntity.ok(
                 ReportDetailResponse.from(dto));
+    }
+
+//    @Operation(summary = "신고 처리하기")
+//    @PatchMapping("v1/reports/result-accept")
+//    public ResponseEntity<ApiResponse<?>> acceptReport(@RequestBody AcceptReportRequest request){
+//
+//        AcceptReportDto dto = AcceptReportDto.builder()
+//                .reportId(request.getReportId())
+//                .reason(request.getAdminReason())
+//                .build();
+//
+//        AcceptReportResultDto result = adminService.acceptReport(dto);
+//        AcceptReportResponse response = AcceptReportResponse.builder()
+//                .reportId(result.getReportId())
+//                .reportState(result.getState().name())
+//                .adminReason(result.getAdminReason())
+//                .build();
+//
+//        // TODO 추가 정책 결정 시, 제재 대상자 userId, 제재 종료 날짜 반환 필요
+//        return ResponseEntity.ok(ApiResponse.success(response));
+//    }
+
+    @Operation(summary = "신고 철회하기")
+    @PatchMapping("v1/reports/result-reject")
+    public ResponseEntity<?> rejectReport(@RequestBody RejectReportRequest request){
+
+        RejectReportDto dto = RejectReportDto.builder()
+                .reportId(request.getReportId())
+                .adminReason(request.getAdminReason())
+                .build();
+
+        adminService.rejectReport(dto);
+        return ResponseEntity.ok("신고를 성공적으로 거절하였습니다.");
     }
 
 }

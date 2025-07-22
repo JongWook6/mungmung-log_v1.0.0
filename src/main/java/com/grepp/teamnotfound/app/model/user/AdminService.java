@@ -4,8 +4,13 @@ import com.grepp.teamnotfound.app.model.board.ArticleService;
 import com.grepp.teamnotfound.app.model.board.dto.MonthlyArticlesStatsDto;
 import com.grepp.teamnotfound.app.model.board.dto.YearlyArticlesStatsDto;
 import com.grepp.teamnotfound.app.model.board.repository.ArticleRepository;
+import com.grepp.teamnotfound.app.model.report.code.ReportState;
+import com.grepp.teamnotfound.app.model.report.entity.Report;
+import com.grepp.teamnotfound.app.model.report.repository.ReportRepository;
 import com.grepp.teamnotfound.app.model.user.dto.*;
 import com.grepp.teamnotfound.app.model.user.repository.UserRepository;
+import com.grepp.teamnotfound.infra.error.exception.BusinessException;
+import com.grepp.teamnotfound.infra.error.exception.code.ReportErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,7 +26,8 @@ import java.util.List;
 public class AdminService {
 
     private final UserRepository userRepository;
-    private final ArticleService articleService;
+    private final ReportRepository reportRepository;
+    private final ArticleRepository articleRepository;
 
     @Transactional(readOnly = true)
     public TotalUsersDto getTotalUsersCount() {
@@ -94,7 +100,7 @@ public class AdminService {
             OffsetDateTime monthStart = now.minusMonths(i).withDayOfMonth(1);
             OffsetDateTime monthEnd = monthStart.withDayOfMonth(monthStart.toLocalDate().lengthOfMonth());
 
-            int articles = articleService.countArticles(monthStart, monthEnd);
+            int articles = articleRepository.countArticlesBetween(monthStart, monthEnd);
 
             MonthlyArticlesStatsDto stats = MonthlyArticlesStatsDto.builder()
                     .month(monthStart.getMonthValue())
@@ -118,7 +124,7 @@ public class AdminService {
             OffsetDateTime yearStart = now.minusYears(i).withDayOfYear(1);
             OffsetDateTime yearEnd = yearStart.withDayOfYear(yearStart.toLocalDate().lengthOfYear());
 
-            int articles = articleService.countArticles(yearStart, yearEnd);
+            int articles = articleRepository.countArticlesBetween(yearStart, yearEnd);
 
             YearlyArticlesStatsDto stats = YearlyArticlesStatsDto.builder()
                     .year(yearStart.getYear())
@@ -130,5 +136,35 @@ public class AdminService {
 
         return response;
 
+    }
+
+    @Transactional
+    public void rejectReport(RejectReportDto dto) {
+        Report targetReport = reportRepository.findById(dto.getReportId())
+                .orElseThrow(() -> new BusinessException(ReportErrorCode.REPORT_NOT_FOUND));
+        if(targetReport.getState() != ReportState.PENDING) throw new BusinessException(ReportErrorCode.ALREADY_COMPLETE_REPORT);
+
+        targetReport.reject(dto.getAdminReason());
+
+        // 같은 contentId, 같은 category, PENDING인 report에 대해 reject 처리
+        // 방법 1. report repo에서 List<Report> reports 를 가져옴
+        //        for 를 돌면서 report.reject(dto.getAdminReason());
+        List<Report> reports = reportRepository.findByContentIdAndReportCategoryAndState(
+                targetReport.getContentId(),
+                targetReport.getCategory(),
+                ReportState.PENDING
+        );
+        for (Report report : reports) {
+            report.reject(dto.getAdminReason());
+        }
+
+        // 방법 2. 벌크 연산
+//        reportRepository.bulkRejectPendingReports(
+//                targetReport.getContentId(),
+//                targetReport.getCategory(),
+//                ReportState.REJECT,
+//                dto.getAdminReason(),
+//                ReportState.PENDING
+//        );
     }
 }

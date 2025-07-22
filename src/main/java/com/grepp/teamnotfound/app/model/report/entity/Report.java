@@ -91,5 +91,11 @@ public class Report extends BaseEntity {
                 .reported(reported)
                 .build();
     }
+
+    public void reject(String adminReason) {
+        this.state = ReportState.REJECT;
+        this.adminReason = adminReason;
+        super.updatedAt = OffsetDateTime.now();
+    }
 }
 
