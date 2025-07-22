@@ -13,7 +13,6 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ScheduleCreateRequestDto {
-    private Long userId;
     private Long petId;
     private String name;
     private LocalDate date;
