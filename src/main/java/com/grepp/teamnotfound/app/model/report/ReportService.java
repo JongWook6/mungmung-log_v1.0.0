@@ -1,6 +1,5 @@
 package com.grepp.teamnotfound.app.model.report;
 
-import com.grepp.teamnotfound.app.model.board.ArticleService;
 import com.grepp.teamnotfound.app.model.board.entity.Article;
 import com.grepp.teamnotfound.app.model.board.repository.ArticleRepository;
 import com.grepp.teamnotfound.app.model.reply.entity.Reply;
@@ -10,7 +9,6 @@ import com.grepp.teamnotfound.app.model.report.dto.ReportCommand;
 import com.grepp.teamnotfound.app.model.report.dto.ReportDetailDto;
 import com.grepp.teamnotfound.app.model.report.entity.Report;
 import com.grepp.teamnotfound.app.model.report.repository.ReportRepository;
-import com.grepp.teamnotfound.app.model.user.UserService;
 import com.grepp.teamnotfound.app.model.user.entity.User;
 import com.grepp.teamnotfound.app.model.user.repository.UserRepository;
 import com.grepp.teamnotfound.infra.error.exception.BusinessException;
@@ -36,10 +34,10 @@ public class ReportService {
         Report report = reportRepository.findByReportId(reportId)
                 .orElseThrow(() -> new BusinessException(ReportErrorCode.REPORT_NOT_FOUND));
 
-        String reporterNickname = userRepository.findNicknameByUserId(report.getReported().getUserId());
+        String reporterNickname = userRepository.findNicknameByUserId(report.getReporter().getUserId());
 
                 Article article = (report.getType()==ReportType.REPLY) ?
-                replyRepository.findArticleIdByReplyId(report.getContentId())
+                replyRepository.findArticleByReplyId(report.getContentId())
                         .orElseThrow(()-> new BusinessException(BoardErrorCode.ARTICLE_NOT_FOUND))
                 : articleRepository.findByArticleId(report.getContentId())
                         .orElseThrow(()-> new BusinessException(BoardErrorCode.ARTICLE_NOT_FOUND));

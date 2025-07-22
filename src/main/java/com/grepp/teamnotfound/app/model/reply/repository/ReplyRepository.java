@@ -4,7 +4,6 @@ import com.grepp.teamnotfound.app.model.board.entity.Article;
 import com.grepp.teamnotfound.app.model.reply.entity.Reply;
 import java.time.OffsetDateTime;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import java.util.Optional;
 
@@ -26,7 +25,7 @@ public interface ReplyRepository extends JpaRepository<Reply, Long> {
 
 
     @Query("select r.article from Reply r where r.replyId = :replyId")
-    Optional<Article> findArticleIdByReplyId(@Param("replyId") Long replyId);
+    Optional<Article> findArticleByReplyId(@Param("replyId") Long replyId);
 
     @Query("select a from Reply a join fetch a.user where a.replyId = :replyId")
     Optional<Reply> findByIdFetchUser(@Param("replyId") Long replyId);
