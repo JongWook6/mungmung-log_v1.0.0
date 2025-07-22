@@ -75,13 +75,16 @@ public class User extends BaseEntity {
     public void suspend(SuspensionPeriod period) {
         if (period.isPermanent()) {
             this.suspensionEndAt = OffsetDateTime.MAX;
+            super.updatedAt = OffsetDateTime.now();
             return;
         }
         OffsetDateTime now = OffsetDateTime.now();
         if (this.suspensionEndAt == null || this.suspensionEndAt.isBefore(now)) {
             this.suspensionEndAt = now.plusDays(period.getDays());
+            super.updatedAt = OffsetDateTime.now();
         } else {
             this.suspensionEndAt = this.suspensionEndAt.plusDays(period.getDays());
+            super.updatedAt = OffsetDateTime.now();
         }
     }
 }

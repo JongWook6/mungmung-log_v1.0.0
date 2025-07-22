@@ -46,11 +46,11 @@ public class ReportService {
     }
 
 
-    // TODO 중복 DB IO 정리
     public Long createReport(ReportCommand command) {
         User reporter = validateReporter(command.getReporterId());
         User reported = findReportedUser(command.getReportType(), command.getContentId());
 
+        // 스스로 신고 불가
         validateSelfReport(reporter, reported);
         // 이미 본인이 신고한 경우 중복 신고 불가
         validateDuplicateReport(reporter, command);

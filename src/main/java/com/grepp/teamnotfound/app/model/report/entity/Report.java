@@ -111,6 +111,7 @@ public class Report extends BaseEntity {
 
         this.state = ReportState.ACCEPT;
         this.adminReason = adminReason;
+        this.reportedAt = OffsetDateTime.now();
         super.updatedAt = OffsetDateTime.now();
     }
 }
