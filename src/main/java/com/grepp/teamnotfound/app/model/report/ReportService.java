@@ -31,23 +31,24 @@ public class ReportService {
     private final ReplyRepository replyRepository;
     private final UserRepository userRepository;
 
-    private final UserService userService;
-    private final ArticleService articleService;
-
     @Transactional(readOnly = true)
     public ReportDetailDto getReportDetail(Long reportId) {
         Report report = reportRepository.findByReportId(reportId)
                 .orElseThrow(() -> new BusinessException(ReportErrorCode.REPORT_NOT_FOUND));
 
-        String reporterNickname = userService.getRequiredUserNickname(report.getReported().getUserId());
+        String reporterNickname = userRepository.findNicknameByUserId(report.getReported().getUserId());
 
-        Long articleId = (report.getType()==ReportType.REPLY) ?
-                articleService.getRequiredArticleIdByReplyId(report.getContentId())
-                : report.getContentId();
+                Article article = (report.getType()==ReportType.REPLY) ?
+                replyRepository.findArticleIdByReplyId(report.getContentId())
+                        .orElseThrow(()-> new BusinessException(BoardErrorCode.ARTICLE_NOT_FOUND))
+                : articleRepository.findByArticleId(report.getContentId())
+                        .orElseThrow(()-> new BusinessException(BoardErrorCode.ARTICLE_NOT_FOUND));
 
-        return ReportDetailDto.from(report, reporterNickname, articleId);
+        return ReportDetailDto.from(report, reporterNickname, article);
     }
 
+
+    // TODO 중복 DB IO 정리
     public Long createReport(ReportCommand command) {
         User reporter = validateReporter(command.getReporterId());
         User reported = findReportedUser(command.getReportType(), command.getContentId());

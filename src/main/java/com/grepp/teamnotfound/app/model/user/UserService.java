@@ -114,11 +114,6 @@ public class UserService {
         return userRepository.findByEmail(email);
     }
 
-    @Transactional(readOnly = true)
-    public String getRequiredUserNickname(Long userId) {
-        return userRepository.findNicknameByUserId(userId);
-    }
-
     @Transactional
     public UserDto updateUser(Long userId, UserWriteRequest request, List<MultipartFile> images) {
         User user = userRepository.findByUserId(userId)

@@ -13,6 +13,7 @@ public class ReportDetailResponse {
     private String type;        //board or reply
     private Long contentId;     // articleid or replyid
     private Long articleId;     // articleid
+    private String boardName;
     private String category;    // "ABUSE\" (or \"SPAM\", \"FRAUD\", \"ADULT_CONTENT\""
     private String reason;
     private String status;      //COMPLETE" (or "PENDING")
@@ -25,6 +26,7 @@ public class ReportDetailResponse {
                 .type(dto.getType())
                 .contentId(dto.getContentId())
                 .articleId(dto.getArticleId())
+                .boardName(dto.getBoardName())
                 .category(dto.getCategory())
                 .reason(dto.getReason())
                 .status(dto.getStatus())
