@@ -22,6 +22,6 @@ public class UserProfileArticleRequest {
     private int size = 5;
 
     @NotNull(message = "정렬 타입은 필수입니다.")
-    private SortType sortType;
+    private SortType sortType = SortType.DATE;
 
 }

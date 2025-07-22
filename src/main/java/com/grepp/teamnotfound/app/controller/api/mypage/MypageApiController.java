@@ -80,7 +80,7 @@ public class MypageApiController {
     ) {
         Long userId = principal.getUserId();
 
-        UserProfileArticleResponse response = articleService.getUsersArticles(userId, type, request);
+        UserProfileArticleResponse response = articleService.getUsersArticles(userId, type, request.getPage(), request.getSize(), request.getSortType());
         return ResponseEntity.ok(response);
     }
 

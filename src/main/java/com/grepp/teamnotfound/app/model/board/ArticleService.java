@@ -6,9 +6,9 @@ import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleListResp
 import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleRequest;
 import com.grepp.teamnotfound.app.controller.api.article.payload.LikeResponse;
 import com.grepp.teamnotfound.app.controller.api.article.payload.PageInfo;
-import com.grepp.teamnotfound.app.controller.api.mypage.payload.UserProfileArticleRequest;
 import com.grepp.teamnotfound.app.controller.api.mypage.payload.UserProfileArticleResponse;
 import com.grepp.teamnotfound.app.model.board.code.ProfileBoardType;
+import com.grepp.teamnotfound.app.model.board.code.SortType;
 import com.grepp.teamnotfound.app.model.board.dto.ArticleListDto;
 import com.grepp.teamnotfound.app.model.board.dto.UserArticleListDto;
 import com.grepp.teamnotfound.app.model.board.entity.Article;
@@ -281,15 +281,17 @@ public class ArticleService {
     public UserProfileArticleResponse getUsersArticles(
         Long userId,
         ProfileBoardType type,
-        UserProfileArticleRequest request
+        int page,
+        int size,
+        SortType sortType
     ) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));
 
         Page<UserArticleListDto> articleListPage = articleRepository.findUserArticleListWithMeta(
-            request.getPage() - 1,
-            request.getSize(),
-            request.getSortType(),
+            page - 1,
+            size,
+            sortType,
             type,
             user.getUserId()
         );

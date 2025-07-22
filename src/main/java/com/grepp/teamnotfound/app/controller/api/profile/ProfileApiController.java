@@ -44,14 +44,14 @@ public class ProfileApiController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/v1/users/{userId}/board/{type}")
+    @GetMapping("/v1/users/{userId}/board")
     public ResponseEntity<?> getUserBoard(
         @PathVariable Long userId,
         @ModelAttribute @Valid UserProfileArticleRequest request
     ) {
         ProfileBoardType type = ProfileBoardType.WRITE;
 
-        UserProfileArticleResponse response = articleService.getUsersArticles(userId, type, request);
+        UserProfileArticleResponse response = articleService.getUsersArticles(userId, type, request.getPage(), request.getSize(), request.getSortType());
         return ResponseEntity.ok(response);
     }
 
