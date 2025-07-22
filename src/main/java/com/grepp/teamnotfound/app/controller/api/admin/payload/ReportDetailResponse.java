@@ -9,7 +9,6 @@ import lombok.Getter;
 public class ReportDetailResponse {
 
     private Long reportId;
-    private String reporter;
     private String type;        //board or reply
     private Long contentId;     // articleid or replyid
     private Long articleId;     // articleid
@@ -22,7 +21,6 @@ public class ReportDetailResponse {
     public static ReportDetailResponse from(ReportDetailDto dto) {
         return ReportDetailResponse.builder()
                 .reportId(dto.getReportId())
-                .reporter(dto.getReporter())
                 .type(dto.getType())
                 .contentId(dto.getContentId())
                 .articleId(dto.getArticleId())
