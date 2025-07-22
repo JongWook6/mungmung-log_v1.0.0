@@ -105,25 +105,19 @@ public class AdminController {
                 ReportDetailResponse.from(dto));
     }
 
-//    @Operation(summary = "신고 처리하기")
-//    @PatchMapping("v1/reports/result-accept")
-//    public ResponseEntity<ApiResponse<?>> acceptReport(@RequestBody AcceptReportRequest request){
-//
-//        AcceptReportDto dto = AcceptReportDto.builder()
-//                .reportId(request.getReportId())
-//                .reason(request.getAdminReason())
-//                .build();
-//
-//        AcceptReportResultDto result = adminService.acceptReport(dto);
-//        AcceptReportResponse response = AcceptReportResponse.builder()
-//                .reportId(result.getReportId())
-//                .reportState(result.getState().name())
-//                .adminReason(result.getAdminReason())
-//                .build();
-//
-//        // TODO 추가 정책 결정 시, 제재 대상자 userId, 제재 종료 날짜 반환 필요
-//        return ResponseEntity.ok(ApiResponse.success(response));
-//    }
+    @Operation(summary = "신고 처리하기")
+    @PatchMapping("v1/reports/result-accept")
+    public ResponseEntity<?> acceptReport(@RequestBody AcceptReportRequest request){
+
+        AcceptReportDto dto = AcceptReportDto.builder()
+                .reportId(request.getReportId())
+                .adminReason(request.getAdminReason())
+                .period(request.getPeriod())
+                .build();
+
+        adminService.acceptReportAndSuspendUser(dto);
+        return ResponseEntity.ok("신고가 정상적으로 처리되었습니다.");
+    }
 
     @Operation(summary = "신고 철회하기")
     @PatchMapping("v1/reports/result-reject")

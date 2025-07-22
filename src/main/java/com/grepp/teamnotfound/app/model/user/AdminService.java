@@ -1,15 +1,21 @@
 package com.grepp.teamnotfound.app.model.user;
 
-import com.grepp.teamnotfound.app.model.board.ArticleService;
 import com.grepp.teamnotfound.app.model.board.dto.MonthlyArticlesStatsDto;
 import com.grepp.teamnotfound.app.model.board.dto.YearlyArticlesStatsDto;
+import com.grepp.teamnotfound.app.model.board.entity.Article;
 import com.grepp.teamnotfound.app.model.board.repository.ArticleRepository;
+import com.grepp.teamnotfound.app.model.reply.entity.Reply;
+import com.grepp.teamnotfound.app.model.reply.repository.ReplyRepository;
 import com.grepp.teamnotfound.app.model.report.code.ReportState;
+import com.grepp.teamnotfound.app.model.report.code.ReportType;
 import com.grepp.teamnotfound.app.model.report.entity.Report;
 import com.grepp.teamnotfound.app.model.report.repository.ReportRepository;
 import com.grepp.teamnotfound.app.model.user.dto.*;
+import com.grepp.teamnotfound.app.model.user.entity.User;
 import com.grepp.teamnotfound.app.model.user.repository.UserRepository;
 import com.grepp.teamnotfound.infra.error.exception.BusinessException;
+import com.grepp.teamnotfound.infra.error.exception.code.BoardErrorCode;
+import com.grepp.teamnotfound.infra.error.exception.code.ReplyErrorCode;
 import com.grepp.teamnotfound.infra.error.exception.code.ReportErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +34,7 @@ public class AdminService {
     private final UserRepository userRepository;
     private final ReportRepository reportRepository;
     private final ArticleRepository articleRepository;
+    private final ReplyRepository replyRepository;
 
     @Transactional(readOnly = true)
     public TotalUsersDto getTotalUsersCount() {
@@ -142,7 +149,6 @@ public class AdminService {
     public void rejectReport(RejectReportDto dto) {
         Report targetReport = reportRepository.findById(dto.getReportId())
                 .orElseThrow(() -> new BusinessException(ReportErrorCode.REPORT_NOT_FOUND));
-        if(targetReport.getState() != ReportState.PENDING) throw new BusinessException(ReportErrorCode.ALREADY_COMPLETE_REPORT);
 
         targetReport.reject(dto.getAdminReason());
 
@@ -166,5 +172,39 @@ public class AdminService {
 //                dto.getAdminReason(),
 //                ReportState.PENDING
 //        );
+    }
+
+    @Transactional
+    public void acceptReportAndSuspendUser(AcceptReportDto dto) {
+        Report targetReport = reportRepository.findById(dto.getReportId())
+                .orElseThrow(() -> new BusinessException(ReportErrorCode.REPORT_NOT_FOUND));
+
+        hideContentIfNot(targetReport);
+        targetReport.accept(dto.getAdminReason());
+
+        List<Report> reports = reportRepository.findByContentIdAndReportCategoryAndState(
+                targetReport.getContentId(),
+                targetReport.getCategory(),
+                ReportState.PENDING
+        );
+        for (Report report : reports) {
+            report.accept(dto.getAdminReason());
+        }
+
+        User user = targetReport.getReported();
+        user.suspend(dto.getPeriod());
+    }
+
+    private void hideContentIfNot(Report targetReport) {
+        if(targetReport.getType() == ReportType.BOARD){
+            Article article = articleRepository.findByArticleId(targetReport.getContentId())
+                    .orElseThrow(() -> new BusinessException(BoardErrorCode.ARTICLE_NOT_FOUND));
+            if(article.getReportedAt() == null){article.report();}
+
+        } else if(targetReport.getType() == ReportType.REPLY){
+            Reply reply = replyRepository.findByReplyId(targetReport.getContentId())
+                    .orElseThrow(() -> new BusinessException(ReplyErrorCode.REPLY_NOT_FOUND));
+            if(reply.getReportedAt() == null){reply.report();}
+        } else throw new BusinessException(ReportErrorCode.REPORT_TYPE_BAD_REQUEST);
     }
 }

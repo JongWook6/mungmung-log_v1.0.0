@@ -1,6 +1,7 @@
 package com.grepp.teamnotfound.app.model.user.entity;
 
 import com.grepp.teamnotfound.app.model.auth.code.Role;
+import com.grepp.teamnotfound.app.model.user.code.SuspensionPeriod;
 import com.grepp.teamnotfound.infra.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,6 +15,8 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.EnumType;
 import lombok.*;
+
+import java.time.OffsetDateTime;
 
 
 @Builder
@@ -65,4 +68,20 @@ public class User extends BaseEntity {
     @Column(length = 20)
     private String provider;
 
+    @Column
+    private OffsetDateTime suspensionEndAt;
+
+
+    public void suspend(SuspensionPeriod period) {
+        if (period.isPermanent()) {
+            this.suspensionEndAt = OffsetDateTime.MAX;
+            return;
+        }
+        OffsetDateTime now = OffsetDateTime.now();
+        if (this.suspensionEndAt == null || this.suspensionEndAt.isBefore(now)) {
+            this.suspensionEndAt = now.plusDays(period.getDays());
+        } else {
+            this.suspensionEndAt = this.suspensionEndAt.plusDays(period.getDays());
+        }
+    }
 }

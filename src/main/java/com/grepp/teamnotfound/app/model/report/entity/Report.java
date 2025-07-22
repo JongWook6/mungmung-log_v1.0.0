@@ -6,6 +6,8 @@ import com.grepp.teamnotfound.app.model.report.code.ReportType;
 import com.grepp.teamnotfound.app.model.report.dto.ReportCommand;
 import com.grepp.teamnotfound.app.model.user.entity.User;
 import com.grepp.teamnotfound.infra.entity.BaseEntity;
+import com.grepp.teamnotfound.infra.error.exception.BusinessException;
+import com.grepp.teamnotfound.infra.error.exception.code.ReportErrorCode;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -93,7 +95,21 @@ public class Report extends BaseEntity {
     }
 
     public void reject(String adminReason) {
+        if (this.state != ReportState.PENDING) {
+            throw new BusinessException(ReportErrorCode.ALREADY_COMPLETE_REPORT);
+        }
+
         this.state = ReportState.REJECT;
+        this.adminReason = adminReason;
+        super.updatedAt = OffsetDateTime.now();
+    }
+
+    public void accept(String adminReason) {
+        if (this.state != ReportState.PENDING) {
+            throw new BusinessException(ReportErrorCode.ALREADY_COMPLETE_REPORT);
+        }
+
+        this.state = ReportState.ACCEPT;
         this.adminReason = adminReason;
         super.updatedAt = OffsetDateTime.now();
     }
