@@ -2,6 +2,7 @@ package com.grepp.teamnotfound.app.controller.api.notification;
 
 import com.grepp.teamnotfound.app.model.auth.domain.Principal;
 import com.grepp.teamnotfound.app.model.notification.NotificationService;
+import com.grepp.teamnotfound.app.model.notification.code.NotiTarget;
 import com.grepp.teamnotfound.app.model.notification.code.NotiType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,7 +54,7 @@ public class NotificationApiController {
     @PatchMapping("/v1/setting")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> changeNotificationSetting(
-        @RequestParam("target") NotiTar target,
+        @RequestParam("target") NotiTarget target,
         @AuthenticationPrincipal Principal principal
     ) {
         Long userId = principal.getUserId();
