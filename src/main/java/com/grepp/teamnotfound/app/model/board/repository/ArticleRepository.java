@@ -1,11 +1,9 @@
 package com.grepp.teamnotfound.app.model.board.repository;
 
-import com.grepp.teamnotfound.app.model.board.code.BoardType;
-import com.grepp.teamnotfound.app.model.board.dto.ArticleListDto;
 import com.grepp.teamnotfound.app.model.board.entity.Article;
 import java.time.OffsetDateTime;
+import java.util.List;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -25,4 +23,7 @@ public interface ArticleRepository extends JpaRepository<Article, Long>, Article
 
     @Query("SELECT COUNT(a) FROM Article  a WHERE a.createdAt BETWEEN :start AND :end")
     int countArticlesBetween(OffsetDateTime start, OffsetDateTime end);
+
+    @Query("SELECT a.articleId FROM Article a WHERE a.deletedAt IS NULL AND a.reportedAt IS NULL ")
+    List<Long> findAllArticleIds();
 }

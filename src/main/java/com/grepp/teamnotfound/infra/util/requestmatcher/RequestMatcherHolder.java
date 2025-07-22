@@ -39,10 +39,15 @@ public class RequestMatcherHolder {
             new RequestInfo(null, "/swagger-resources/**", null),
             new RequestInfo(null, "/webjars/**", null),
 
+
+            // 소셜 로그인 로컬 테스트
+            new RequestInfo(GET, "/social/login", null),
+            new RequestInfo(GET, "/error/**", null),
+
             // 5. 기타 개발용 open page
             // GET /**
             new RequestInfo(GET, "/", null),
-            new RequestInfo(GET, "/api/community/**", null),
+//            new RequestInfo(GET, "/api/community/**", null),
 //            new RequestInfo(GET, "/api/life-record/**", null),
 //            new RequestInfo(GET, "/api/mypage/**", null),
             new RequestInfo(GET, "/api/profile/**", null)
