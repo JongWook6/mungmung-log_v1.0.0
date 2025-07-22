@@ -4,6 +4,7 @@ import com.grepp.teamnotfound.app.controller.api.auth.payload.*;
 import com.grepp.teamnotfound.app.model.auth.AuthService;
 import com.grepp.teamnotfound.app.model.auth.dto.LoginCommand;
 import com.grepp.teamnotfound.app.model.auth.dto.LoginResult;
+import com.grepp.teamnotfound.app.model.auth.oauth.CustomOAuth2UserService;
 import com.grepp.teamnotfound.infra.util.mail.MailService;
 import com.grepp.teamnotfound.app.model.auth.token.dto.TokenDto;
 import com.grepp.teamnotfound.app.model.user.UserService;
@@ -28,6 +29,7 @@ public class AuthController {
     private final AuthService authService;
     private final UserService userService;
     private final MailService mailService;
+    private final CustomOAuth2UserService customOAuth2UserService;
 
     @Operation(summary = "이메일 중복 확인")
     @GetMapping("v1/check-email")
@@ -87,6 +89,13 @@ public class AuthController {
         Long userId = userService.registerAdmin(command);
         RegisterResponse response = new RegisterResponse(userId);
         return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @Operation(summary = "소셜 로그인")
+    @GetMapping("v1/social-auth/{provider}")
+    public ResponseEntity<?> socialLogin(@PathVariable String provider) {
+        String url = customOAuth2UserService.getAuthUrl(provider);
+        return ResponseEntity.ok(url);
     }
 
 
@@ -155,4 +164,6 @@ public class AuthController {
         response.addHeader("Set-Cookie", accessTokenCookie.toString());
         response.addHeader("Set-Cookie", refreshTokenCookie.toString());
     }
+
+
 }
