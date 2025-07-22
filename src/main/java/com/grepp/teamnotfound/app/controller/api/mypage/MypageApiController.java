@@ -4,9 +4,13 @@ package com.grepp.teamnotfound.app.controller.api.mypage;
 import com.grepp.teamnotfound.app.controller.api.mypage.payload.PasswordRequestDto;
 import com.grepp.teamnotfound.app.controller.api.mypage.payload.PetWriteRequest;
 import com.grepp.teamnotfound.app.controller.api.mypage.payload.UserWriteRequest;
+import com.grepp.teamnotfound.app.controller.api.mypage.payload.UserProfileArticleRequest;
+import com.grepp.teamnotfound.app.controller.api.mypage.payload.UserProfileArticleResponse;
 import com.grepp.teamnotfound.app.controller.api.mypage.payload.VaccineWriteRequest;
 import com.grepp.teamnotfound.app.controller.api.profile.payload.ProfilePetResponse;
 import com.grepp.teamnotfound.app.model.auth.domain.Principal;
+import com.grepp.teamnotfound.app.model.board.ArticleService;
+import com.grepp.teamnotfound.app.model.board.code.ProfileBoardType;
 import com.grepp.teamnotfound.app.model.pet.PetService;
 import com.grepp.teamnotfound.app.model.pet.dto.PetDto;
 import com.grepp.teamnotfound.app.model.user.UserService;
@@ -23,6 +27,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -42,9 +47,10 @@ public class MypageApiController {
     private final PetService petService;
     private final UserService userService;
     private final VaccinationService vaccinationService;
+    private final ArticleService articleService;
 
     /**
-     * 나 & 내 펫 정보 반환
+     * 나 & 내 펫 & 게시물 정보 반환
      **/
     @GetMapping("/v1/me")
     @PreAuthorize("isAuthenticated()")
@@ -67,6 +73,18 @@ public class MypageApiController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/v1/board/{type}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> getUserBoard(
+        @AuthenticationPrincipal Principal principal,
+        @PathVariable(name = "type") ProfileBoardType type,
+        @ModelAttribute @Valid UserProfileArticleRequest request
+    ) {
+        Long userId = principal.getUserId();
+
+        UserProfileArticleResponse response = articleService.getUsersArticles(userId, type, request.getPage(), request.getSize(), request.getSortType());
+        return ResponseEntity.ok(response);
+    }
 
     /**
      * 펫 관련 API

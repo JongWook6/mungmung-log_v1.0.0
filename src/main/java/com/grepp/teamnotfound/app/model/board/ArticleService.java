@@ -6,9 +6,11 @@ import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleListResp
 import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleRequest;
 import com.grepp.teamnotfound.app.controller.api.article.payload.LikeResponse;
 import com.grepp.teamnotfound.app.controller.api.article.payload.PageInfo;
-import com.grepp.teamnotfound.app.model.board.code.BoardType;
-import com.grepp.teamnotfound.app.model.board.code.SearchType;
+import com.grepp.teamnotfound.app.controller.api.mypage.payload.UserProfileArticleResponse;
+import com.grepp.teamnotfound.app.model.board.code.ProfileBoardType;
+import com.grepp.teamnotfound.app.model.board.code.SortType;
 import com.grepp.teamnotfound.app.model.board.dto.ArticleListDto;
+import com.grepp.teamnotfound.app.model.board.dto.UserArticleListDto;
 import com.grepp.teamnotfound.app.model.board.entity.Article;
 import com.grepp.teamnotfound.app.model.board.entity.ArticleImg;
 import com.grepp.teamnotfound.app.model.board.entity.ArticleLike;
@@ -39,10 +41,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.time.OffsetDateTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -277,5 +275,30 @@ public class ArticleService {
     public Long getRequiredArticleIdByReplyId(Long replyId) {
         return replyRepository.findArticleIdByReplyId(replyId)
                 .orElseThrow(()-> new BusinessException(BoardErrorCode.ARTICLE_NOT_FOUND));
+    }
+
+    @Transactional
+    public UserProfileArticleResponse getUsersArticles(
+        Long userId,
+        ProfileBoardType type,
+        int page,
+        int size,
+        SortType sortType
+    ) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));
+
+        Page<UserArticleListDto> articleListPage = articleRepository.findUserArticleListWithMeta(
+            page - 1,
+            size,
+            sortType,
+            type,
+            user.getUserId()
+        );
+
+        return UserProfileArticleResponse.builder()
+            .articles(articleListPage.toList())
+            .pageInfo(PageInfo.fromPage(articleListPage))
+            .build();
     }
 }
