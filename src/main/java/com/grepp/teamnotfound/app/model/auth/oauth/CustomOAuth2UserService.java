@@ -10,6 +10,7 @@ import com.grepp.teamnotfound.infra.auth.oauth2.user.KakaoOAuth2UserInfo;
 import com.grepp.teamnotfound.infra.auth.oauth2.user.OAuth2UserInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -29,6 +30,10 @@ import java.util.Random;
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
+
+    @Value("${oauth2.redirect.base-url}")
+    private String baseUrl;
+
 
     @Transactional
     @Override
@@ -124,5 +129,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         int num = random.nextInt(10000);
 
         return adj+dog+num;
+    }
+
+    public String getAuthUrl(String provider) {
+        return baseUrl + "/oauth2/authorization/" + provider;
     }
 }
