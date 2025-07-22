@@ -9,8 +9,8 @@ public class ReportRequest {
 
     private Long reporterId;
     private Long reportedId;
-    private ReportType reportType;
+    private ReportType reportType;          // BOARD, REPLY
     private Long contentId;
-    private ReportCategory reportCategory;
+    private ReportCategory reportCategory;  // ABUSE, SPAM, FRAUD, ADULT_CONTENT
     private String reason;
 }

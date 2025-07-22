@@ -27,7 +27,7 @@ public class ReportDetailDto {
                 .articleId(articleId)
                 .category(report.getCategory().name())
                 .reason(report.getReason())
-                .status(report.getIsDone() ? "COMPLETE" : "PENDING")
+                .status(report.getState().name())
                 .build();
     }
 }
