@@ -158,7 +158,7 @@ public class AdminService {
             report.reject(dto.getAdminReason());
         }
 
-        // 방법 2. 벌크 연산
+        // 방법 2. 벌크 연산 - updatedAt 추가 필요
 //        reportRepository.bulkRejectPendingReports(
 //                targetReport.getContentId(),
 //                targetReport.getCategory(),

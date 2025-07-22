@@ -19,6 +19,7 @@ public class ReportApiController {
 
     private final ReportService reportService;
 
+    // TODO self report ex
     @PostMapping("/v1")
     @Operation(summary = "커뮤니티 게시글/댓글 신고")
     public ResponseEntity<?> createReport(@RequestBody ReportRequest request,
@@ -26,7 +27,7 @@ public class ReportApiController {
 
         ReportCommand command = ReportCommand.builder()
                 .reporterId(principal.getUserId())
-                .reportedId(request.getReporterId())
+//                .reportedId(request.getReportedId())
                 .reportType(request.getReportType())
                 .contentId(request.getContentId())
                 .reportCategory(request.getReportCategory())

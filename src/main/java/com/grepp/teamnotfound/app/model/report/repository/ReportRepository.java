@@ -27,9 +27,9 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     @Query("select r from Report r where r.contentId = :contentId and r.category = :category and r.state = :reportState")
     List<Report> findByContentIdAndReportCategoryAndState(@Param("contentId") Long contentId, @Param("category") ReportCategory category, @Param("reportState") ReportState reportState);
 
-    @Modifying
-    @Query("update Report r set r.state = :reportState, r.reason = :adminReason " +
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("update Report r set r.state = :reportState, r.adminReason = :adminReason " +
             "where r.contentId = :contentId and r.category = :category and r.state = :currentState")
-    int bulkRejectPendingReports(@Param("contentId") Long contentId, @Param("category") ReportCategory category,
+    void bulkRejectPendingReports(@Param("contentId") Long contentId, @Param("category") ReportCategory category,
                                  @Param("reportState") ReportState reportState, @Param("adminReason") String adminReason, @Param("currentState") ReportState currentState);
 }

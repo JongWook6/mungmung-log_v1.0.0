@@ -10,7 +10,7 @@ import lombok.Getter;
 public class ReportCommand {
 
     private Long reporterId;
-    private Long  reportedId;
+//    private Long  reportedId;
     private ReportType reportType;
     private Long contentId;
     private ReportCategory reportCategory;
