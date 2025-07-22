@@ -180,12 +180,13 @@ public class PetService {
     }
 
     private void uploadAndSaveImgs(List<MultipartFile> images, Pet pet) {
-        // 기존 이미지 조회
-        petImgRepository.softDeletePetImg(pet.getPetId());
 
         if (images == null || images.isEmpty()) {
             return;
         }
+
+        // 기존 이미지 삭제
+        petImgRepository.softDeletePetImg(pet.getPetId());
 
         try {
             // 버킷에 업로드

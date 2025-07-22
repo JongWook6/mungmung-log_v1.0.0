@@ -30,14 +30,14 @@ public class ProfileApiController {
     private final ArticleService articleService;
 
     @GetMapping("/v1/users/{userId}")
-    public ResponseEntity<UserDto> getUser(
+    public ResponseEntity<?> getUser(
         @PathVariable Long userId
     ) {
         return ResponseEntity.ok(userService.findByUserId(userId));
     }
 
     @GetMapping("/v1/users/{userId}/pet")
-    public ResponseEntity<List<ProfilePetResponse>> getUserPets(
+    public ResponseEntity<List<?>> getUserPets(
         @PathVariable Long userId
     ) {
         List<ProfilePetResponse> response = petService.findByUserId(userId);
