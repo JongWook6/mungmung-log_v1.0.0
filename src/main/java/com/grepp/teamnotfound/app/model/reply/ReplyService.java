@@ -112,7 +112,9 @@ public class ReplyService {
             throw new BoardException(BoardErrorCode.REPLY_FORBIDDEN);
         }
 
-        reply.setDeletedAt(OffsetDateTime.now());
+        OffsetDateTime deletedTime = OffsetDateTime.now();
+        reply.setDeletedAt(deletedTime);
+        reply.setUpdatedAt(deletedTime);
         replyRepository.save(reply);
     }
 

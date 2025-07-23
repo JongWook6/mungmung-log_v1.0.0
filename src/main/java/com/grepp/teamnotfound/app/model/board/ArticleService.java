@@ -175,6 +175,7 @@ public class ArticleService {
         // 게시글을 삭제하면 댓글, 이미지 모두 soft delete
         OffsetDateTime deletedTime = OffsetDateTime.now();
         article.setDeletedAt(deletedTime);
+        article.setUpdatedAt(deletedTime);
         articleImgRepository.softDeleteByArticleId(articleId, deletedTime);
         articleLikeRepository.hardDeleteByArticleId(articleId);
         replyRepository.softDeleteByArticleId(articleId, deletedTime);
