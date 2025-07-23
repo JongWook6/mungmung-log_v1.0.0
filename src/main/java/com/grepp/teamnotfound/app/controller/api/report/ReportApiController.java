@@ -1,12 +1,16 @@
 package com.grepp.teamnotfound.app.controller.api.report;
 
 import com.grepp.teamnotfound.app.controller.api.report.payload.ReportRequest;
+import com.grepp.teamnotfound.app.model.auth.domain.Principal;
+import com.grepp.teamnotfound.app.model.report.ReportService;
+import com.grepp.teamnotfound.app.model.report.dto.ReportCommand;
+import com.grepp.teamnotfound.infra.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -15,12 +19,23 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/community/reports")
 public class ReportApiController {
 
+    private final ReportService reportService;
+
+    // TODO self report ex
     @PostMapping("/v1")
     @Operation(summary = "커뮤니티 게시글/댓글 신고")
-    public ResponseEntity<?> createReport(
-        @ModelAttribute ReportRequest request
-    ) {
-        return ResponseEntity.ok(Map.of("data", Map.of("msg", "신고가 정상적으로 접수되었습니다.")));
+    public ResponseEntity<?> createReport(@RequestBody ReportRequest request,
+                                          @AuthenticationPrincipal Principal principal) {
+
+        ReportCommand command = ReportCommand.builder()
+                .reporterId(principal.getUserId())
+                .reportType(request.getReportType())
+                .contentId(request.getContentId())
+                .reportCategory(request.getReportCategory())
+                .reason(request.getReason())
+                .build();
+        Long createId = reportService.createReport(command);
+        return ResponseEntity.ok(ApiResponse.success(createId));
     }
 
 }

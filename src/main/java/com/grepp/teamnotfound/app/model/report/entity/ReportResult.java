@@ -45,9 +45,5 @@ public class ReportResult extends BaseEntity {
     @Column(nullable = false)
     private OffsetDateTime endedAt;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "report_id", nullable = false, unique = true)
-    private Report report;
-
 }
 
