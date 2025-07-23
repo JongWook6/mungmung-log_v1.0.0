@@ -3,17 +3,7 @@ package com.grepp.teamnotfound.app.model.user.entity;
 import com.grepp.teamnotfound.app.model.auth.code.Role;
 import com.grepp.teamnotfound.app.model.user.code.SuspensionPeriod;
 import com.grepp.teamnotfound.infra.entity.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.SequenceGenerator;
-import jakarta.persistence.Table;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.EnumType;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.OffsetDateTime;

@@ -8,7 +8,6 @@ import com.grepp.teamnotfound.app.model.report.ReportService;
 import com.grepp.teamnotfound.app.model.report.dto.ReportDetailDto;
 import com.grepp.teamnotfound.app.model.user.AdminService;
 import com.grepp.teamnotfound.app.model.user.dto.*;
-import com.grepp.teamnotfound.infra.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
