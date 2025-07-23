@@ -27,7 +27,6 @@ public class ReportApiController {
 
         ReportCommand command = ReportCommand.builder()
                 .reporterId(principal.getUserId())
-//                .reportedId(request.getReportedId())
                 .reportType(request.getReportType())
                 .contentId(request.getContentId())
                 .reportCategory(request.getReportCategory())
