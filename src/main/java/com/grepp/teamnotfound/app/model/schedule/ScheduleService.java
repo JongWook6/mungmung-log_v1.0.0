@@ -154,15 +154,6 @@ public class ScheduleService {
             }
             scheduleRepository.saveAll(schedules);
         }else {
-            // 단독 일정만 수정
-            schedule.setPet(pet);
-            schedule.setName(request.getName());
-            schedule.setScheduleDate(request.getDate());
-            schedule.setUpdatedAt(OffsetDateTime.now());
-            schedule.setCycle(request.getCycle());
-            schedule.setCycleEnd(request.getCycleEnd());
-            scheduleRepository.save(schedule);
-            
             // 단독 일정을 반복일정으로 수정 시 추가 일정 생성
             if (!request.getCycle().equals(ScheduleCycle.NONE)) {
                 List<Schedule> schedules = scheduleRepository.findByNameAndCycleAndCycleEnd(schedule.getName(), schedule.getCycle(), schedule.getCycleEnd());
@@ -179,6 +170,15 @@ public class ScheduleService {
                     schedules.add(addSchedule);
                 }
                 scheduleRepository.saveAll(schedules);
+            }else{
+                // 단독 일정만 수정
+                schedule.setPet(pet);
+                schedule.setName(request.getName());
+                schedule.setScheduleDate(request.getDate());
+                schedule.setUpdatedAt(OffsetDateTime.now());
+                schedule.setCycle(request.getCycle());
+                schedule.setCycleEnd(request.getCycleEnd());
+                scheduleRepository.save(schedule);
             }
         }
     }
