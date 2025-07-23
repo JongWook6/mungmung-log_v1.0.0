@@ -1,5 +1,6 @@
 package com.grepp.teamnotfound.app.model.user;
 
+import com.grepp.teamnotfound.app.controller.api.admin.payload.UsersListRequest;
 import com.grepp.teamnotfound.app.model.board.dto.MonthlyArticlesStatsDto;
 import com.grepp.teamnotfound.app.model.board.dto.YearlyArticlesStatsDto;
 import com.grepp.teamnotfound.app.model.board.entity.Article;
@@ -19,6 +20,9 @@ import com.grepp.teamnotfound.infra.error.exception.code.ReplyErrorCode;
 import com.grepp.teamnotfound.infra.error.exception.code.ReportErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -206,5 +210,10 @@ public class AdminService {
                     .orElseThrow(() -> new BusinessException(ReplyErrorCode.REPLY_NOT_FOUND));
             if(reply.getReportedAt() == null){reply.report();}
         } else throw new BusinessException(ReportErrorCode.REPORT_TYPE_BAD_REQUEST);
+    }
+
+    public Page<UsersListDto> getUsersList(UsersListRequest request) {
+        Pageable pageable = PageRequest.of(request.getPage() -1, request.getSize());
+        return userRepository.findUserListWithMeta(request, pageable);
     }
 }

@@ -9,7 +9,9 @@ import com.grepp.teamnotfound.app.model.report.dto.ReportDetailDto;
 import com.grepp.teamnotfound.app.model.user.AdminService;
 import com.grepp.teamnotfound.app.model.user.dto.*;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +30,7 @@ public class AdminController {
 
     @Operation(summary = "전체 가입자 수 조회")
     @GetMapping("v1/stats/users")
-    public ResponseEntity<UserCountResponse> users(){
+    public ResponseEntity<UserCountResponse> getUsersCount(){
         TotalUsersDto totalUsersDto = adminService.getTotalUsersCount();
         UserCountResponse response = UserCountResponse.builder()
                 .date(OffsetDateTime.now())
@@ -37,14 +39,19 @@ public class AdminController {
         return ResponseEntity.ok(response);
     }
 
-//    @Operation(summary = "회원 목록 조회")
-//    @GetMapping("v1/users")
-//    public ResponseEntity<List<UsersListResponse>> usersList(
-//            @Valid @ModelAttribute UsersListRequest request
-//            ){
-//        List<UsersListResponse> responseList = adminService.getUsersList(request);
-//        return ResponseEntity.ok(responseList);
-//    }
+    @Operation(summary = "회원 목록 조회")
+    @GetMapping("v1/users")
+    public ResponseEntity<UsersListResponse> getUsers(
+            @Valid @ModelAttribute UsersListRequest request
+            ){
+        Page<UsersListDto> userPage = adminService.getUsersList(request);
+        UsersListResponse response = UsersListResponse.builder()
+                .users(userPage.getContent())
+                .pageInfo(PageInfo.fromPage(userPage))
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
 
     @Operation(summary = "가입/탈퇴자 수 추이 조회")
     @GetMapping("v1/stats/transition")
