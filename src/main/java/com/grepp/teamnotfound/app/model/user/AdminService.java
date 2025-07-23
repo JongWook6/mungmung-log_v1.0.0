@@ -1,5 +1,6 @@
 package com.grepp.teamnotfound.app.model.user;
 
+import com.grepp.teamnotfound.app.controller.api.admin.payload.ReportsListRequest;
 import com.grepp.teamnotfound.app.controller.api.admin.payload.UsersListRequest;
 import com.grepp.teamnotfound.app.model.board.dto.MonthlyArticlesStatsDto;
 import com.grepp.teamnotfound.app.model.board.dto.YearlyArticlesStatsDto;
@@ -9,6 +10,7 @@ import com.grepp.teamnotfound.app.model.reply.entity.Reply;
 import com.grepp.teamnotfound.app.model.reply.repository.ReplyRepository;
 import com.grepp.teamnotfound.app.model.report.code.ReportState;
 import com.grepp.teamnotfound.app.model.report.code.ReportType;
+import com.grepp.teamnotfound.app.model.report.dto.ReportsListDto;
 import com.grepp.teamnotfound.app.model.report.entity.Report;
 import com.grepp.teamnotfound.app.model.report.repository.ReportRepository;
 import com.grepp.teamnotfound.app.model.user.dto.*;
@@ -212,8 +214,14 @@ public class AdminService {
         } else throw new BusinessException(ReportErrorCode.REPORT_TYPE_BAD_REQUEST);
     }
 
+    // todo request 가 이상한 값이 들어오면!? -> 커스텀 예외처리 필요
     public Page<UsersListDto> getUsersList(UsersListRequest request) {
         Pageable pageable = PageRequest.of(request.getPage() -1, request.getSize());
         return userRepository.findUserListWithMeta(request, pageable);
+    }
+
+    public Page<ReportsListDto> getReportsList(ReportsListRequest request) {
+        Pageable pageable = PageRequest.of(request.getPage() -1, request.getSize());
+        return reportRepository.findReportListWithMeta(request, pageable);
     }
 }

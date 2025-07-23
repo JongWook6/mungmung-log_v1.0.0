@@ -6,6 +6,7 @@ import com.grepp.teamnotfound.app.model.board.dto.MonthlyArticlesStatsDto;
 import com.grepp.teamnotfound.app.model.board.dto.YearlyArticlesStatsDto;
 import com.grepp.teamnotfound.app.model.report.ReportService;
 import com.grepp.teamnotfound.app.model.report.dto.ReportDetailDto;
+import com.grepp.teamnotfound.app.model.report.dto.ReportsListDto;
 import com.grepp.teamnotfound.app.model.user.AdminService;
 import com.grepp.teamnotfound.app.model.user.dto.*;
 import io.swagger.v3.oas.annotations.Operation;
@@ -48,6 +49,20 @@ public class AdminController {
         UsersListResponse response = UsersListResponse.builder()
                 .users(userPage.getContent())
                 .pageInfo(PageInfo.fromPage(userPage))
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "신고 내역 목록 조회")
+    @GetMapping("v1/reports")
+    public ResponseEntity<ReportsListResponse> getReports(
+            @Valid @ModelAttribute ReportsListRequest request
+    ){
+        Page<ReportsListDto> reportPage = adminService.getReportsList(request);
+        ReportsListResponse response = ReportsListResponse.builder()
+                .reports(reportPage.getContent())
+                .pageInfo(PageInfo.fromPage(reportPage))
                 .build();
 
         return ResponseEntity.ok(response);

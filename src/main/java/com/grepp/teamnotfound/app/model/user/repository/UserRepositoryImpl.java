@@ -122,7 +122,7 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
     // 이걸 다중 정렬로 모든 우선순위를 상정해서 반환해주는 게 너무 오버엔지니어링이라 판단
     private OrderSpecifier<?> getOrderSpecifier(UsersListSortBy sortBy, AdminListSortDirection direction) {
         if (sortBy == null) {
-            return user.createdAt.desc();
+            return user.createdAt.asc();
         }
 
         return switch (sortBy) {
