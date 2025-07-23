@@ -343,15 +343,6 @@ public class ArticleService {
         return articleRepository.countByArticleIdAndDeletedAtIsNullAndReportedAtIsNull(articleId);
     }
 
-    public int countArticles(OffsetDateTime monthStart, OffsetDateTime monthEnd) {
-        return articleRepository.countArticlesBetween(monthStart, monthEnd);
-    }
-
-    public Long getRequiredArticleIdByReplyId(Long replyId) {
-        return replyRepository.findArticleIdByReplyId(replyId)
-                .orElseThrow(()-> new BusinessException(BoardErrorCode.ARTICLE_NOT_FOUND));
-    }
-
     @Transactional
     public UserProfileArticleResponse getUsersArticles(
         Long userId,

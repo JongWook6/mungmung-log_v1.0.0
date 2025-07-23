@@ -69,4 +69,8 @@ public class Article extends BaseEntity {
     @OneToMany(mappedBy = "article")
     private Set<ArticleImg> articleImgs = new HashSet<>();
 
+    public void report() {
+        this.reportedAt = OffsetDateTime.now();
+        super.updatedAt = this.reportedAt;
+    }
 }
