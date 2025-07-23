@@ -10,7 +10,6 @@ import com.grepp.teamnotfound.infra.auth.token.TokenCookieFactory;
 import com.grepp.teamnotfound.infra.auth.token.code.TokenType;
 import com.grepp.teamnotfound.infra.error.exception.CommonException;
 import com.grepp.teamnotfound.infra.error.exception.code.AuthErrorCode;
-import com.grepp.teamnotfound.infra.util.requestmatcher.RequestMatcherHolder;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
@@ -36,17 +35,32 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final RefreshTokenService refreshTokenService;
     private final TokenBlackListRepository tokenBlackListRepository;
 
-    private final RequestMatcherHolder requestMatcherHolder;
-
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+
+        String uri = request.getRequestURI();
+        String method = request.getMethod();
 
         // OPTIONS(프리플라이트) 요청은 필터를 타지 않도록 처리
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             return true;
         }
 
-        return requestMatcherHolder.getRequestMatchersByMinRole(null).matches(request);
+        return (
+                uri.equals("/") || uri.equals("/error") || uri.equals("/favicon.ico") ||
+
+                        // 로그인/회원가입
+                        (uri.startsWith("/api/auth/") && (method.equals("GET") || method.equals("POST"))) ||
+
+                        // 소셜 로그인 테스트 및 오류 페이지 -> 프론트 연동 후 삭제 예정
+                        // 에러 페이지는 토큰 should not 설정 필요
+                        (uri.equals("/social/login") && method.equals("GET")) ||
+                        uri.startsWith("/error/") ||
+
+                        // Swagger 관련
+                        uri.equals("/swagger-ui.html") || uri.startsWith("/swagger-ui/") || uri.startsWith("/swagger-resources/") ||
+                        uri.startsWith("/v3/api-docs/") || uri.startsWith("/webjars/")
+        );
     }
 
     @Override
@@ -56,7 +70,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // 1. accessToken 확인 - 토큰이 없는 경우 filtering
         String accessToken = jwtProvider.resolveToken(request, TokenType.ACCESS_TOKEN);
         if (accessToken == null) {
-            throw new CommonException(AuthErrorCode.UNAUTHENTICATED);
+            filterChain.doFilter(request, response);
+            return;
         }
 
         // 2. parseClaim - // 블랙리스트 filtering

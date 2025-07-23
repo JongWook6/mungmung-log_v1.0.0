@@ -58,6 +58,7 @@ public class ArticleApiController {
 
     @GetMapping("/v1/{articleId}")
     @Operation(summary = "게시글 상세 조회")
+    @PreAuthorize("isAnonymous() or isAuthenticated()")
     public ResponseEntity<?> getArticle(
         @PathVariable Long articleId,
         @AuthenticationPrincipal Principal principal
