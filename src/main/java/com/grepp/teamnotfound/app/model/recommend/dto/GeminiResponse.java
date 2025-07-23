@@ -1,5 +1,6 @@
-package com.grepp.teamnotfound.app.controller.api.recommend.payload;
+package com.grepp.teamnotfound.app.model.recommend.dto;
 
+import com.grepp.teamnotfound.app.model.recommend.code.RecommendState;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,7 +18,7 @@ public class GeminiResponse {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Recommendation {
-        private String status;
+        private RecommendState status;
         private String recommendation;
     }
 

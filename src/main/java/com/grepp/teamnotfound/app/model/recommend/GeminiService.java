@@ -1,8 +1,8 @@
 package com.grepp.teamnotfound.app.model.recommend;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.grepp.teamnotfound.app.controller.api.recommend.payload.GeminiFullResponse;
-import com.grepp.teamnotfound.app.controller.api.recommend.payload.GeminiResponse;
+import com.grepp.teamnotfound.app.model.recommend.dto.GeminiFullResponse;
+import com.grepp.teamnotfound.app.model.recommend.dto.GeminiResponse;
 import com.grepp.teamnotfound.app.model.recommend.dto.RecommendRequestDto;
 import com.grepp.teamnotfound.app.model.recommend.dto.GeminiRequestDto;
 import com.grepp.teamnotfound.app.model.recommend.entity.Standard;
@@ -47,11 +47,11 @@ public class GeminiService {
         return String.format("""
             너는 반려동물의 건강 데이터를 분석하여 상태를 진단하는 AI 전문가다.
             주어진 '건강 가이드라인'과 '반려견의 최근 10일 기록'을 비교 분석해라.
-            각 항목(몸무게, 수면, 식사, 산책)에 대해 현재 상태를 5단계('매우 부족', '부족', '적정', '과다', '매우 과다') 중 하나로 분류해야 한다.
+            각 항목(몸무게, 수면, 식사, 산책)에 대해 현재 상태를 5단계('VERY_LOW', 'LOW', 'NORMAL', 'HIGH', 'VERY_HIGH') 중 하나로 분류해야 한다.
 
             분석 기준은 다음과 같다:
             1. 몸무게: '최근 10일 기록'의 가장 최신 몸무게(weightList의 첫 번째 값)를 '건강 가이드라인'의 minWeight, maxWeight와 비교하여 판단한다.
-            2. 수면/식사/산책: '최근 10일 기록'의 평균값(avgSleepTime 등)을 '건강 가이드라인'의 최소, 최대 권장량과 비교하여 판단한다. 일별 데이터(List)의 변동성도 참고하여 너무 불규칙할 경우 '부족' 또는 '과다' 쪽으로 판단할 수 있다.
+            2. 수면/식사/산책: '최근 10일 기록'의 평균값(avgSleepTime 등)을 '건강 가이드라인'의 최소, 최대 권장량과 비교하여 판단한다. 일별 데이터(List)의 변동성도 참고하여 너무 불규칙할 경우 'LOW' 또는 'HIGH' 쪽으로 판단할 수 있다.
 
             **절대로 다른 설명이나 문장을 추가하지 말고, 아래에 명시된 JSON 형식만 응답해야 한다.**
 

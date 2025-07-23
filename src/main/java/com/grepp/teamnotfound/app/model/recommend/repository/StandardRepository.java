@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository;
 public interface StandardRepository extends JpaRepository<Standard, Long> {
 
     // 반려견의 나이에 따른 Breed, Size, Age 기준으로 Standard 데이터 반환
-    @Query("SELECT s FROM Standard s WHERE s.breed = :breed AND s.size = :size AND s.startAge <= :ageInMonths ORDER BY s.startAge DESC")
-    Optional<Standard> findStandardByBreedAndSizeAndAge(@Param("breed") PetType breed, @Param("size") PetSize size, @Param("ageInMonths") Integer ageInMonths);
+    @Query("SELECT s FROM Standard s WHERE s.breed = :breed AND s.startAge <= :ageInMonths ORDER BY s.startAge DESC")
+    Optional<Standard> findStandardByBreedAndAge(@Param("breed") PetType breed, @Param("ageInMonths") Integer ageInMonths);
 
 }

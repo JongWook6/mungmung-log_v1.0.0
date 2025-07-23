@@ -1,6 +1,7 @@
 package com.grepp.teamnotfound.app.controller.api.recommend;
 
-import com.grepp.teamnotfound.app.controller.api.recommend.payload.GeminiResponse;
+import com.grepp.teamnotfound.app.controller.api.recommend.payload.RecommendResponse;
+import com.grepp.teamnotfound.app.model.recommend.dto.GeminiResponse;
 import com.grepp.teamnotfound.app.model.pet.PetService;
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.recommend.RecommendService;
@@ -24,7 +25,7 @@ public class RecommendApiController {
     @Operation(summary = "반려견 맞춤형 정보 제공")
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/v1/pet/{petId}")
-    public ResponseEntity<?> getRecommend(
+    public ResponseEntity<RecommendResponse> getRecommend(
             @PathVariable Long petId
     ) {
         Pet pet = petService.getPet(petId);
@@ -37,9 +38,7 @@ public class RecommendApiController {
         // Gemini 응답
         GeminiResponse response = recommendService.getGemini(pet);
         // Recommend 생성
-        recommendService.createRecommend(pet, response);
-
-        return ResponseEntity.ok(recommendService.getGemini(pet));
+        return ResponseEntity.ok(recommendService.createRecommend(pet, response));
     }
 
 }

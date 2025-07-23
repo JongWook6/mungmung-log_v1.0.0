@@ -1,7 +1,7 @@
 package com.grepp.teamnotfound.app.model.recommend;
 
-import com.grepp.teamnotfound.app.controller.api.recommend.payload.GeminiResponse;
-import com.grepp.teamnotfound.app.model.recommend.dto.RecommendDto;
+import com.grepp.teamnotfound.app.model.recommend.dto.GeminiResponse;
+import com.grepp.teamnotfound.app.controller.api.recommend.payload.RecommendResponse;
 import com.grepp.teamnotfound.app.model.recommend.dto.RecommendRequestDto;
 import com.grepp.teamnotfound.app.model.life_record.entity.LifeRecord;
 import com.grepp.teamnotfound.app.model.life_record.repository.LifeRecordRepository;
@@ -14,9 +14,9 @@ import com.grepp.teamnotfound.infra.error.exception.RecommendException;
 import com.grepp.teamnotfound.infra.error.exception.StandardException;
 import com.grepp.teamnotfound.infra.error.exception.code.RecommendErrorCode;
 import com.grepp.teamnotfound.infra.error.exception.code.StandardErrorCode;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -31,6 +31,8 @@ public class RecommendService {
     private final StandardRepository standardRepository;
     private final GeminiService geminiService;
 
+    ModelMapper modelMapper = new ModelMapper();
+
     public Recommend matchDailyRecommend(Pet pet, LocalDate date) {
         return null;
     }
@@ -43,6 +45,21 @@ public class RecommendService {
         return recommend.getContent();
     }
 
+    // Recommend 있는지 확인
+    @Transactional(readOnly = true)
+    public Boolean existsByPetAndDate(Pet pet) {
+        return recommendRepository.existsByPetAndDate(pet, LocalDate.now());
+    }
+
+    // 기존 Recommend 가져오기
+    @Transactional(readOnly = true)
+    public RecommendResponse getRecommendByPet(Pet pet) {
+        Recommend recommend = recommendRepository.findByPetAndDate(pet, LocalDate.now())
+                .orElseThrow(() -> new RecommendException(RecommendErrorCode.RECOMMEND_NOT_FOUND));
+
+        return RecommendResponse.toResponse(recommend) ;
+    }
+
     // Gemini 응답 생성
     @Transactional(readOnly = true)
     public GeminiResponse getGemini(Pet pet) {
@@ -52,7 +69,7 @@ public class RecommendService {
         RecommendRequestDto dto = RecommendRequestDto.toDto(pet, lifeRecordList);
 
         // 반려견의 기준표 반환
-        Standard standard = standardRepository.findStandardByBreedAndSizeAndAge(dto.getBreed(), dto.getSize(), dto.getAge())
+        Standard standard = standardRepository.findStandardByBreedAndAge(dto.getBreed(), dto.getAge())
                 .orElseThrow(() -> new StandardException(StandardErrorCode.STANDARD_NOT_FOUND));
 
         // 프롬프트 생성
@@ -60,9 +77,20 @@ public class RecommendService {
         // Gemini 응답 생성
         String geminiApiResponse = geminiService.getGeminiResponse(prompt);
         // 응답 데이터로 변경
-        GeminiResponse response = geminiService.parseGeminiResponse(geminiApiResponse);
+        return geminiService.parseGeminiResponse(geminiApiResponse);
+    }
 
-        return response;
+    // Recommend 생성
+    @Transactional
+    public RecommendResponse createRecommend(Pet pet, GeminiResponse response) {
+        RecommendResponse res = RecommendResponse.toResponse(response);
+
+        Recommend recommend = modelMapper.map(res, Recommend.class);
+        recommend.setPet(pet);
+
+        recommendRepository.save(recommend);
+
+        return res;
     }
 
 }

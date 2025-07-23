@@ -1,4 +1,4 @@
-package com.grepp.teamnotfound.app.controller.api.recommend.payload;
+package com.grepp.teamnotfound.app.model.recommend.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
