@@ -209,4 +209,11 @@ public class ScheduleService {
         schedule.setIsDone(!schedule.getIsDone());
         scheduleRepository.save(schedule);
     }
+
+    @Transactional
+    public void deleteVaccinationSchedule(Pet pet, String keywords) {
+        List<Schedule> schedules = scheduleRepository.findByPetAndNameContainingAndDeletedAtNull(pet, keywords);
+        schedules.forEach(schedule -> schedule.setDeletedAt(OffsetDateTime.now()));
+        scheduleRepository.saveAll(schedules);
+    }
 }

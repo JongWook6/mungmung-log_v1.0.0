@@ -1,17 +1,17 @@
 package com.grepp.teamnotfound.app.model.user.repository;
 
 import com.grepp.teamnotfound.app.model.user.entity.UserImg;
+import feign.Param;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 public interface UserImgRepository extends JpaRepository<UserImg, Long> {
 
-    @Query("SELECT ui FROM UserImg ui " +
-            "JOIN FETCH ui.user " +
-            "WHERE ui.user.userId = :userId")
-    UserImg findByUserImgWithUser(@Param("userId") Long userId);
-
     Optional<UserImg> findByUser_UserIdAndDeletedAtIsNull(Long userId);
+
+    @Modifying(clearAutomatically=true, flushAutomatically=true)
+    @Query("UPDATE UserImg ui SET ui.deletedAt = CURRENT_TIMESTAMP WHERE ui.user.userId = :userId AND ui.deletedAt IS NULL")
+    void softDeleteUserImg(@Param("userId") Long userId);
 }

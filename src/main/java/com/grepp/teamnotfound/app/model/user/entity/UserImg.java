@@ -1,14 +1,17 @@
 package com.grepp.teamnotfound.app.model.user.entity;
 
+import com.grepp.teamnotfound.infra.code.ImgType;
 import com.grepp.teamnotfound.infra.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -39,7 +42,8 @@ public class UserImg extends BaseEntity {
     private String savePath;
 
     @Column(length = 20)
-    private String type;
+    @Enumerated(EnumType.STRING)
+    private ImgType type;
 
     @Column
     private String originName;
@@ -47,8 +51,8 @@ public class UserImg extends BaseEntity {
     @Column
     private String renamedName;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
 }

@@ -5,6 +5,7 @@ import com.grepp.teamnotfound.app.model.structured_data.dto.FeedingDto;
 import com.grepp.teamnotfound.app.model.structured_data.dto.WalkingDto;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,19 +28,25 @@ public class LifeRecordDto {
     public static LifeRecordDto toDto(LifeRecordData data) {
         ZoneId seoulZoneId = ZoneId.of("Asia/Seoul");
 
-        List<WalkingDto> walkingDtos = data.getWalkingList().stream()
-                .map(walkingData -> WalkingDto.builder()
-                        .startTime(walkingData.getStartTime().atZone(seoulZoneId).toOffsetDateTime())
-                        .endTime(walkingData.getEndTime().atZone(seoulZoneId).toOffsetDateTime())
-                        .pace(walkingData.getPace())
-                        .build()).toList();
+        List<WalkingDto> walkingDtos = new ArrayList<>();
+        if(data.getWalkingList() != null){
+            walkingDtos = data.getWalkingList().stream()
+                    .map(walkingData -> WalkingDto.builder()
+                            .startTime(walkingData.getStartTime().atZone(seoulZoneId).toOffsetDateTime())
+                            .endTime(walkingData.getEndTime().atZone(seoulZoneId).toOffsetDateTime())
+                            .pace(walkingData.getPace())
+                            .build()).toList();
+        }
 
-        List<FeedingDto> feedingDtos = data.getFeedingList().stream()
-                .map(feedingData -> FeedingDto.builder()
-                        .mealTime(feedingData.getMealtime().atZone(seoulZoneId).toOffsetDateTime())
-                        .amount(feedingData.getAmount())
-                        .unit(feedingData.getUnit())
-                        .build()).toList();
+        List<FeedingDto> feedingDtos = new ArrayList<>();
+        if(data.getFeedingList() != null){
+            feedingDtos = data.getFeedingList().stream()
+                    .map(feedingData -> FeedingDto.builder()
+                            .mealTime(feedingData.getMealtime().atZone(seoulZoneId).toOffsetDateTime())
+                            .amount(feedingData.getAmount())
+                            .unit(feedingData.getUnit())
+                            .build()).toList();
+        }
 
         return LifeRecordDto.builder()
                 .petId(data.getPetId())
