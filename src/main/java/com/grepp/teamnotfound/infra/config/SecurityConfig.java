@@ -1,6 +1,7 @@
 package com.grepp.teamnotfound.infra.config;
 
 import com.grepp.teamnotfound.app.model.auth.oauth.CustomOAuth2UserService;
+import com.grepp.teamnotfound.infra.auth.AuthenticationEntryPointImpl;
 import com.grepp.teamnotfound.infra.auth.oauth2.OAuth2FailureHandler;
 import com.grepp.teamnotfound.infra.auth.oauth2.OAuth2SuccessHandler;
 import com.grepp.teamnotfound.infra.auth.token.filter.AuthExceptionFilter;
@@ -38,7 +39,7 @@ public class SecurityConfig {
 
     private final AuthExceptionFilter authExceptionFilter;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-
+    private final AuthenticationEntryPointImpl authenticationEntryPoint;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final ApplicationContext applicationContext;
 
@@ -80,6 +81,9 @@ public class SecurityConfig {
                         // get /api/profile/v1/users/{userId}/board
                         .requestMatchers(GET, "/api/profile/v1/users/**").permitAll()
                         .anyRequest().authenticated()
+        ).exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                // .accessDeniedHandler(customAccessDeniedHandler) // 권한 부족 시 호출 (필요한 경우)
         );
         http.addFilterBefore(applicationContext.getBean(LogoutFilter.class), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
