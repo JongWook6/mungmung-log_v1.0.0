@@ -31,7 +31,6 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -93,7 +92,7 @@ public class VaccinationService {
     @Transactional
     public void savePetVaccinations(Long petId, List<VaccineWriteRequest> requests) {
         if (requests == null || requests.isEmpty()) {
-            return;
+            vaccinationRepository.softDeleteAll(petId, OffsetDateTime.now());
         }
 
         Pet pet = petRepository.findById(petId)
