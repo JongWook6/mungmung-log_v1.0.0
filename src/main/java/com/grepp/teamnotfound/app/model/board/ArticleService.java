@@ -63,6 +63,7 @@ public class ArticleService {
         Page<ArticleListDto> articleListPage = articleRepository.findArticleListWithMeta(
             request.getPage() - 1,
             request.getSize(),
+            request.getBoardType(),
             request.getSortType(),
             request.getSearchType(),
             request.getKeyword()
