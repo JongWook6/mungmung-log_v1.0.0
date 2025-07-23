@@ -125,10 +125,12 @@ public class UserService {
             .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
 
         validateNicknameExceptMe(request.getNickname(), user.getUserId()); // 자신 제외 닉네임 중복 검사
+
         // 로컬 유저만 비밀번호 변경 가능 & 비밀번호 타입 검증
-        if (user.getProvider().equals("local")) {
-            String password = request.getPassword();
-            if (password == null || !password.matches("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]).{8,20}$")) {
+        String password = request.getPassword();
+        if (user.getProvider().equals("local") && password != null && !password.isBlank()) {
+
+            if (!password.matches("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]).{8,20}$")) {
                 throw new BusinessException(UserErrorCode.INVALID_PASSWORD_FORMAT);
             }
 
