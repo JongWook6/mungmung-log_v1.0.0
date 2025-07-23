@@ -214,7 +214,6 @@ public class AdminService {
         } else throw new BusinessException(ReportErrorCode.REPORT_TYPE_BAD_REQUEST);
     }
 
-    // todo request 가 이상한 값이 들어오면!? -> 커스텀 예외처리 필요
     public Page<UsersListDto> getUsersList(UsersListRequest request) {
         Pageable pageable = PageRequest.of(request.getPage() -1, request.getSize());
         return userRepository.findUserListWithMeta(request, pageable);
