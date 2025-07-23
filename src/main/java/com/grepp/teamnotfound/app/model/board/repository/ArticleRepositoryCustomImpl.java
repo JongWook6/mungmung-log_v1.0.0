@@ -1,6 +1,7 @@
 package com.grepp.teamnotfound.app.model.board.repository;
 
 import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleDetailResponse;
+import com.grepp.teamnotfound.app.model.board.code.BoardType;
 import com.grepp.teamnotfound.app.model.board.code.ProfileBoardType;
 import com.grepp.teamnotfound.app.model.board.code.SearchType;
 import com.grepp.teamnotfound.app.model.board.code.SortType;
@@ -143,7 +144,7 @@ public class ArticleRepositoryCustomImpl implements ArticleRepositoryCustom {
     }
 
     @Override
-    public Page<ArticleListDto> findArticleListWithMeta(int page, int size, SortType sortType,
+    public Page<ArticleListDto> findArticleListWithMeta(int page, int size, BoardType boardType, SortType sortType,
         SearchType searchType, String keyword) {
 
         // 정렬 기준 리스트
@@ -153,6 +154,7 @@ public class ArticleRepositoryCustomImpl implements ArticleRepositoryCustom {
         BooleanBuilder searchCondition = new BooleanBuilder();
         searchCondition.and(article.deletedAt.isNull());
         searchCondition.and(article.reportedAt.isNull());
+        searchCondition.and(article.board.name.eq(boardType.name()));
 
         // 검색 조건 추가
         if (searchType != null && keyword != null && !keyword.trim().isEmpty()) {
