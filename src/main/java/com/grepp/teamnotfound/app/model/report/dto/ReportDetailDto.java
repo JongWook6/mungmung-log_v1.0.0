@@ -1,5 +1,6 @@
 package com.grepp.teamnotfound.app.model.report.dto;
 
+import com.grepp.teamnotfound.app.model.board.entity.Article;
 import com.grepp.teamnotfound.app.model.report.entity.Report;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,18 +17,20 @@ public class ReportDetailDto {
     private String category;    // "ABUSE" or "SPAM", "FRAUD", "ADULT_CONTENT"
     private String reason;
     private String status;
+    private String boardName;
 
 
-    public static ReportDetailDto from(Report report, String reporterNickname, Long articleId) {
+    public static ReportDetailDto from(Report report, String reporterNickname, Article article) {
         return ReportDetailDto.builder()
                 .reportId(report.getReportId())
                 .reporter(reporterNickname)
                 .type(report.getType().name())
                 .contentId(report.getContentId())
-                .articleId(articleId)
+                .articleId(article.getArticleId())
                 .category(report.getCategory().name())
                 .reason(report.getReason())
-                .status(report.getIsDone() ? "COMPLETE" : "PENDING")
+                .status(report.getState().name())
+                .boardName(article.getBoard().getName())
                 .build();
     }
 }

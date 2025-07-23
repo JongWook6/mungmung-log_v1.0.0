@@ -1,10 +1,7 @@
 package com.grepp.teamnotfound.app.controller.api.admin;
 
 import com.grepp.teamnotfound.app.controller.api.admin.code.StatsUnit;
-import com.grepp.teamnotfound.app.controller.api.admin.payload.ArticlesStatsResponse;
-import com.grepp.teamnotfound.app.controller.api.admin.payload.ReportDetailResponse;
-import com.grepp.teamnotfound.app.controller.api.admin.payload.UserCountResponse;
-import com.grepp.teamnotfound.app.controller.api.admin.payload.UserStatsResponse;
+import com.grepp.teamnotfound.app.controller.api.admin.payload.*;
 import com.grepp.teamnotfound.app.model.board.dto.MonthlyArticlesStatsDto;
 import com.grepp.teamnotfound.app.model.board.dto.YearlyArticlesStatsDto;
 import com.grepp.teamnotfound.app.model.report.ReportService;
@@ -105,6 +102,33 @@ public class AdminController {
 
         return ResponseEntity.ok(
                 ReportDetailResponse.from(dto));
+    }
+
+    @Operation(summary = "신고 처리하기")
+    @PatchMapping("v1/reports/result-accept")
+    public ResponseEntity<?> acceptReport(@RequestBody AcceptReportRequest request){
+
+        AcceptReportDto dto = AcceptReportDto.builder()
+                .reportId(request.getReportId())
+                .adminReason(request.getAdminReason())
+                .period(request.getPeriod())
+                .build();
+
+        adminService.acceptReportAndSuspendUser(dto);
+        return ResponseEntity.ok("신고가 정상적으로 처리되었습니다.");
+    }
+
+    @Operation(summary = "신고 철회하기")
+    @PatchMapping("v1/reports/result-reject")
+    public ResponseEntity<?> rejectReport(@RequestBody RejectReportRequest request){
+
+        RejectReportDto dto = RejectReportDto.builder()
+                .reportId(request.getReportId())
+                .adminReason(request.getAdminReason())
+                .build();
+
+        adminService.rejectReport(dto);
+        return ResponseEntity.ok("신고를 성공적으로 거절하였습니다.");
     }
 
 }

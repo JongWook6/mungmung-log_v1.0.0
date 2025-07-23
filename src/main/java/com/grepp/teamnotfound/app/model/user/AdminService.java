@@ -1,11 +1,22 @@
 package com.grepp.teamnotfound.app.model.user;
 
-import com.grepp.teamnotfound.app.model.board.ArticleService;
 import com.grepp.teamnotfound.app.model.board.dto.MonthlyArticlesStatsDto;
 import com.grepp.teamnotfound.app.model.board.dto.YearlyArticlesStatsDto;
+import com.grepp.teamnotfound.app.model.board.entity.Article;
 import com.grepp.teamnotfound.app.model.board.repository.ArticleRepository;
+import com.grepp.teamnotfound.app.model.reply.entity.Reply;
+import com.grepp.teamnotfound.app.model.reply.repository.ReplyRepository;
+import com.grepp.teamnotfound.app.model.report.code.ReportState;
+import com.grepp.teamnotfound.app.model.report.code.ReportType;
+import com.grepp.teamnotfound.app.model.report.entity.Report;
+import com.grepp.teamnotfound.app.model.report.repository.ReportRepository;
 import com.grepp.teamnotfound.app.model.user.dto.*;
+import com.grepp.teamnotfound.app.model.user.entity.User;
 import com.grepp.teamnotfound.app.model.user.repository.UserRepository;
+import com.grepp.teamnotfound.infra.error.exception.BusinessException;
+import com.grepp.teamnotfound.infra.error.exception.code.BoardErrorCode;
+import com.grepp.teamnotfound.infra.error.exception.code.ReplyErrorCode;
+import com.grepp.teamnotfound.infra.error.exception.code.ReportErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,7 +32,9 @@ import java.util.List;
 public class AdminService {
 
     private final UserRepository userRepository;
-    private final ArticleService articleService;
+    private final ReportRepository reportRepository;
+    private final ArticleRepository articleRepository;
+    private final ReplyRepository replyRepository;
 
     @Transactional(readOnly = true)
     public TotalUsersDto getTotalUsersCount() {
@@ -94,7 +107,7 @@ public class AdminService {
             OffsetDateTime monthStart = now.minusMonths(i).withDayOfMonth(1);
             OffsetDateTime monthEnd = monthStart.withDayOfMonth(monthStart.toLocalDate().lengthOfMonth());
 
-            int articles = articleService.countArticles(monthStart, monthEnd);
+            int articles = articleRepository.countArticlesBetween(monthStart, monthEnd);
 
             MonthlyArticlesStatsDto stats = MonthlyArticlesStatsDto.builder()
                     .month(monthStart.getMonthValue())
@@ -118,7 +131,7 @@ public class AdminService {
             OffsetDateTime yearStart = now.minusYears(i).withDayOfYear(1);
             OffsetDateTime yearEnd = yearStart.withDayOfYear(yearStart.toLocalDate().lengthOfYear());
 
-            int articles = articleService.countArticles(yearStart, yearEnd);
+            int articles = articleRepository.countArticlesBetween(yearStart, yearEnd);
 
             YearlyArticlesStatsDto stats = YearlyArticlesStatsDto.builder()
                     .year(yearStart.getYear())
@@ -130,5 +143,68 @@ public class AdminService {
 
         return response;
 
+    }
+
+    @Transactional
+    public void rejectReport(RejectReportDto dto) {
+        Report targetReport = reportRepository.findById(dto.getReportId())
+                .orElseThrow(() -> new BusinessException(ReportErrorCode.REPORT_NOT_FOUND));
+
+        targetReport.reject(dto.getAdminReason());
+
+        // 같은 contentId, 같은 category, PENDING인 report에 대해 reject 처리
+        // 방법 1. report repo에서 List<Report> reports 를 가져옴
+        //        for 를 돌면서 report.reject(dto.getAdminReason());
+        List<Report> reports = reportRepository.findByContentIdAndReportCategoryAndState(
+                targetReport.getContentId(),
+                targetReport.getCategory(),
+                ReportState.PENDING
+        );
+        for (Report report : reports) {
+            report.reject(dto.getAdminReason());
+        }
+
+        // 방법 2. 벌크 연산 - updatedAt 추가 필요
+//        reportRepository.bulkRejectPendingReports(
+//                targetReport.getContentId(),
+//                targetReport.getCategory(),
+//                ReportState.REJECT,
+//                dto.getAdminReason(),
+//                ReportState.PENDING
+//        );
+    }
+
+    @Transactional
+    public void acceptReportAndSuspendUser(AcceptReportDto dto) {
+        Report targetReport = reportRepository.findById(dto.getReportId())
+                .orElseThrow(() -> new BusinessException(ReportErrorCode.REPORT_NOT_FOUND));
+
+        hideContentIfNot(targetReport);
+        targetReport.accept(dto.getAdminReason());
+
+        List<Report> reports = reportRepository.findByContentIdAndReportCategoryAndState(
+                targetReport.getContentId(),
+                targetReport.getCategory(),
+                ReportState.PENDING
+        );
+        for (Report report : reports) {
+            report.accept(dto.getAdminReason());
+        }
+
+        User user = targetReport.getReported();
+        user.suspend(dto.getPeriod());
+    }
+
+    private void hideContentIfNot(Report targetReport) {
+        if(targetReport.getType() == ReportType.BOARD){
+            Article article = articleRepository.findByArticleId(targetReport.getContentId())
+                    .orElseThrow(() -> new BusinessException(BoardErrorCode.ARTICLE_NOT_FOUND));
+            if(article.getReportedAt() == null){article.report();}
+
+        } else if(targetReport.getType() == ReportType.REPLY){
+            Reply reply = replyRepository.findByReplyId(targetReport.getContentId())
+                    .orElseThrow(() -> new BusinessException(ReplyErrorCode.REPLY_NOT_FOUND));
+            if(reply.getReportedAt() == null){reply.report();}
+        } else throw new BusinessException(ReportErrorCode.REPORT_TYPE_BAD_REQUEST);
     }
 }
