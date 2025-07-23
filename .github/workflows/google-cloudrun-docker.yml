@@ -70,7 +70,7 @@ jobs:
             --platform managed \
             --region ${{ secrets.GCP_REGION }} \
             --allow-unauthenticated \
-            --set-env-vars "JWT_SECRET=${{ secrets.JWT_SECRET }},REDIS_SECRET=${{ secrets.REDIS_SECRET }},POSTGRESQL_SECRET=${{ secrets.POSTGRESQL_SECRET }},SPRING_MAIL_SECRET=${{ secrets.SPRING_MAIL_SECRET }},GEMINI_SECRET=${{ secrets.GEMINI_SECRET }},GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }},GOOGLE_SECRET=${{ secrets.GOOGLE_SECRET }},NAVER_CLIENT_ID=${{ secrets.NAVER_CLIENT_ID }},NAVER_SECRET=${{ secrets.NAVER_SECRET }},KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }},KAKAO_SECRET=${{ secrets.KAKAO_SECRET }}"
+            --set-env-vars "JWT_SECRET=${{ secrets.JWT_SECRET }},REDIS_SECRET=${{ secrets.REDIS_SECRET }},POSTGRESQL_SECRET=${{ secrets.POSTGRESQL_SECRET }},SPRING_MAIL_SECRET=${{ secrets.SPRING_MAIL_SECRET }}"
 
         # END - Docker auth and build
 
