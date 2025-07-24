@@ -12,7 +12,7 @@
 <script>
   const output = document.getElementById("output");
 
-  const source = new EventSource("http://localhost:8080/api/notification/subscribe");
+  const source = new EventSource("http://localhost:8080/api/notification/v1/subscribe");
 
   source.onmessage = function(event) {
     output.textContent += "message: " + event.data + "\n";
