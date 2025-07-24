@@ -84,6 +84,10 @@ public class ArticleService {
         Board board = boardRepository.findByName(request.getBoardType().name())
             .orElseThrow(() -> new BoardException(BoardErrorCode.BOARD_NOT_FOUND));
 
+        if (!user.getState() || user.getSuspensionEndAt() != null) {
+            throw new BusinessException(UserErrorCode.USER_REPORTED);
+        }
+
         Article article = Article.builder()
             .title(request.getTitle())
             .content(request.getContent())
@@ -147,6 +151,10 @@ public class ArticleService {
 
         if (!beforeArticle.getBoard().getName().equals(request.getBoardType().name())) {
             throw new BoardException(BoardErrorCode.BOARD_CONFLICT);
+        }
+
+        if (!requestUser.getState() || requestUser.getSuspensionEndAt() != null) {
+            throw new BusinessException(UserErrorCode.USER_REPORTED);
         }
 
         beforeArticle.setTitle(request.getTitle());
