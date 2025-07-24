@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.Query;
 
 public interface DailyRecommendRepository extends JpaRepository<DailyRecommend, Long> {
 
@@ -14,5 +15,7 @@ public interface DailyRecommendRepository extends JpaRepository<DailyRecommend, 
 
     Boolean existsByPetAndDate(Pet pet, LocalDate now);
 
+    @Query("SELECT d.rec FROM DailyRecommend d WHERE d.pet = :pet AND d.date = :now AND d.deletedAt IS NULL")
     Optional<Recommend> findRecommendByPetAndDate(Pet pet, LocalDate now);
+
 }

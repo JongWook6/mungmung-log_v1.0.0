@@ -35,19 +35,10 @@ public class DailyRecommendService {
         }
     }
 
-    // DailyRecommend 있는지 확인
-    @Transactional(readOnly = true)
-    public Boolean existsByPetAndDate(Pet pet) {
-        return dailyRecommendRepository.existsByPetAndDate(pet, LocalDate.now());
-    }
-
     // 기존 Recommend 조회
     @Transactional(readOnly = true)
-    public String getRecommendByPet(Pet pet) {
-        Recommend recommend = dailyRecommendRepository.findRecommendByPetAndDate(pet, LocalDate.now())
-                .orElseThrow(() -> new DailyRecommendException(DailyRecommendErrorCode.DAILY_NOT_FOUND));
-
-        return recommend.getContent();
+    public Optional<Recommend> getRecommendByPet(Pet pet) {
+        return dailyRecommendRepository.findRecommendByPetAndDate(pet, LocalDate.now());
     }
 
 }

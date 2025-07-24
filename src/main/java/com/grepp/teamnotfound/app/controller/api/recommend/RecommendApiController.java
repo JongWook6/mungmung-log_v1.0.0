@@ -6,7 +6,9 @@ import com.grepp.teamnotfound.app.model.recommend.dto.GeminiResponse;
 import com.grepp.teamnotfound.app.model.pet.PetService;
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.recommend.RecommendService;
+import com.grepp.teamnotfound.app.model.recommend.entity.Recommend;
 import io.swagger.v3.oas.annotations.Operation;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -32,9 +34,12 @@ public class RecommendApiController {
     ) {
         Pet pet = petService.getPet(petId);
 
-        // 기존 Recommend가 있으면 반환
-        if(dailyRecommendService.existsByPetAndDate(pet)){
-            return ResponseEntity.ok(dailyRecommendService.getRecommendByPet(pet));
+        // 1. 반려견의 기존 DailyRecommend 있는지 체크
+        Optional<Recommend> existingRecommendByDaily = dailyRecommendService.getRecommendByPet(pet);
+        if(existingRecommendByDaily.isPresent()) {
+            String content = existingRecommendByDaily.get().getContent();
+            return ResponseEntity.ok(content);
+        }
         }
 
         // Gemini 응답
