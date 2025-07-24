@@ -15,4 +15,7 @@ public interface ServiceNotiRepository extends JpaRepository<ServiceNoti, Long> 
     @Modifying
     @Query("UPDATE ServiceNoti s SET s.deletedAt = CURRENT_TIMESTAMP WHERE s.serviceNotiId = :notiId")
     void deleteOne(@Param("notiId") Long notiId);
+
+    @Query("SELECT s FROM ServiceNoti s WHERE s.deletedAt IS NULL AND s.user.userId = :userId AND s.createdAt >= :monthBefore")
+    List<ServiceNoti> getAllNoti(@Param("userId") Long userId, @Param("monthBefore") OffsetDateTime monthBefore);
 }
