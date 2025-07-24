@@ -1,6 +1,8 @@
 package com.grepp.teamnotfound.app.model.notification.handler;
 
+import com.grepp.teamnotfound.app.model.notification.code.NotiType;
 import com.grepp.teamnotfound.app.model.notification.dto.NotiScheduleCreateDto;
+import com.grepp.teamnotfound.app.model.notification.dto.NotiUserDto;
 import com.grepp.teamnotfound.app.model.notification.entity.ScheduleNoti;
 import com.grepp.teamnotfound.app.model.notification.repository.ScheduleNotiRepository;
 import com.grepp.teamnotfound.app.model.schedule.entity.Schedule;
@@ -20,7 +22,7 @@ public class ScheduleNotiHandlerImpl implements ScheduleNotiHandler {
     private ScheduleRepository scheduleRepository;
 
     @Override
-    public void handle(User user, NotiScheduleCreateDto dto) {
+    public NotiUserDto handle(User user, NotiScheduleCreateDto dto) {
 
         ScheduleNoti noti = new ScheduleNoti();
 
@@ -28,11 +30,23 @@ public class ScheduleNotiHandlerImpl implements ScheduleNotiHandler {
         String content = schedule.getName();
         LocalDate notiDate = schedule.getScheduleDate();
 
-        noti.setContent("오늘 " + content + " 일정이 예정되어있습니다.");
+        if (notiDate.isBefore(LocalDate.now())) {
+            return null;
+        }
+        noti.setContent("내일 " + content + " 일정이 예정되어있습니다.");
         noti.setUser(user);
         noti.setSchedule(schedule);
         noti.setNotiDate(notiDate);
 
-        scheduleNotiRepository.save(noti);
+        ScheduleNoti saved = scheduleNotiRepository.save(noti);
+
+        return NotiUserDto.builder()
+            .notiId(saved.getScheduleNotiId())
+            .content(saved.getContent())
+            .type(NotiType.SCHEDULE)
+            .targetId(schedule.getScheduleId())
+            .isRead(saved.getIsRead())
+            .createdAt(saved.getCreatedAt())
+            .build();
     }
 }
