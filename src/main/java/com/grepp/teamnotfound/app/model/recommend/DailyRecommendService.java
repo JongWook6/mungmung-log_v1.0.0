@@ -35,6 +35,18 @@ public class DailyRecommendService {
         }
     }
 
+    // DailyRecommend 생성
+    @Transactional
+    public void createDailyRecommend(Pet pet, Recommend recommend) {
+        DailyRecommend dailyRecommend = DailyRecommend.builder()
+                .pet(pet)
+                .date(LocalDate.now())
+                .rec(recommend)
+                .build();
+
+        dailyRecommendRepository.save(dailyRecommend);
+    }
+
     // 기존 Recommend 조회
     @Transactional(readOnly = true)
     public Optional<Recommend> getRecommendByPet(Pet pet) {

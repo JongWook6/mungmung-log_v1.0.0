@@ -40,6 +40,15 @@ public class RecommendApiController {
             String content = existingRecommendByDaily.get().getContent();
             return ResponseEntity.ok(content);
         }
+
+        // 2. 반려견의 정보 + 상태와 동일한 Recommend 있는지 체크
+        Optional<Recommend> existingRecommend = recommendService.getRecommendByPetStates(pet);
+        if (existingRecommend.isPresent()) {
+            String content = existingRecommend.get().getContent();
+
+            // DailyRecommend에 저장
+            dailyRecommendService.createDailyRecommend(pet, existingRecommend.get());
+            return ResponseEntity.ok(content);
         }
 
         // Gemini 응답

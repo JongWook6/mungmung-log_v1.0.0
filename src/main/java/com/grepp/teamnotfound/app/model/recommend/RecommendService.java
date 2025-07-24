@@ -93,4 +93,24 @@ public class RecommendService {
         return res;
     }
 
+    // 기존 Recommend 여부 체크
+    @Transactional(readOnly = true)
+    public Optional<Recommend> getRecommendByPetStates(Pet pet) {
+        Integer age = pet.getAge(pet.getBirthday());
+        Standard standard = standardRepository.findStandardByBreedAndAge(pet.getBreed(), age)
+                .orElseThrow(() -> new StandardException(StandardErrorCode.STANDARD_NOT_FOUND));
+
+        List<LifeRecord> lifeRecordList = lifeRecordRepository.findTop10ByPet(pet);
+        LifeRecordAvgDto avgDto = LifeRecordAvgDto.toDto(lifeRecordList);
+        RecommendStateDto stateDto = RecommendStateDto.toDto(avgDto, standard);
+
+        return recommendRepository.findRecommendByAllStates(
+                pet.getBreed(),
+                standard.getAge(),
+                stateDto.getWeightState(),
+                stateDto.getWalkingState(),
+                stateDto.getSleepingState()
+        );
+    }
+    
 }
