@@ -34,14 +34,14 @@ public class NotificationApiController {
      **/
     private final EmitterRepository emitterRepository;
 
-    @GetMapping("/notifications")
+    @GetMapping("/v1/notifications")
     public ResponseEntity<?> getUserNoti(@AuthenticationPrincipal Principal principal) {
         Long userId = principal.getUserId();
 
         return ResponseEntity.ok(notificationService.getUserNoti(userId));
     }
 
-    @GetMapping(value = "/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "/v1/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter subscribe(@AuthenticationPrincipal Principal principal) {
         Long userId = principal.getUserId();
 
