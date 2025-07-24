@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
+
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @Slf4j
@@ -42,7 +44,7 @@ public class GlobalExceptionHandler {
 
         BindingResult bindingResult = e.getBindingResult();
 
-        String errorMessage = bindingResult.getFieldErrors().getFirst().getDefaultMessage();
+        String errorMessage = "입력 필드에 잘못된 값이 입력되었습니다.";
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)

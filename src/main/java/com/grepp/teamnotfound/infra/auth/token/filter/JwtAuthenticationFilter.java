@@ -55,11 +55,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         // 소셜 로그인 테스트 및 오류 페이지 -> 프론트 연동 후 삭제 예정
                         // 에러 페이지는 토큰 should not 설정 필요
                         (uri.equals("/social/login") && method.equals("GET")) ||
-                        uri.startsWith("/error/") ||
+                        uri.startsWith("/error") ||
 
                         // Swagger 관련
-                        uri.equals("/swagger-ui.html") || uri.startsWith("/swagger-ui/") || uri.startsWith("/swagger-resources/") ||
-                        uri.startsWith("/v3/api-docs/") || uri.startsWith("/webjars/")
+                        uri.equals("/swagger-ui.html") || uri.startsWith("/swagger-ui") || uri.startsWith("/swagger-resources") ||
+                        uri.startsWith("/v3/api-docs") || uri.startsWith("/webjars")
         );
     }
 
