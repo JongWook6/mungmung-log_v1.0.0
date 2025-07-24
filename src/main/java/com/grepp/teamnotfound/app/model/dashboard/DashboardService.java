@@ -6,7 +6,9 @@ import com.grepp.teamnotfound.app.model.life_record.entity.LifeRecord;
 import com.grepp.teamnotfound.app.model.pet.PetService;
 import com.grepp.teamnotfound.app.model.pet.dto.PetDto;
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
+import com.grepp.teamnotfound.app.model.recommend.DailyRecommendService;
 import com.grepp.teamnotfound.app.model.recommend.RecommendService;
+import com.grepp.teamnotfound.app.model.recommend.repository.DailyRecommendRepository;
 import com.grepp.teamnotfound.app.model.structured_data.FeedingService;
 import com.grepp.teamnotfound.app.model.structured_data.WalkingService;
 import com.grepp.teamnotfound.app.model.structured_data.code.FeedUnit;
@@ -30,7 +32,7 @@ public class DashboardService {
     private final PetService petService;
     private final WalkingService walkingService;
     private final FeedingService feedingService;
-    private final RecommendService recommendService;
+    private final DailyRecommendService dailyRecommendService;
     private final LifeRecordService lifeRecordService;
 
     ModelMapper modelMapper = new ModelMapper();
@@ -40,7 +42,7 @@ public class DashboardService {
         Pet pet = petService.getPet(petId);
         if(!pet.getUser().getUserId().equals(userId)) throw new UserException(UserErrorCode.USER_ACCESS_DENIED);
 
-        return recommendService.getRecommend(pet, date);
+        return dailyRecommendService.getRecommend(pet, date);
     }
 
     @Transactional(readOnly = true)
