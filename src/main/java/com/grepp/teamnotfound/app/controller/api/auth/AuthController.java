@@ -1,12 +1,16 @@
 package com.grepp.teamnotfound.app.controller.api.auth;
 
-import com.grepp.teamnotfound.app.controller.api.auth.payload.*;
+import com.grepp.teamnotfound.app.controller.api.auth.payload.EmailVerificationRequest;
+import com.grepp.teamnotfound.app.controller.api.auth.payload.EmailVerifyRequest;
+import com.grepp.teamnotfound.app.controller.api.auth.payload.LoginRequest;
+import com.grepp.teamnotfound.app.controller.api.auth.payload.LoginResponse;
+import com.grepp.teamnotfound.app.controller.api.auth.payload.RegisterRequest;
+import com.grepp.teamnotfound.app.controller.api.auth.payload.RegisterResponse;
+import com.grepp.teamnotfound.app.controller.api.auth.payload.TokenResponse;
 import com.grepp.teamnotfound.app.model.auth.AuthService;
 import com.grepp.teamnotfound.app.model.auth.dto.LoginCommand;
 import com.grepp.teamnotfound.app.model.auth.dto.LoginResult;
 import com.grepp.teamnotfound.app.model.auth.oauth.CustomOAuth2UserService;
-import com.grepp.teamnotfound.infra.util.mail.MailService;
-import com.grepp.teamnotfound.app.model.auth.token.dto.TokenDto;
 import com.grepp.teamnotfound.app.model.notification.NotificationService;
 import com.grepp.teamnotfound.app.model.user.UserService;
 import com.grepp.teamnotfound.app.model.user.dto.RegisterCommand;
@@ -22,6 +26,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
