@@ -55,7 +55,4 @@ public class ScheduleNoti extends BaseEntity {
     @JoinColumn(name = "schedule_id", nullable = false, unique = true)
     private Schedule schedule;
 
-    @Column(nullable = false)
-    private LocalDate notiDate;
-
 }
