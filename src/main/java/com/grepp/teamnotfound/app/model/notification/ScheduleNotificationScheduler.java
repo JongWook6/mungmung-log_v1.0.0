@@ -22,8 +22,8 @@ public class ScheduleNotificationScheduler {
     private final ScheduleNotiRepository scheduleNotiRepository;
     private final NotiAppender notiAppender;
 
-//    @Scheduled(cron = "0 50 11 * * *", zone = "Asia/Seoul") // 매일 오후 11시 50분
-    @Scheduled(cron = "*/10 * * * * *") // 10초마다
+    @Scheduled(cron = "0 50 11 * * *", zone = "Asia/Seoul") // 매일 오후 11시 50분
+//    @Scheduled(cron = "*/10 * * * * *") // 10초마다
     @Transactional
     public void createScheduleNotifications() {
         LocalDate tomorrow = LocalDate.now().plusDays(1);
