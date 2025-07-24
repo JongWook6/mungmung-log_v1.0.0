@@ -217,4 +217,36 @@ class ReportServiceTest {
         verify(articleRepository, never()).findWithBoardByArticleId(anyLong());
     }
 
+    @Test
+    @DisplayName("성공 - 대상자가 탈퇴일 때 해당 UserState = LEAVE")
+    void getReportDetail_whenReportedUserIsLeave() {
+        // given
+        User reportedLeaveUser = User.builder()
+                .userId(1L)
+                .nickname("탈퇴한대상자")
+                .build();
+        reportedLeaveUser.setDeletedAt(OffsetDateTime.now().minusDays(1));
+
+        Long reportId = 1L;
+        Long contentId = article.getArticleId();
+        Report report = Report.builder()
+                .reportId(reportId)
+                .reporter(reporter)
+                .reported(reportedLeaveUser)
+                .type(ReportType.BOARD)
+                .contentId(contentId)
+                .build();
+
+
+        when(reportRepository.findByReportIdWithUsers(reportId))
+                .thenReturn(Optional.of(report));
+        when(articleRepository.findWithBoardByArticleId(contentId))
+                .thenReturn(Optional.of(article));
+
+        // when
+        ReportDetailDto result = reportService.getReportDetail(reportId);
+
+        // then
+        assertThat(result.getReportedState()).isEqualTo(UserStateResponse.LEAVE);
+    }
 }
