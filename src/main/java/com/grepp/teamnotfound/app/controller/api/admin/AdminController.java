@@ -119,11 +119,8 @@ public class AdminController {
     @Operation(summary = "신고내역 상세 보기")
     @GetMapping("v1/reports/{reportId}")
     public ResponseEntity<ReportDetailResponse> getReportDetail(@PathVariable Long reportId) {
-
         ReportDetailDto dto = reportService.getReportDetail(reportId);
-
-        return ResponseEntity.ok(
-                ReportDetailResponse.from(dto));
+        return ResponseEntity.ok(ReportDetailResponse.from(dto));
     }
 
     @Operation(summary = "신고 처리하기")
