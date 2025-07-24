@@ -11,7 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 public interface ScheduleNotiRepository extends JpaRepository<ScheduleNoti, Long> {
 
     @Modifying(clearAutomatically=true, flushAutomatically=true)
-    @Query("UPDATE ScheduleNoti s SET s.deletedAt = CURRENT_TIMESTAMP WHERE s.user = :userId")
+    @Query("UPDATE ScheduleNoti s SET s.deletedAt = CURRENT_TIMESTAMP WHERE s.user.userId = :userId")
     void deleteAllByUser(@Param("userId") Long userId);
 
     @Modifying

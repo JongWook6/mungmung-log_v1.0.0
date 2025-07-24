@@ -2,6 +2,8 @@ package com.grepp.teamnotfound.app.model.notification.repository;
 
 import com.grepp.teamnotfound.app.model.notification.entity.ServiceNoti;
 import feign.Param;
+import java.time.OffsetDateTime;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -9,7 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 public interface ServiceNotiRepository extends JpaRepository<ServiceNoti, Long> {
 
     @Modifying(clearAutomatically=true, flushAutomatically=true)
-    @Query("UPDATE ServiceNoti s SET s.deletedAt = CURRENT_TIMESTAMP WHERE s.user = :userId")
+    @Query("UPDATE ServiceNoti s SET s.deletedAt = CURRENT_TIMESTAMP WHERE s.user.userId = :userId")
     void deleteAllByUser(@Param("userId") Long userId);
 
     @Modifying
