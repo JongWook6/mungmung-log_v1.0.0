@@ -2,26 +2,27 @@ package com.grepp.teamnotfound.app.model.notification;
 
 import com.grepp.teamnotfound.app.model.notification.code.NotiTarget;
 import com.grepp.teamnotfound.app.model.notification.code.NotiType;
-import com.grepp.teamnotfound.app.model.notification.dto.NotiBasicDto;
 import com.grepp.teamnotfound.app.model.notification.dto.NotiReadDto;
-import com.grepp.teamnotfound.app.model.notification.dto.NotiScheduleCreateDto;
-import com.grepp.teamnotfound.app.model.notification.dto.NotiServiceCreateDto;
+import com.grepp.teamnotfound.app.model.notification.dto.NotiUserDto;
 import com.grepp.teamnotfound.app.model.notification.dto.NotiUserSettingDto;
 import com.grepp.teamnotfound.app.model.notification.entity.NotiManagement;
 import com.grepp.teamnotfound.app.model.notification.entity.ScheduleNoti;
 import com.grepp.teamnotfound.app.model.notification.entity.ServiceNoti;
-import com.grepp.teamnotfound.app.model.notification.handler.ScheduleNotiHandlerImpl;
-import com.grepp.teamnotfound.app.model.notification.handler.ServiceNotiHandlerImpl;
 import com.grepp.teamnotfound.app.model.notification.repository.NotiManagementRepository;
 import com.grepp.teamnotfound.app.model.notification.repository.ScheduleNotiRepository;
 import com.grepp.teamnotfound.app.model.notification.repository.ServiceNotiRepository;
+import com.grepp.teamnotfound.app.model.schedule.repository.ScheduleRepository;
 import com.grepp.teamnotfound.app.model.user.entity.User;
 import com.grepp.teamnotfound.app.model.user.repository.UserRepository;
 import com.grepp.teamnotfound.infra.error.exception.BusinessException;
 import com.grepp.teamnotfound.infra.error.exception.code.NotificationErrorCode;
 import com.grepp.teamnotfound.infra.error.exception.code.UserErrorCode;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,17 +40,54 @@ public class NotificationService {
     private final NotiManagementRepository notiManagementRepository;
     private final ScheduleNotiRepository scheduleNotiRepository;
     private final ServiceNotiRepository serviceNotiRepository;
-    private final ScheduleNotiHandlerImpl scheduleNotiHandlerImpl;
-    private final ServiceNotiHandlerImpl serviceNotiHandlerImpl;
+    private final ScheduleRepository scheduleRepository;
 
     ModelMapper modelMapper = new ModelMapper();
 
-//    public List<NotiUserDto> getUserNoti(Long userId) {
-//        User user = userRepository.findById(userId).orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
-//
-//
-//    }
+    public List<NotiUserDto> getUserNoti(Long userId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
 
+        List<NotiUserDto> result = new ArrayList<>();
+
+        // 스케줄 알림
+        LocalDate startMonth = LocalDate.now().minusMonths(1);
+        LocalDate tomorrow = LocalDate.now().plusDays(1);
+
+        List<ScheduleNoti> scheduleNotis = scheduleNotiRepository.getAllNoti(user.getUserId(), startMonth, tomorrow);
+        for (ScheduleNoti sn : scheduleNotis) {
+            result.add(NotiUserDto.builder()
+                .notiId(sn.getScheduleNotiId())
+                .content(sn.getContent())
+                .type(NotiType.SCHEDULE)
+                .targetId(sn.getSchedule().getScheduleId())
+                .isRead(sn.getIsRead())
+                .createdAt(sn.getCreatedAt())
+                .build());
+        }
+
+        // 서비스 알림
+        OffsetDateTime monthBefore = OffsetDateTime.now().minusMonths(1);
+
+        List<ServiceNoti> serviceNotis = serviceNotiRepository.getAllNoti(user.getUserId(), monthBefore);
+        for (ServiceNoti sn : serviceNotis) {
+            result.add(NotiUserDto.builder()
+                .notiId(sn.getServiceNotiId())
+                .content(sn.getContent())
+                .type(sn.getNotificationType())
+                .targetId(sn.getTargetId())
+                .isRead(sn.getIsRead())
+                .createdAt(sn.getCreatedAt())
+                .build());
+        }
+
+        // 최신순 정렬
+        result.sort(Comparator.comparing(NotiUserDto::getCreatedAt).reversed());
+
+        return result;
+    }
+
+    @Transactional
     public NotiUserSettingDto getUserSetting(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
 
@@ -76,18 +114,6 @@ public class NotificationService {
         noti.setUser(user);
 
         notiManagementRepository.save(noti);
-    }
-
-    @Transactional
-    public void createNoti(Long userId, NotiType notiType, NotiBasicDto dto) {
-        User user = userRepository.findById(userId)
-            .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
-
-        if (notiType == NotiType.SCHEDULE) {
-            scheduleNotiHandlerImpl.handle(user, (NotiScheduleCreateDto) dto);
-        } else {
-            serviceNotiHandlerImpl.handle(user, (NotiServiceCreateDto) dto);
-        }
     }
 
     @Transactional
