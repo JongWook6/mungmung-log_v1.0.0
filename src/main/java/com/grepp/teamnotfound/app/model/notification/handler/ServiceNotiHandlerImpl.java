@@ -72,7 +72,7 @@ public class ServiceNotiHandlerImpl implements ServiceNotiHandler {
                 Report reported = reportRepository.findByReportId(dto.getTargetId())
                     .orElseThrow(() -> new BusinessException(ReportErrorCode.REPORT_NOT_FOUND));
                 String adminReasonReported = reported.getAdminReason();
-                noti.setContent(adminReasonReported + "로 인해 내가 작성한 게시글/댓글로 인해 신고를 받았습니다.");
+                noti.setContent(adminReasonReported + "로 인해 내가 작성한 게시글/댓글이 숨김처리 되었습니다.");
                 break;
             }
             // TODO : 맞춤형제안 PR 머지되면 서비스 끼워넣기

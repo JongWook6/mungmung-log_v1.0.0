@@ -16,6 +16,6 @@ public class NotiServiceCreateDto implements NotiBasicDto{
 
     @Override
     public NotiType getType() {
-        return null;
+        return this.notiType;
     }
 }

@@ -11,7 +11,6 @@ import com.grepp.teamnotfound.app.model.notification.repository.NotiManagementRe
 import com.grepp.teamnotfound.app.model.user.entity.User;
 import com.grepp.teamnotfound.app.model.user.repository.UserRepository;
 import com.grepp.teamnotfound.infra.error.exception.BusinessException;
-import com.grepp.teamnotfound.infra.error.exception.code.NotificationErrorCode;
 import com.grepp.teamnotfound.infra.error.exception.code.UserErrorCode;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +34,14 @@ public class NotiAppender {
             .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
 
         NotiManagement notiManagement = notiManagementRepository.findByUser(user)
-            .orElseThrow(() -> new BusinessException(NotificationErrorCode.NOTIFICATION_MANAGEMENT_NOT_FOUND));
+            .orElseGet(() -> {
+                log.warn("회원가입 당시 NotiManagement 미생성 오류 지금 생성 작업 진행 userId: {}", userId);
+
+                NotiManagement created = new NotiManagement();
+                created.setUser(user);
+
+                return notiManagementRepository.save(created);
+            });
 
         if (!notiManagement.getIsNotiAll()) {
             return;
