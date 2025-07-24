@@ -1,6 +1,7 @@
 package com.grepp.teamnotfound.app.controller.api.recommend;
 
 import com.grepp.teamnotfound.app.controller.api.recommend.payload.RecommendResponse;
+import com.grepp.teamnotfound.app.model.recommend.DailyRecommendService;
 import com.grepp.teamnotfound.app.model.recommend.dto.GeminiResponse;
 import com.grepp.teamnotfound.app.model.pet.PetService;
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
@@ -20,25 +21,26 @@ import org.springframework.web.bind.annotation.RestController;
 public class RecommendApiController {
 
     private final PetService petService;
+    private final DailyRecommendService dailyRecommendService;
     private final RecommendService recommendService;
 
     @Operation(summary = "반려견 맞춤형 정보 제공")
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/v1/pet/{petId}")
-    public ResponseEntity<RecommendResponse> getRecommend(
+    public ResponseEntity<String> getRecommend(
             @PathVariable Long petId
     ) {
         Pet pet = petService.getPet(petId);
 
         // 기존 Recommend가 있으면 반환
-        if(recommendService.existsByPetAndDate(pet)){
-            return ResponseEntity.ok(recommendService.getRecommendByPet(pet));
+        if(dailyRecommendService.existsByPetAndDate(pet)){
+            return ResponseEntity.ok(dailyRecommendService.getRecommendByPet(pet));
         }
 
         // Gemini 응답
         GeminiResponse response = recommendService.getGemini(pet);
         // Recommend 생성
-        return ResponseEntity.ok(recommendService.createRecommend(pet, response));
+        return ResponseEntity.ok("");
     }
 
 }

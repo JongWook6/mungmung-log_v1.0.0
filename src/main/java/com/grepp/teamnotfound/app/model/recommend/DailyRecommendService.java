@@ -4,11 +4,14 @@ import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.recommend.entity.DailyRecommend;
 import com.grepp.teamnotfound.app.model.recommend.entity.Recommend;
 import com.grepp.teamnotfound.app.model.recommend.repository.DailyRecommendRepository;
+import com.grepp.teamnotfound.infra.error.exception.DailyRecommendException;
+import com.grepp.teamnotfound.infra.error.exception.code.DailyRecommendErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.Optional;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -31,4 +34,20 @@ public class DailyRecommendService {
             return recommend.getContent();
         }
     }
+
+    // DailyRecommend 있는지 확인
+    @Transactional(readOnly = true)
+    public Boolean existsByPetAndDate(Pet pet) {
+        return dailyRecommendRepository.existsByPetAndDate(pet, LocalDate.now());
+    }
+
+    // 기존 Recommend 조회
+    @Transactional(readOnly = true)
+    public String getRecommendByPet(Pet pet) {
+        Recommend recommend = dailyRecommendRepository.findRecommendByPetAndDate(pet, LocalDate.now())
+                .orElseThrow(() -> new DailyRecommendException(DailyRecommendErrorCode.DAILY_NOT_FOUND));
+
+        return recommend.getContent();
+    }
+
 }
