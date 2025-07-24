@@ -89,6 +89,7 @@ public class ServiceNotiHandlerImpl implements ServiceNotiHandler {
         return NotiUserDto.builder()
             .notiId(saved.getServiceNotiId())
             .content(saved.getContent())
+            .targetId(saved.getTargetId())
             .type(notiType)
             .isRead(saved.getIsRead())
             .createdAt(saved.getCreatedAt())
