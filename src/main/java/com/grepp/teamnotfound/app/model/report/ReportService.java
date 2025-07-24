@@ -31,13 +31,14 @@ public class ReportService {
 
     @Transactional(readOnly = true)
     public ReportDetailDto getReportDetail(Long reportId) {
-        Report report = reportRepository.findByReportId(reportId)
+
+        Report report = reportRepository.findByReportIdWithUsers(reportId)
                 .orElseThrow(() -> new BusinessException(ReportErrorCode.REPORT_NOT_FOUND));
 
         Article article = (report.getType() == ReportType.REPLY) ?
-                replyRepository.findArticleByReplyId(report.getContentId())
+                replyRepository.findArticleWithBoardByReplyId(report.getContentId())
                         .orElseThrow(() -> new BusinessException(BoardErrorCode.ARTICLE_NOT_FOUND))
-                : articleRepository.findByArticleId(report.getContentId())
+                : articleRepository.findWithBoardByArticleId(report.getContentId())
                 .orElseThrow(() -> new BusinessException(BoardErrorCode.ARTICLE_NOT_FOUND));
 
         return ReportDetailDto.from(report, article);
