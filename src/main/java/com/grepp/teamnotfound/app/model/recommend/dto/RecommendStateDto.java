@@ -1,11 +1,7 @@
 package com.grepp.teamnotfound.app.model.recommend.dto;
 
-import com.grepp.teamnotfound.app.model.life_record.entity.LifeRecord;
 import com.grepp.teamnotfound.app.model.recommend.code.RecommendState;
 import com.grepp.teamnotfound.app.model.recommend.entity.Standard;
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 

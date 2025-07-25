@@ -3,9 +3,8 @@ package com.grepp.teamnotfound.app.model.recommend;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.grepp.teamnotfound.app.model.recommend.dto.GeminiFullResponse;
 import com.grepp.teamnotfound.app.model.recommend.dto.GeminiResponse;
-import com.grepp.teamnotfound.app.model.recommend.dto.RecommendRequestDto;
+import com.grepp.teamnotfound.app.model.recommend.dto.RecommendCheckDto;
 import com.grepp.teamnotfound.app.model.recommend.dto.GeminiRequestDto;
-import com.grepp.teamnotfound.app.model.recommend.entity.Standard;
 import com.grepp.teamnotfound.infra.error.exception.GeminiException;
 import com.grepp.teamnotfound.infra.error.exception.code.GeminiErrorCode;
 import java.util.List;
@@ -30,24 +29,23 @@ public class GeminiService {
     }
 
     // 프롬프트 생성
-    public String createPrompt(RecommendRequestDto request, Standard standard){
-        String weightListStr = request.getWeightList().stream()
+    public String createPrompt(RecommendCheckDto checkDto){
+        String weightListStr = checkDto.getListDto().getWeightList().stream()
                 .map(Object::toString)
                 .collect(Collectors.joining(", "));
 
-        String sleepTimeListStr = request.getSleepTimeList().stream()
+        String sleepTimeListStr = checkDto.getListDto().getSleepTimeList().stream()
                 .map(Object::toString)
                 .collect(Collectors.joining(", "));
 
-        String walkingListStr = request.getWalkingList().stream()
+        String walkingListStr = checkDto.getListDto().getWalkingList().stream()
                 .map(Object::toString)
                 .collect(Collectors.joining(", "));
 
         // 전체 프롬프트를 구성
         return String.format("""
-            너는 반려동물의 건강 데이터를 분석하여 상태를 진단하는 AI 전문가다.
-            주어진 '건강 가이드라인'과 '반려견의 최근 10일 기록'을 비교 분석해라.
-            각 항목(몸무게, 수면, 식사, 산책)에 대해 현재 상태를 5단계('VERY_LOW', 'LOW', 'NORMAL', 'HIGH', 'VERY_HIGH') 중 하나로 분류해야 한다.
+            너는 반려동물의 건강 데이터를 분석하여 상태를 진단하는 AI 전문가야.
+            주어진 '건강 가이드라인'과 '반려견의 최근 10일 몸무게, 수면시간, 식사량 기록 및 평균'과 '반려견의 최근 10일 몸무게, 수면시간, 식사량 상태'을 분석해줘.
 
             분석 기준은 다음과 같다:
             1. 몸무게: '최근 10일 기록'의 가장 최신 몸무게(weightList의 첫 번째 값)를 '건강 가이드라인'의 minWeight, maxWeight와 비교하여 판단한다.
@@ -68,32 +66,29 @@ public class GeminiService {
               "sleepTimeList": [%s], "avgSleepTime": %.2f,
               "walkingList": [%s], "avgWalking": %.2f
             }
-
+            
             # 출력 형식 (Output Format)
             {
               "weight": {
-                "status": "여기에 분류 결과",
                 "recommendation": "여기에 몸무게 관련 맞춤형 제안 문구"
               },
               "sleep": {
-                "status": "여기에 분류 결과",
                 "recommendation": "여기에 수면 관련 맞춤형 제안 문구"
               },
               "walk": {
-                "status": "여기에 분류 결과",
                 "recommendation": "여기에 산책 관련 맞춤형 제안 문구"
               }
             }
             """,
             // 건강 가이드라인 데이터
-            standard.getMinWeight(), standard.getMaxWeight(),
-            standard.getMinSleep(), standard.getMaxSleep(),
-            standard.getMinWalk(), standard.getMaxWalk(),
+            checkDto.getStandard().getMinWeight(), checkDto.getStandard().getMaxWeight(),
+            checkDto.getStandard().getMinSleep(), checkDto.getStandard().getMaxSleep(),
+            checkDto.getStandard().getMinWalk(), checkDto.getStandard().getMaxWalk(),
 
             // 반려견 기록 데이터
-            weightListStr, request.getAvgWeight(),
-            sleepTimeListStr, request.getAvgSleepTime(),
-            walkingListStr, request.getAvgWalking()
+            weightListStr, checkDto.getAvgDto().getAvgWeight(),
+            sleepTimeListStr, checkDto.getAvgDto().getAvgSleepTime(),
+            walkingListStr, checkDto.getAvgDto().getAvgWalking()
         );
     }
 

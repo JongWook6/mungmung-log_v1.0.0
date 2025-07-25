@@ -58,6 +58,7 @@ public class RecommendService {
                 .avgDto(avgDto)
                 .stateDto(stateDto)
                 .petInfoDto(petInfoDto)
+                .standard(standard)
                 .build();
     }
 
@@ -75,18 +76,9 @@ public class RecommendService {
 
     // Gemini 응답 생성
     @Transactional(readOnly = true)
-    public GeminiResponse getGemini(Pet pet) {
-        List<LifeRecord> lifeRecordList = lifeRecordRepository.findTop10ByPet(pet);
-
-        // 질문에 필요한 데이터 만들기
-        RecommendRequestDto dto = RecommendRequestDto.toDto(pet, lifeRecordList);
-
-        // 반려견의 기준표 반환
-        Standard standard = standardRepository.findStandardByBreedAndAge(dto.getBreed(), dto.getAge())
-                .orElseThrow(() -> new StandardException(StandardErrorCode.STANDARD_NOT_FOUND));
-
+    public GeminiResponse getGemini(RecommendCheckDto checkDto) {
         // 프롬프트 생성
-        String prompt = geminiService.createPrompt(dto, standard);
+        String prompt = geminiService.createPrompt(checkDto);
         // Gemini 응답 생성
         String geminiApiResponse = geminiService.getGeminiResponse(prompt);
         // 응답 데이터로 변경
@@ -94,16 +86,14 @@ public class RecommendService {
     }
 
     // Recommend 생성
-    @Transactional
-    public RecommendResponse createRecommend(Pet pet, GeminiResponse response) {
-        RecommendResponse res = RecommendResponse.toResponse(response);
+    public Recommend createRecommend(PetInfoDto petInfoDto, RecommendStateDto stateDto, GeminiResponse response) {
+        RecommendDto res = RecommendDto.toDto(petInfoDto, stateDto, response);
 
         Recommend recommend = modelMapper.map(res, Recommend.class);
-        recommend.setPet(pet);
 
         recommendRepository.save(recommend);
 
-        return res;
+        return recommend;
     }
 
 }

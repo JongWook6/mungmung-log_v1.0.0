@@ -1,11 +1,11 @@
 package com.grepp.teamnotfound.app.controller.api.recommend;
 
-import com.grepp.teamnotfound.app.controller.api.recommend.payload.RecommendResponse;
 import com.grepp.teamnotfound.app.model.recommend.DailyRecommendService;
 import com.grepp.teamnotfound.app.model.recommend.dto.GeminiResponse;
 import com.grepp.teamnotfound.app.model.pet.PetService;
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.recommend.RecommendService;
+import com.grepp.teamnotfound.app.model.recommend.dto.RecommendCheckDto;
 import com.grepp.teamnotfound.app.model.recommend.entity.Recommend;
 import io.swagger.v3.oas.annotations.Operation;
 import java.util.Optional;
@@ -54,10 +54,15 @@ public class RecommendApiController {
             return ResponseEntity.ok(content);
         }
 
+        // 4. 새로운 Recommend 생성
         // Gemini 응답
-        GeminiResponse response = recommendService.getGemini(pet);
+        GeminiResponse response = recommendService.getGemini(checkDto);
         // Recommend 생성
-        return ResponseEntity.ok("");
+        Recommend recommend = recommendService.createRecommend(checkDto.getPetInfoDto(), checkDto.getStateDto(), response);
+        // DailyRecommend에 저장
+        dailyRecommendService.createDailyRecommend(pet, recommend);
+
+        return ResponseEntity.ok(recommend.getContent());
     }
 
 }

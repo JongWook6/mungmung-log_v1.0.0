@@ -12,5 +12,6 @@ public class RecommendCheckDto {
     private LifeRecordAvgDto avgDto;
     private RecommendStateDto stateDto;
     private PetInfoDto petInfoDto;
+    private Standard standard;
 
 }
