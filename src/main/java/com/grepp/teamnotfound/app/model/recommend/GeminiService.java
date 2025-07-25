@@ -58,6 +58,13 @@ public class GeminiService {
             너는 반려동물의 건강 데이터를 보고 맞춤형 제안을 해주는 AI 전문가야.
             주어진 '건강 가이드라인'과 '반려견의 최근 10일 몸무게, 수면시간, 산책량 기록 및 평균'과 '반려견의 최근 10일 몸무게, 수면시간, 산책량 상태'을 보고 자세한 맞춤형 제안을 해줘.
             
+            # 반려견의 정보 (Pet's Information)
+            {
+              "breed": "%s",
+              "age": %s,
+              "size": "%s"
+            }
+            
             # 반려견의 최근 10일 기록 (Pet's Recent Data)
             {
               "weightList": [%s], "avgWeight": %.2f,
@@ -70,6 +77,11 @@ public class GeminiService {
               "recommendation": "여기에 반려견 정보를 제외한 맞춤형 제안 문구 3줄 이하"
             }
             """,
+            // 반려견 정보
+            checkDto.getPetInfoDto().getBreed(),
+            checkDto.getPetInfoDto().getAge(),
+            checkDto.getPetInfoDto().getSize(),
+
             // 반려견 기록 데이터
             weightListStr, checkDto.getAvgDto().getAvgWeight(),
             sleepTimeListStr, checkDto.getAvgDto().getAvgSleepTime(),
