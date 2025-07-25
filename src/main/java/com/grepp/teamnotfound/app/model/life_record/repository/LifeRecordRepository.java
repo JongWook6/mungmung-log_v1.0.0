@@ -19,6 +19,9 @@ public interface LifeRecordRepository extends JpaRepository<LifeRecord, Long>, L
     @Query("SELECT l.lifeRecordId FROM LifeRecord l WHERE l.pet.petId = :petId AND l.recordedAt = :recordAt AND l.deletedAt IS NULL")
     Optional<Long> findLifeRecordId(@Param("petId") Long petId, @Param("recordAt") LocalDate recordAt);
 
+    @Query("SELECT l FROM LifeRecord l WHERE l.pet = :pet AND l.deletedAt IS NULL ORDER BY l.recordedAt DESC LIMIT 10")
+    List<LifeRecord> findTop10ByPet(Pet pet);
+
     List<LifeRecord> findTop10ByPetAndDeletedAtNullAndRecordedAtBeforeAndSleepingTimeIsNotNullOrderByRecordedAtDesc(Pet pet, LocalDate date);
 
     List<LifeRecord> findTop10ByPetAndDeletedAtNullAndRecordedAtBeforeAndWeightIsNotNullOrderByRecordedAtDesc(Pet pet, LocalDate date);

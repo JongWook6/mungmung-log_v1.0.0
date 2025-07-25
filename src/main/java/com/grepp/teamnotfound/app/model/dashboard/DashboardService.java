@@ -13,6 +13,8 @@ import com.grepp.teamnotfound.app.model.pet.PetService;
 import com.grepp.teamnotfound.app.model.pet.dto.PetDto;
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.recommend.DailyRecommendService;
+import com.grepp.teamnotfound.app.model.recommend.RecommendService;
+import com.grepp.teamnotfound.app.model.recommend.repository.DailyRecommendRepository;
 import com.grepp.teamnotfound.app.model.schedule.dto.ScheduleDto;
 import com.grepp.teamnotfound.app.model.schedule.entity.Schedule;
 import com.grepp.teamnotfound.app.model.schedule.repository.ScheduleRepository;
