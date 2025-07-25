@@ -20,7 +20,8 @@ public interface RecommendRepository extends JpaRepository<Recommend, Long> {
     @Query("SELECT r FROM Recommend r WHERE r.breed = :breed AND r.age = :age "
             + "AND r.weightState = :weightState "
             + "AND r.sleepingState = :sleepingState "
-            + "AND r.walkingState = :walkingState ")
+            + "AND r.walkingState = :walkingState "
+            + "AND r.deletedAt IS NULL")
     Optional<Recommend> findRecommendByAllStates(
             @Param("breed") PetType breed,
             @Param("age") PetPhase age,
