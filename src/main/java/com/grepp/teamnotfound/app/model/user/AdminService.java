@@ -16,20 +16,13 @@ import com.grepp.teamnotfound.app.model.report.code.ReportType;
 import com.grepp.teamnotfound.app.model.report.dto.ReportsListDto;
 import com.grepp.teamnotfound.app.model.report.entity.Report;
 import com.grepp.teamnotfound.app.model.report.repository.ReportRepository;
-import com.grepp.teamnotfound.app.model.user.dto.AcceptReportDto;
-import com.grepp.teamnotfound.app.model.user.dto.MonthlyUserStatsDto;
-import com.grepp.teamnotfound.app.model.user.dto.RejectReportDto;
-import com.grepp.teamnotfound.app.model.user.dto.TotalUsersDto;
-import com.grepp.teamnotfound.app.model.user.dto.YearlyUserStatsDto;
+import com.grepp.teamnotfound.app.model.user.dto.*;
 import com.grepp.teamnotfound.app.model.user.entity.User;
 import com.grepp.teamnotfound.app.model.user.repository.UserRepository;
 import com.grepp.teamnotfound.infra.error.exception.BusinessException;
 import com.grepp.teamnotfound.infra.error.exception.code.BoardErrorCode;
 import com.grepp.teamnotfound.infra.error.exception.code.ReplyErrorCode;
 import com.grepp.teamnotfound.infra.error.exception.code.ReportErrorCode;
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -37,6 +30,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @Slf4j

@@ -55,21 +55,21 @@ public class ServiceNotiHandlerImpl implements ServiceNotiHandler {
                 break;
             }
             case REPORT_SUCCESS: {
-                Report reportSuc = reportRepository.findByReportId(dto.getTargetId())
+                Report reportSuc = reportRepository.findById(dto.getTargetId())
                     .orElseThrow(() -> new BusinessException(ReportErrorCode.REPORT_NOT_FOUND));
                 String adminReasonSuc = reportSuc.getAdminReason();
                 noti.setContent(adminReasonSuc + " 처리되어 신고가 정상 접수되었습니다.");
                 break;
             }
             case REPORT_FAIL: {
-                Report reportFail = reportRepository.findByReportId(dto.getTargetId())
+                Report reportFail = reportRepository.findById(dto.getTargetId())
                     .orElseThrow(() -> new BusinessException(ReportErrorCode.REPORT_NOT_FOUND));
                 String adminReasonFail = reportFail.getAdminReason();
                 noti.setContent(adminReasonFail + " 처리되어 신고가 기각됐습니다.");
                 break;
             }
             case REPORTED: {
-                Report reported = reportRepository.findByReportId(dto.getTargetId())
+                Report reported = reportRepository.findById(dto.getTargetId())
                     .orElseThrow(() -> new BusinessException(ReportErrorCode.REPORT_NOT_FOUND));
                 String adminReasonReported = reported.getAdminReason();
                 noti.setContent(adminReasonReported + "로 인해 내가 작성한 게시글/댓글이 숨김처리 되었습니다.");
