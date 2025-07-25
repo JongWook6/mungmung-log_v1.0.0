@@ -44,6 +44,15 @@ public class RecommendApiController {
         // 2. 반려견의 종+나이, 최근 10일 생활기록 평균 데이터 생성
         RecommendCheckDto checkDto = recommendService.getRecommendCheck(pet);
 
+        // 데이터가 없을 경우
+        if(checkDto.getListDto().getWeightList().isEmpty()
+                && checkDto.getListDto().getSleepTimeList().isEmpty()
+                && checkDto.getListDto().getWalkingList().isEmpty()
+        ) {
+            return ResponseEntity.ok("최근 생활기록이 없어서 맞춤형 제안이 어려워요!\n"
+                    + "생활기록을 등록하여 맞춤형 제안을 받아보세요.");
+        }
+
         // 3. 데이터 기반 Recommend 있는지 체크 (종, 나이, 생활기록 상태)
         Optional<Recommend> existingRecommend = recommendService.getRecommendByPetStates(checkDto);
         if (existingRecommend.isPresent()) {
