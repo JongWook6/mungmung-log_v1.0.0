@@ -44,22 +44,9 @@ public class GeminiService {
 
         // 전체 프롬프트를 구성
         return String.format("""
-            너는 반려동물의 건강 데이터를 분석하여 상태를 진단하는 AI 전문가야.
-            주어진 '건강 가이드라인'과 '반려견의 최근 10일 몸무게, 수면시간, 식사량 기록 및 평균'과 '반려견의 최근 10일 몸무게, 수면시간, 식사량 상태'을 분석해줘.
-
-            분석 기준은 다음과 같다:
-            1. 몸무게: '최근 10일 기록'의 가장 최신 몸무게(weightList의 첫 번째 값)를 '건강 가이드라인'의 minWeight, maxWeight와 비교하여 판단한다.
-            2. 수면/식사/산책: '최근 10일 기록'의 평균값(avgSleepTime 등)을 '건강 가이드라인'의 최소, 최대 권장량과 비교하여 판단한다. 일별 데이터(List)의 변동성도 참고하여 너무 불규칙할 경우 'LOW' 또는 'HIGH' 쪽으로 판단할 수 있다.
-
-            **절대로 다른 설명이나 문장을 추가하지 말고, 아래에 명시된 JSON 형식만 응답해야 한다.**
-
-            # 건강 가이드라인 (Standard Data)
-            {
-              "minWeight": %.1f, "maxWeight": %.1f,
-              "minSleep": %d, "maxSleep": %d,
-              "minWalk": %d, "maxWalk": %d
-            }
-
+            너는 반려동물의 건강 데이터를 보고 맞춤형 제안을 해주는 AI 전문가야.
+            주어진 '건강 가이드라인'과 '반려견의 최근 10일 몸무게, 수면시간, 산책량 기록 및 평균'과 '반려견의 최근 10일 몸무게, 수면시간, 산책량 상태'을 보고 자세한 맞춤형 제안을 해줘.
+            
             # 반려견의 최근 10일 기록 (Pet's Recent Data)
             {
               "weightList": [%s], "avgWeight": %.2f,
@@ -69,22 +56,9 @@ public class GeminiService {
             
             # 출력 형식 (Output Format)
             {
-              "weight": {
-                "recommendation": "여기에 몸무게 관련 맞춤형 제안 문구"
-              },
-              "sleep": {
-                "recommendation": "여기에 수면 관련 맞춤형 제안 문구"
-              },
-              "walk": {
-                "recommendation": "여기에 산책 관련 맞춤형 제안 문구"
-              }
+              "recommendation": "여기에 반려견 정보를 제외한 맞춤형 제안 문구 3줄 이하"
             }
             """,
-            // 건강 가이드라인 데이터
-            checkDto.getStandard().getMinWeight(), checkDto.getStandard().getMaxWeight(),
-            checkDto.getStandard().getMinSleep(), checkDto.getStandard().getMaxSleep(),
-            checkDto.getStandard().getMinWalk(), checkDto.getStandard().getMaxWalk(),
-
             // 반려견 기록 데이터
             weightListStr, checkDto.getAvgDto().getAvgWeight(),
             sleepTimeListStr, checkDto.getAvgDto().getAvgSleepTime(),
