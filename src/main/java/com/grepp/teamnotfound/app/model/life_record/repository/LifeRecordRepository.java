@@ -2,6 +2,7 @@ package com.grepp.teamnotfound.app.model.life_record.repository;
 
 import com.grepp.teamnotfound.app.model.life_record.entity.LifeRecord;
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
+import com.grepp.teamnotfound.app.model.structured_data.code.FeedUnit;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -30,4 +31,8 @@ public interface LifeRecordRepository extends JpaRepository<LifeRecord, Long>, L
 
     @Query("SELECT l FROM LifeRecord l WHERE l.recordedAt = :today AND l.deletedAt IS NULL")
     List<LifeRecord> findToday(LocalDate today);
+
+    @Query("SELECT f.unit FROM Feeding f JOIN f.lifeRecord lr WHERE lr.pet.petId = :petId ORDER BY f.mealTime DESC LIMIT 1")
+    Optional<FeedUnit> findRecentFeedUnit(@Param("petId") Long petId);
+
 }

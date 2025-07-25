@@ -9,6 +9,7 @@ import com.grepp.teamnotfound.app.model.life_record.LifeRecordService;
 import com.grepp.teamnotfound.app.model.life_record.dto.LifeRecordDto;
 import com.grepp.teamnotfound.app.model.life_record.dto.LifeRecordListDto;
 import com.grepp.teamnotfound.app.model.pet.PetService;
+import com.grepp.teamnotfound.app.model.structured_data.code.FeedUnit;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
@@ -102,7 +103,17 @@ public class LifeRecordApiController {
             return ResponseEntity.ok(Map.of("data", lifeRecord));
         }
 
-        return ResponseEntity.ok("데이터 등록 가능");
+        // 가장 최근 식사 단위 불러오기
+        String unitName = lifeRecordService.getRecentFeedUnit(petId)
+            .map(FeedUnit::name)
+            .orElse(FeedUnit.GRAM.name()); // 최근 식사 단위가 없으면 Default로 GRAM 전송
+
+        Map<String, String> responseBody = Map.of(
+            "result", "데이터 입력 가능",
+            "unit", unitName
+        );
+
+        return ResponseEntity.ok(responseBody);
     }
 
     @Operation(summary = "생활기록 등록")
