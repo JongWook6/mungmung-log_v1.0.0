@@ -143,16 +143,16 @@ public class LifeRecordService {
     } 
   
     public List<LifeRecord> getSleepingLifeRecordList(Pet pet, LocalDate date){
-        return lifeRecordRepository.findTop10ByPetAndDeletedAtNullAndRecordedAtBeforeAndSleepingTimeIsNotNullOrderByRecordedAtDesc(pet, date);
+        return lifeRecordRepository.findTop10ByPetAndDeletedAtNullAndRecordedAtBeforeAndSleepingTimeIsNotNullOrderByRecordedAtDesc(pet, date.plusDays(1));
 
     }
 
     public List<LifeRecord> getWeightLifeRecordList(Pet pet, LocalDate date) {
-        return lifeRecordRepository.findTop10ByPetAndDeletedAtNullAndRecordedAtBeforeAndWeightIsNotNullOrderByRecordedAtDesc(pet, date);
+        return lifeRecordRepository.findTop10ByPetAndDeletedAtNullAndRecordedAtBeforeAndWeightIsNotNullOrderByRecordedAtDesc(pet, date.plusDays(1));
     }
 
     public Map<Long, LocalDate> get7LifeRecordList(Pet pet, LocalDate date) {
-        List<LifeRecord> lifeRecords = lifeRecordRepository.findByPetAndDeletedAtNullAndRecordedAtBetweenOrderByRecordedAtDesc(pet, date.minusWeeks(1), date);
+        List<LifeRecord> lifeRecords = lifeRecordRepository.findByPetAndDeletedAtNullAndRecordedAtBetweenOrderByRecordedAtDesc(pet, date.minusDays(8), date.minusDays(1));
         Map<Long, LocalDate> mapList = new HashMap<>();
         for (LifeRecord lifeRecord : lifeRecords){
             mapList.put(lifeRecord.getLifeRecordId(), lifeRecord.getRecordedAt());
