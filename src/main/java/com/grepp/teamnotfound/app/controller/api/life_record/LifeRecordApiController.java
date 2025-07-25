@@ -104,11 +104,13 @@ public class LifeRecordApiController {
         }
 
         // 가장 최근 식사 단위 불러오기
-        FeedUnit unit = lifeRecordService.getRecentFeedUnit(petId);
+        String unitName = lifeRecordService.getRecentFeedUnit(petId)
+            .map(FeedUnit::name)
+            .orElse(FeedUnit.GRAM.name()); // 최근 식사 단위가 없으면 Default로 GRAM 전송
 
         Map<String, String> responseBody = Map.of(
             "result", "데이터 입력 가능",
-            "unit", unit.name()
+            "unit", unitName
         );
 
         return ResponseEntity.ok(responseBody);

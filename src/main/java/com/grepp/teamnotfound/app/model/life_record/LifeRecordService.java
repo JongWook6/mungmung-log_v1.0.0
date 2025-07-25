@@ -184,8 +184,7 @@ public class LifeRecordService {
     }
 
     @Transactional(readOnly = true)
-    public FeedUnit getRecentFeedUnit(Long petId) {
-        return lifeRecordRepository.findRecentFeedUnit(petId)
-                .orElseThrow(() -> new LifeRecordException(LifeRecordErrorCode.FEEDING_UNIT_NOT_FOUND));
+    public Optional<FeedUnit> getRecentFeedUnit(Long petId) {
+        return lifeRecordRepository.findRecentFeedUnit(petId);
     }
 }
