@@ -13,11 +13,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class NotiUserDto {
 
-    Long notiId;
-    NotiType type;
-    String content;
-    Long targetId;
-    Boolean isRead;
-    OffsetDateTime createdAt;
+    private Long notiId;
+    private NotiType type;
+    private String content;
+    private Long targetId;
+    private Boolean isRead;
+    private OffsetDateTime createdAt;
 
 }

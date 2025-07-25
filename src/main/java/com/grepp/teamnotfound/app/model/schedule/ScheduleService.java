@@ -1,7 +1,5 @@
 package com.grepp.teamnotfound.app.model.schedule;
 
-import com.grepp.teamnotfound.app.model.notification.handler.NotiAppender;
-import com.grepp.teamnotfound.app.model.notification.repository.ScheduleNotiRepository;
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.pet.repository.PetRepository;
 import com.grepp.teamnotfound.app.model.schedule.code.ScheduleCycle;
@@ -33,8 +31,6 @@ public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
     private final PetRepository petRepository;
     private final UserRepository userRepository;
-    private final NotiAppender notiAppender;
-    private final ScheduleNotiRepository scheduleNotiRepository;
 
     // 한달치 일정 조회
     @Transactional
