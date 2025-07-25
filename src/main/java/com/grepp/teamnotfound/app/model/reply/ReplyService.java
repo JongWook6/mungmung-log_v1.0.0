@@ -17,6 +17,7 @@ import com.grepp.teamnotfound.app.model.user.repository.UserImgRepository;
 import com.grepp.teamnotfound.app.model.user.repository.UserRepository;
 import com.grepp.teamnotfound.infra.error.exception.AuthException;
 import com.grepp.teamnotfound.infra.error.exception.BoardException;
+import com.grepp.teamnotfound.infra.error.exception.BusinessException;
 import com.grepp.teamnotfound.infra.error.exception.code.BoardErrorCode;
 import com.grepp.teamnotfound.infra.error.exception.code.UserErrorCode;
 import java.time.OffsetDateTime;
@@ -47,6 +48,10 @@ public class ReplyService {
             .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));
         Article article = articleRepository.findById(articleId)
             .orElseThrow(() -> new BoardException(BoardErrorCode.ARTICLE_NOT_FOUND));
+
+        if (user.getSuspensionEndAt() != null && user.getSuspensionEndAt().isAfter(OffsetDateTime.now())) {
+            throw new BusinessException(UserErrorCode.USER_REPORTED);
+        }
 
         String profileImgPath = userService.getProfileImgPath(userId);
 
@@ -87,6 +92,9 @@ public class ReplyService {
             throw new BoardException(BoardErrorCode.REPLY_FORBIDDEN);
         }
 
+        if (user.getSuspensionEndAt() != null && user.getSuspensionEndAt().isAfter(OffsetDateTime.now())) {
+            throw new BusinessException(UserErrorCode.USER_REPORTED);
+        }
         reply.setContent(request.getContent());
         reply.setUpdatedAt(OffsetDateTime.now());
         Reply savedReply = replyRepository.save(reply);
@@ -119,7 +127,9 @@ public class ReplyService {
             throw new BoardException(BoardErrorCode.REPLY_FORBIDDEN);
         }
 
-        reply.setDeletedAt(OffsetDateTime.now());
+        OffsetDateTime deletedTime = OffsetDateTime.now();
+        reply.setDeletedAt(deletedTime);
+        reply.setUpdatedAt(deletedTime);
         replyRepository.save(reply);
     }
 
