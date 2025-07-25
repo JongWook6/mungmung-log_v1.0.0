@@ -32,7 +32,6 @@ public class RecommendService {
     private final RecommendRepository recommendRepository;
     private final LifeRecordRepository lifeRecordRepository;
     private final StandardRepository standardRepository;
-    private final GeminiService geminiService;
 
     ModelMapper modelMapper = new ModelMapper();
 
@@ -72,17 +71,6 @@ public class RecommendService {
                 checkDto.getStateDto().getSleepingState(),
                 checkDto.getStateDto().getSleepingState()
         );
-    }
-
-    // Gemini 응답 생성
-    @Transactional(readOnly = true)
-    public GeminiResponse getGemini(RecommendCheckDto checkDto) {
-        // 프롬프트 생성
-        String prompt = geminiService.createPrompt(checkDto);
-        // Gemini 응답 생성
-        String geminiApiResponse = geminiService.getGeminiResponse(prompt);
-        // 응답 데이터로 변경
-        return geminiService.parseGeminiResponse(geminiApiResponse);
     }
 
     // Recommend 생성

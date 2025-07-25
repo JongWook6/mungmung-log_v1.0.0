@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
@@ -26,6 +27,16 @@ public class GeminiService {
 
     public GeminiService(@Qualifier("geminiWebClient") WebClient webClient) {
         this.webClient = webClient;
+    }
+
+    // Gemini 응답 생성
+    public GeminiResponse getGemini(RecommendCheckDto checkDto) {
+        // 프롬프트 생성
+        String prompt = createPrompt(checkDto);
+        // Gemini 응답 생성
+        String geminiApiResponse = getGeminiResponse(prompt);
+        // 응답 데이터로 변경
+        return parseGeminiResponse(geminiApiResponse);
     }
 
     // 프롬프트 생성

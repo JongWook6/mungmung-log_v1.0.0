@@ -1,6 +1,7 @@
 package com.grepp.teamnotfound.app.controller.api.recommend;
 
 import com.grepp.teamnotfound.app.model.recommend.DailyRecommendService;
+import com.grepp.teamnotfound.app.model.recommend.GeminiService;
 import com.grepp.teamnotfound.app.model.recommend.dto.GeminiResponse;
 import com.grepp.teamnotfound.app.model.pet.PetService;
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
@@ -25,6 +26,7 @@ public class RecommendApiController {
     private final PetService petService;
     private final DailyRecommendService dailyRecommendService;
     private final RecommendService recommendService;
+    private final GeminiService geminiService;
 
     @Operation(summary = "반려견 맞춤형 정보 제공")
     @PreAuthorize("isAuthenticated()")
@@ -65,7 +67,7 @@ public class RecommendApiController {
 
         // 4. 새로운 Recommend 생성
         // Gemini 응답
-        GeminiResponse response = recommendService.getGemini(checkDto);
+        GeminiResponse response = geminiService.getGemini(checkDto);
         // Recommend 생성
         Recommend recommend = recommendService.createRecommend(checkDto.getPetInfoDto(), checkDto.getStateDto(), response);
         // DailyRecommend에 저장
