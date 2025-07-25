@@ -12,6 +12,7 @@ import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.pet.repository.PetRepository;
 import com.grepp.teamnotfound.app.model.structured_data.FeedingService;
 import com.grepp.teamnotfound.app.model.structured_data.WalkingService;
+import com.grepp.teamnotfound.app.model.structured_data.code.FeedUnit;
 import com.grepp.teamnotfound.app.model.structured_data.entity.Feeding;
 import com.grepp.teamnotfound.app.model.structured_data.entity.Walking;
 import com.grepp.teamnotfound.infra.error.exception.LifeRecordException;
@@ -180,5 +181,11 @@ public class LifeRecordService {
                 .filter(lifeRecord -> lifeRecord.getDeletedAt() == null)
                 .map(lifeRecord -> getLifeRecord(lifeRecord.getLifeRecordId()))
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public FeedUnit getRecentFeedUnit(Long petId) {
+        return lifeRecordRepository.findRecentFeedUnit(petId)
+                .orElseThrow(() -> new LifeRecordException(LifeRecordErrorCode.FEEDING_UNIT_NOT_FOUND));
     }
 }
