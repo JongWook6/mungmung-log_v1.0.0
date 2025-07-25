@@ -20,6 +20,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
@@ -83,4 +84,9 @@ public class Pet extends BaseEntity {
     @OneToMany(mappedBy = "pet", cascade = CascadeType.ALL)
     @Where(clause = "deleted_at IS NULL")
     private List<PetImg> images = new ArrayList<>();
+
+    public Integer getAge(LocalDate birthDay) {
+        LocalDate now = LocalDate.now();
+        return Period.between(birthDay, now).getMonths();
+    }
 }

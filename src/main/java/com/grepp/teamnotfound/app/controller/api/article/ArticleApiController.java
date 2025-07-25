@@ -37,6 +37,7 @@ public class ArticleApiController {
 
     @GetMapping("/v1")
     @Operation(summary = "특정 게시판의 게시글 리스트 조회")
+    @PreAuthorize("isAnonymous() or isAuthenticated()")
     public ResponseEntity<?> getAllArticles(
         @ModelAttribute @Valid ArticleListRequest request
     ) {
@@ -58,6 +59,7 @@ public class ArticleApiController {
 
     @GetMapping("/v1/{articleId}")
     @Operation(summary = "게시글 상세 조회")
+    @PreAuthorize("isAnonymous() or isAuthenticated()")
     public ResponseEntity<?> getArticle(
         @PathVariable Long articleId,
         @AuthenticationPrincipal Principal principal

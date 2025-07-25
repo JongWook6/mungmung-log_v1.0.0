@@ -28,14 +28,14 @@ public class Recommend extends BaseEntity {
     @Id
     @Column(nullable = false, updatable = false)
     @SequenceGenerator(
-        name = "primary_sequence",
-        sequenceName = "primary_sequence",
-        allocationSize = 1,
-        initialValue = 10000
+            name = "primary_sequence",
+            sequenceName = "primary_sequence",
+            allocationSize = 1,
+            initialValue = 10000
     )
     @GeneratedValue(
-        strategy = GenerationType.SEQUENCE,
-        generator = "primary_sequence"
+            strategy = GenerationType.SEQUENCE,
+            generator = "primary_sequence"
     )
     private Long recId;
 
@@ -63,8 +63,7 @@ public class Recommend extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private RecommendState sleepingState;
 
-
-    @Column(nullable = false, length = 60)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
 }

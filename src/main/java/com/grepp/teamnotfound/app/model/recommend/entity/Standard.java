@@ -43,6 +43,9 @@ public class Standard extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private PetPhase age;
 
+    @Column(nullable = false)
+    private Integer startAge;
+
     @Column(nullable = false, length = 10)
     @Enumerated(EnumType.STRING)
     private PetSize size;

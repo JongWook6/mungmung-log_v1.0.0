@@ -1,7 +1,5 @@
 package com.grepp.teamnotfound.app.model.schedule;
 
-import com.grepp.teamnotfound.app.controller.api.schedule.payload.ScheduleCreateRequest;
-import com.grepp.teamnotfound.app.controller.api.schedule.payload.ScheduleEditRequest;
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.pet.repository.PetRepository;
 import com.grepp.teamnotfound.app.model.schedule.code.ScheduleCycle;
@@ -18,16 +16,14 @@ import com.grepp.teamnotfound.infra.error.exception.UserException;
 import com.grepp.teamnotfound.infra.error.exception.code.PetErrorCode;
 import com.grepp.teamnotfound.infra.error.exception.code.ScheduleErrorCode;
 import com.grepp.teamnotfound.infra.error.exception.code.UserErrorCode;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestParam;
-
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -79,6 +75,7 @@ public class ScheduleService {
                     .pet(pet)
                     .user(user).build();
             scheduleRepository.save(schedule);
+
         }else{
             for(LocalDate date = request.getDate(); date.isBefore(request.getCycleEnd()); date = date.plusDays(request.getCycle().getDays(date))){
                 Schedule schedule = Schedule.builder()
@@ -106,6 +103,17 @@ public class ScheduleService {
         Schedule schedule = scheduleRepository.findById(request.getScheduleId()).orElseThrow(() -> new ScheduleException(ScheduleErrorCode.SCHEDULE_NOT_FOUND));
         // 사이클 전체 or 해당 일정만 수정
         if (request.getCycleLink()){
+            if (request.getCycle() == ScheduleCycle.NONE) {
+                // 단일 일정만 수정
+                schedule.setPet(pet);
+                schedule.setName(request.getName());
+                schedule.setScheduleDate(request.getDate());
+                schedule.setCycle(request.getCycle());
+                schedule.setCycleEnd(request.getCycleEnd());
+                schedule.setUpdatedAt(OffsetDateTime.now());
+                scheduleRepository.save(schedule);
+                return;
+            }
             List<Schedule> schedules = scheduleRepository.findByNameAndCycleAndCycleEnd(schedule.getName(), schedule.getCycle(), schedule.getCycleEnd());
             LocalDate date = request.getDate();
             for(Schedule schedule1: schedules){
@@ -115,6 +123,7 @@ public class ScheduleService {
                     continue;
                 }
 
+                schedule.setPet(pet);
                 schedule1.setName(request.getName());
                 schedule1.setScheduleDate(date);
                 schedule1.setCycle(request.getCycle());
@@ -142,12 +151,7 @@ public class ScheduleService {
             }
             scheduleRepository.saveAll(schedules);
         }else {
-            // 단독 일정만 수정
-            schedule.setName(request.getName());
-            schedule.setScheduleDate(request.getDate());
-            schedule.setUpdatedAt(OffsetDateTime.now());
-            schedule.setCycle(request.getCycle());
-            scheduleRepository.save(schedule);
+            // 단독 일정을 반복일정으로 수정 시 추가 일정 생성
             if (!request.getCycle().equals(ScheduleCycle.NONE)) {
                 List<Schedule> schedules = scheduleRepository.findByNameAndCycleAndCycleEnd(schedule.getName(), schedule.getCycle(), schedule.getCycleEnd());
                 LocalDate date = request.getDate();
@@ -163,6 +167,15 @@ public class ScheduleService {
                     schedules.add(addSchedule);
                 }
                 scheduleRepository.saveAll(schedules);
+            }else{
+                // 단독 일정만 수정
+                schedule.setPet(pet);
+                schedule.setName(request.getName());
+                schedule.setScheduleDate(request.getDate());
+                schedule.setUpdatedAt(OffsetDateTime.now());
+                schedule.setCycle(request.getCycle());
+                schedule.setCycleEnd(request.getCycleEnd());
+                scheduleRepository.save(schedule);
             }
         }
     }
