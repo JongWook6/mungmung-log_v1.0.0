@@ -57,7 +57,6 @@ public class RecommendService {
                 .avgDto(avgDto)
                 .stateDto(stateDto)
                 .petInfoDto(petInfoDto)
-                .standard(standard)
                 .build();
     }
 

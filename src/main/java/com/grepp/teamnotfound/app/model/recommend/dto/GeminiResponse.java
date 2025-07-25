@@ -9,15 +9,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class GeminiResponse {
 
-    private Recommendation weight;
-    private Recommendation sleep;
-    private Recommendation walk;
-
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Recommendation {
-        private String recommendation;
-    }
+    private String recommendation;
 
 }

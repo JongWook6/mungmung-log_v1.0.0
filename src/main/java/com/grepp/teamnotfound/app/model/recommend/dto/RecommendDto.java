@@ -22,12 +22,6 @@ public class RecommendDto {
 
     // 데이터를 저장할 때 사용
     public static RecommendDto toDto(PetInfoDto petInfoDto, RecommendStateDto stateDto, GeminiResponse response) {
-        String content = String.join("\n",
-            response.getWeight().getRecommendation(),
-            response.getWalk().getRecommendation(),
-            response.getSleep().getRecommendation()
-        );
-
         return RecommendDto.builder()
                 .breed(petInfoDto.getBreed())
                 .size(petInfoDto.getSize())
@@ -35,7 +29,7 @@ public class RecommendDto {
                 .weightState(stateDto.getWeightState())
                 .walkingState(stateDto.getWalkingState())
                 .sleepingState(stateDto.getSleepingState())
-                .content(content)
+                .content(response.getRecommendation())
                 .build();
     }
 
