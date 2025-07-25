@@ -13,8 +13,6 @@ public interface DailyRecommendRepository extends JpaRepository<DailyRecommend, 
 
     Optional<DailyRecommend> findByPetAndDate(Pet pet, LocalDate date);
 
-    Boolean existsByPetAndDate(Pet pet, LocalDate now);
-
     @Query("SELECT d.rec FROM DailyRecommend d WHERE d.pet = :pet AND d.date = :now AND d.deletedAt IS NULL")
     Optional<Recommend> findRecommendByPetAndDate(Pet pet, LocalDate now);
 

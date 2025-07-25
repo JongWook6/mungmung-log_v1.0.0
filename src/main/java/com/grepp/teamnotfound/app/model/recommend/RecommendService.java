@@ -68,7 +68,7 @@ public class RecommendService {
                 checkDto.getPetInfoDto().getAge(),
                 checkDto.getStateDto().getWeightState(),
                 checkDto.getStateDto().getSleepingState(),
-                checkDto.getStateDto().getSleepingState()
+                checkDto.getStateDto().getWalkingState()
         );
     }
 
