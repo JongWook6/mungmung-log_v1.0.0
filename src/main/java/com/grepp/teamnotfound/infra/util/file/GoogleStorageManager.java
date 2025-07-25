@@ -63,7 +63,6 @@ public class GoogleStorageManager extends AbstractFileManager {
 
     @Override
     protected String createSavePath(String depth) {
-        // NOTE 연/월/일 경로로 할 건지 수정 필요
         return storageBaseUrl + bucket + "/" + depth + "/";
     }
 }

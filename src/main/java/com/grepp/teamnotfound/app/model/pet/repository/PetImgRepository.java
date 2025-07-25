@@ -18,5 +18,5 @@ public interface PetImgRepository extends JpaRepository<PetImg, Long> {
     @Query("UPDATE PetImg pi SET pi.deletedAt = CURRENT_TIMESTAMP WHERE pi.pet.petId = :petId AND pi.deletedAt IS NULL")
     void softDeletePetImg(@Param("petId") Long petId);
 
-    List<PetImg> findByDeletedAtBefore(OffsetDateTime dateTime);
+    List<PetImg> findByDeletedAtBetween(OffsetDateTime startOfTargetDay, OffsetDateTime endOfTargetDay);
 }

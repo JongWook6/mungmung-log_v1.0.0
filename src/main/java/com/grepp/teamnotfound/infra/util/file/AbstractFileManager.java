@@ -30,7 +30,7 @@ public abstract class AbstractFileManager {
     }
 
     public void delete(List<FileDto> fileDtos) {
-        // 사진 일괄 삭제 메서드
+
     }
 
     protected void uploadFile(MultipartFile file, FileDto fileDto) throws IOException {

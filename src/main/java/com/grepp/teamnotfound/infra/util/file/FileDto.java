@@ -11,30 +11,4 @@ public record FileDto(
     String savePath
 ) {
 
-    public static FileDto fromArticleImg(ArticleImg articleImg) {
-        return new FileDto(
-            articleImg.getOriginName(),
-            articleImg.getRenamedName(),
-            "article",
-            articleImg.getSavePath()
-        );
-    }
-
-    public static FileDto fromPetImg(PetImg petImg) {
-        return new FileDto(
-            petImg.getOriginName(),
-            petImg.getRenamedName(),
-            "pet",
-            petImg.getSavePath()
-        );
-    }
-
-    public static FileDto fromUserImg(UserImg userImg) {
-        return new FileDto(
-            userImg.getOriginName(),
-            userImg.getRenamedName(),
-            "user",
-            userImg.getSavePath()
-        );
-    }
 }

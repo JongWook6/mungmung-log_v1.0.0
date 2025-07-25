@@ -19,5 +19,5 @@ public interface ArticleImgRepository extends JpaRepository<ArticleImg, Long> {
     @Query("UPDATE ArticleImg ai SET ai.deletedAt = :deletedAt, ai.updatedAt = :deletedAt WHERE ai.article.articleId = :articleId AND ai.deletedAt IS NULL ")
     void softDeleteByArticleId(@Param("articleId") Long articleId, @Param("deletedAt") OffsetDateTime deletedAt);
 
-    List<ArticleImg> findByDeletedAtBefore(OffsetDateTime dateTime);
+    List<ArticleImg> findByDeletedAtBetween(OffsetDateTime startOfTargetDay, OffsetDateTime endOfTargetDay);
 }

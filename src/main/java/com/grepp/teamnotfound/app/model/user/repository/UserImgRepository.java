@@ -17,5 +17,5 @@ public interface UserImgRepository extends JpaRepository<UserImg, Long> {
     @Query("UPDATE UserImg ui SET ui.deletedAt = CURRENT_TIMESTAMP WHERE ui.user.userId = :userId AND ui.deletedAt IS NULL")
     void softDeleteUserImg(@Param("userId") Long userId);
 
-    List<UserImg> findByDeletedAtBefore(OffsetDateTime thresholdTime);
+    List<UserImg> findByDeletedAtBetween(OffsetDateTime startOfTargetDay, OffsetDateTime endOfTargetDay);
 }
