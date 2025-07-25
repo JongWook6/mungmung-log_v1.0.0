@@ -6,11 +6,13 @@ import com.grepp.teamnotfound.app.controller.api.reply.payload.ReplyListResponse
 import com.grepp.teamnotfound.app.controller.api.reply.payload.ReplyRequest;
 import com.grepp.teamnotfound.app.model.board.entity.Article;
 import com.grepp.teamnotfound.app.model.board.repository.ArticleRepository;
+import com.grepp.teamnotfound.app.model.notification.code.NotiType;
+import com.grepp.teamnotfound.app.model.notification.dto.NotiServiceCreateDto;
+import com.grepp.teamnotfound.app.model.notification.handler.NotiAppender;
 import com.grepp.teamnotfound.app.model.reply.entity.Reply;
 import com.grepp.teamnotfound.app.model.reply.repository.ReplyRepository;
 import com.grepp.teamnotfound.app.model.user.UserService;
 import com.grepp.teamnotfound.app.model.user.entity.User;
-import com.grepp.teamnotfound.app.model.user.entity.UserImg;
 import com.grepp.teamnotfound.app.model.user.repository.UserImgRepository;
 import com.grepp.teamnotfound.app.model.user.repository.UserRepository;
 import com.grepp.teamnotfound.infra.error.exception.AuthException;
@@ -19,7 +21,6 @@ import com.grepp.teamnotfound.infra.error.exception.code.BoardErrorCode;
 import com.grepp.teamnotfound.infra.error.exception.code.UserErrorCode;
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -38,6 +39,7 @@ public class ReplyService {
     private final ArticleRepository articleRepository;
     private final UserImgRepository userImgRepository;
     private final ReplyRepository replyRepository;
+    private final NotiAppender notiAppender;
 
     @Transactional
     public ReplyDetailResponse createReply(ReplyRequest request, Long articleId, Long userId) {
@@ -54,6 +56,11 @@ public class ReplyService {
             .content(request.getContent())
             .build();
         Reply savedReply = replyRepository.save(reply);
+
+        NotiServiceCreateDto notiDto = NotiServiceCreateDto.builder()
+            .targetId(reply.getReplyId())
+            .build();
+        notiAppender.append(reply.getArticle().getUser().getUserId(), NotiType.COMMENT, notiDto);
 
         return ReplyDetailResponse.builder()
             .articleId(articleId)
