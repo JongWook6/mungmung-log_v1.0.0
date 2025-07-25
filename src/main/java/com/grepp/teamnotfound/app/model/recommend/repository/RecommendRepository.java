@@ -19,14 +19,14 @@ public interface RecommendRepository extends JpaRepository<Recommend, Long> {
     // 종, 나이, 반려견 상태값이 모두 일치하는 Recommend가 있는지 확인
     @Query("SELECT r FROM Recommend r WHERE r.breed = :breed AND r.age = :age "
             + "AND r.weightState = :weightState "
-            + "AND r.walkingState = :walkingState "
-            + "AND r.sleepingState = :sleepingState")
+            + "AND r.sleepingState = :sleepingState "
+            + "AND r.walkingState = :walkingState ")
     Optional<Recommend> findRecommendByAllStates(
             @Param("breed") PetType breed,
             @Param("age") PetPhase age,
             @Param("weightState") RecommendState weightState,
-            @Param("walkingState") RecommendState walkingState,
-            @Param("sleepingState") RecommendState sleepingState
+            @Param("sleepingState") RecommendState sleepingState,
+            @Param("walkingState") RecommendState walkingState
     );
 
 }

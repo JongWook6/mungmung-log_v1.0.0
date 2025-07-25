@@ -37,13 +37,14 @@ public class RecommendResponse {
 
     // 기존 데이터 보여줄 때 사용
     public static RecommendResponse toResponse(Recommend recommend) {
-        return RecommendResponse.builder()
-                .date(recommend.getDate())
-                .weightState(recommend.getWeightState())
-                .walkingState(recommend.getWalkingState())
-                .sleepingState(recommend.getSleepingState())
-                .content(recommend.getContent())
-                .build();
+//        return RecommendResponse.builder()
+//                .date(recommend.getDate())
+//                .weightState(recommend.getWeightState())
+//                .walkingState(recommend.getWalkingState())
+//                .sleepingState(recommend.getSleepingState())
+//                .content(recommend.getContent())
+//                .build();
+        return null;
     }
 
 }

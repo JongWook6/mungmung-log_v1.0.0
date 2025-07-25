@@ -1,20 +1,23 @@
 package com.grepp.teamnotfound.app.model.recommend;
 
 import com.grepp.teamnotfound.app.model.recommend.dto.GeminiResponse;
-import com.grepp.teamnotfound.app.controller.api.recommend.payload.RecommendResponse;
-import com.grepp.teamnotfound.app.model.recommend.dto.RecommendRequestDto;
+import com.grepp.teamnotfound.app.model.recommend.dto.RecommendDto;
+import com.grepp.teamnotfound.app.model.recommend.dto.LifeRecordAvgDto;
+import com.grepp.teamnotfound.app.model.recommend.dto.LifeRecordListDto;
+import com.grepp.teamnotfound.app.model.recommend.dto.PetInfoDto;
+import com.grepp.teamnotfound.app.model.recommend.dto.RecommendCheckDto;
 import com.grepp.teamnotfound.app.model.life_record.entity.LifeRecord;
 import com.grepp.teamnotfound.app.model.life_record.repository.LifeRecordRepository;
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
+import com.grepp.teamnotfound.app.model.recommend.dto.RecommendStateDto;
 import com.grepp.teamnotfound.app.model.recommend.entity.Recommend;
 import com.grepp.teamnotfound.app.model.recommend.entity.Standard;
 import com.grepp.teamnotfound.app.model.recommend.repository.RecommendRepository;
 import com.grepp.teamnotfound.app.model.recommend.repository.StandardRepository;
-import com.grepp.teamnotfound.infra.error.exception.RecommendException;
 import com.grepp.teamnotfound.infra.error.exception.StandardException;
-import com.grepp.teamnotfound.infra.error.exception.code.RecommendErrorCode;
 import com.grepp.teamnotfound.infra.error.exception.code.StandardErrorCode;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -37,27 +40,37 @@ public class RecommendService {
         return null;
     }
 
+    // 반려견의 종+나이, 최근 10일 생활기록 평균 데이터 생성
     @Transactional(readOnly = true)
-    public String getRecommend(Pet pet, LocalDate date) {
-        Recommend recommend = recommendRepository.findByPetAndDate(pet, date)
-                .orElseThrow(() -> new RecommendException(RecommendErrorCode.RECOMMEND_NOT_FOUND));
+    public RecommendCheckDto getRecommendCheck(Pet pet){
+        Integer age = pet.getAge(pet.getBirthday());
+        Standard standard = standardRepository.findStandardByBreedAndAge(pet.getBreed(), age)
+                .orElseThrow(() -> new StandardException(StandardErrorCode.STANDARD_NOT_FOUND));
 
-        return recommend.getContent();
+        List<LifeRecord> lifeRecordList = lifeRecordRepository.findTop10ByPet(pet);
+        LifeRecordListDto listDto = LifeRecordListDto.toDto(lifeRecordList);
+        LifeRecordAvgDto avgDto = LifeRecordAvgDto.toDto(lifeRecordList);
+        RecommendStateDto stateDto = RecommendStateDto.toDto(avgDto, standard);
+        PetInfoDto petInfoDto = PetInfoDto.toDto(standard);
+
+        return RecommendCheckDto.builder()
+                .listDto(listDto)
+                .avgDto(avgDto)
+                .stateDto(stateDto)
+                .petInfoDto(petInfoDto)
+                .build();
     }
 
-    // Recommend 있는지 확인
+    // 기존 Recommend 여부 체크
     @Transactional(readOnly = true)
-    public Boolean existsByPetAndDate(Pet pet) {
-        return recommendRepository.existsByPetAndDate(pet, LocalDate.now());
-    }
-
-    // 기존 Recommend 가져오기
-    @Transactional(readOnly = true)
-    public RecommendResponse getRecommendByPet(Pet pet) {
-        Recommend recommend = recommendRepository.findByPetAndDate(pet, LocalDate.now())
-                .orElseThrow(() -> new RecommendException(RecommendErrorCode.RECOMMEND_NOT_FOUND));
-
-        return RecommendResponse.toResponse(recommend) ;
+    public Optional<Recommend> getRecommendByPetStates(RecommendCheckDto checkDto) {
+        return recommendRepository.findRecommendByAllStates(
+                checkDto.getPetInfoDto().getBreed(),
+                checkDto.getPetInfoDto().getAge(),
+                checkDto.getStateDto().getWeightState(),
+                checkDto.getStateDto().getSleepingState(),
+                checkDto.getStateDto().getSleepingState()
+        );
     }
 
     // Gemini 응답 생성
@@ -93,24 +106,4 @@ public class RecommendService {
         return res;
     }
 
-    // 기존 Recommend 여부 체크
-    @Transactional(readOnly = true)
-    public Optional<Recommend> getRecommendByPetStates(Pet pet) {
-        Integer age = pet.getAge(pet.getBirthday());
-        Standard standard = standardRepository.findStandardByBreedAndAge(pet.getBreed(), age)
-                .orElseThrow(() -> new StandardException(StandardErrorCode.STANDARD_NOT_FOUND));
-
-        List<LifeRecord> lifeRecordList = lifeRecordRepository.findTop10ByPet(pet);
-        LifeRecordAvgDto avgDto = LifeRecordAvgDto.toDto(lifeRecordList);
-        RecommendStateDto stateDto = RecommendStateDto.toDto(avgDto, standard);
-
-        return recommendRepository.findRecommendByAllStates(
-                pet.getBreed(),
-                standard.getAge(),
-                stateDto.getWeightState(),
-                stateDto.getWalkingState(),
-                stateDto.getSleepingState()
-        );
-    }
-    
 }

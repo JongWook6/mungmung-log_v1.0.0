@@ -41,8 +41,11 @@ public class RecommendApiController {
             return ResponseEntity.ok(content);
         }
 
-        // 2. 반려견의 정보 + 상태와 동일한 Recommend 있는지 체크
-        Optional<Recommend> existingRecommend = recommendService.getRecommendByPetStates(pet);
+        // 2. 반려견의 종+나이, 최근 10일 생활기록 평균 데이터 생성
+        RecommendCheckDto checkDto = recommendService.getRecommendCheck(pet);
+
+        // 3. 데이터 기반 Recommend 있는지 체크 (종, 나이, 생활기록 상태)
+        Optional<Recommend> existingRecommend = recommendService.getRecommendByPetStates(checkDto);
         if (existingRecommend.isPresent()) {
             String content = existingRecommend.get().getContent();
 
