@@ -1,13 +1,20 @@
 package com.grepp.teamnotfound.app.controller.api.profile;
 
+import com.grepp.teamnotfound.app.controller.api.mypage.payload.UserProfileArticleRequest;
+import com.grepp.teamnotfound.app.controller.api.mypage.payload.UserProfileArticleResponse;
 import com.grepp.teamnotfound.app.controller.api.profile.payload.ProfilePetResponse;
+import com.grepp.teamnotfound.app.model.board.ArticleService;
+import com.grepp.teamnotfound.app.model.board.code.ProfileBoardType;
 import com.grepp.teamnotfound.app.model.pet.PetService;
 import com.grepp.teamnotfound.app.model.user.UserService;
+import com.grepp.teamnotfound.app.model.user.dto.UserDto;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,6 +27,7 @@ public class ProfileApiController {
 
     private final UserService userService;
     private final PetService petService;
+    private final ArticleService articleService;
 
     @GetMapping("/v1/users/{userId}")
     public ResponseEntity<?> getUser(
@@ -36,12 +44,16 @@ public class ProfileApiController {
         return ResponseEntity.ok(response);
     }
 
-//    @GetMapping("/v1/board")
-//    public ResponseEntity<PetDto> getUserBoard(
-//        @AuthenticationPrincipal Principal principal
-//    ) {
-//        return ResponseEntity.ok(petService.findOne(userId));
-//    }
+    @GetMapping("/v1/users/{userId}/board")
+    public ResponseEntity<?> getUserBoard(
+        @PathVariable Long userId,
+        @ModelAttribute @Valid UserProfileArticleRequest request
+    ) {
+        ProfileBoardType type = ProfileBoardType.WRITE;
+
+        UserProfileArticleResponse response = articleService.getUsersArticles(userId, type, request.getPage(), request.getSize(), request.getSortType());
+        return ResponseEntity.ok(response);
+    }
 
 
 }

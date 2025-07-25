@@ -37,6 +37,7 @@ public class ArticleApiController {
 
     @GetMapping("/v1")
     @Operation(summary = "특정 게시판의 게시글 리스트 조회")
+    @PreAuthorize("isAnonymous() or isAuthenticated()")
     public ResponseEntity<?> getAllArticles(
         @ModelAttribute @Valid ArticleListRequest request
     ) {
@@ -58,6 +59,7 @@ public class ArticleApiController {
 
     @GetMapping("/v1/{articleId}")
     @Operation(summary = "게시글 상세 조회")
+    @PreAuthorize("isAnonymous() or isAuthenticated()")
     public ResponseEntity<?> getArticle(
         @PathVariable Long articleId,
         @AuthenticationPrincipal Principal principal
@@ -102,7 +104,7 @@ public class ArticleApiController {
         @PathVariable Long articleId,
         @AuthenticationPrincipal Principal principal
     ) {
-        LikeResponse response = articleService.likeArticle(articleId, principal.getUserId());
+        LikeResponse response = articleService.likeWithRedis(articleId, principal.getUserId());
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
@@ -113,7 +115,7 @@ public class ArticleApiController {
         @PathVariable Long articleId,
         @AuthenticationPrincipal Principal principal
     ) {
-        LikeResponse response = articleService.unlikeArticle(articleId, principal.getUserId());
+        LikeResponse response = articleService.unlikeWithRedis(articleId, principal.getUserId());
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
@@ -131,7 +133,7 @@ public class ArticleApiController {
     public ResponseEntity<?> getLikeCount(
         @PathVariable Long articleId
     ) {
-        Integer likeCount = articleService.getLikeCount(articleId);
+        Integer likeCount = articleService.getActualLikeCount(articleId);
         return ResponseEntity.ok(ApiResponse.success(Map.of("likes", likeCount)));
     }
 

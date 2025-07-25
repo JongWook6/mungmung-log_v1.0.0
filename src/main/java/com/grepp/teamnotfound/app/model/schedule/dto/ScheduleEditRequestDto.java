@@ -14,7 +14,6 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class ScheduleEditRequestDto {
     private Long scheduleId;
-    private Long userId;
     private Long petId;
     private String name;
     private LocalDate date;

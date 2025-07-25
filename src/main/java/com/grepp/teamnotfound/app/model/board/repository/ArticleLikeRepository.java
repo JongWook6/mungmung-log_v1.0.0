@@ -1,7 +1,7 @@
 package com.grepp.teamnotfound.app.model.board.repository;
 
-import com.grepp.teamnotfound.app.model.board.entity.Article;
 import com.grepp.teamnotfound.app.model.board.entity.ArticleLike;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -21,4 +21,10 @@ public interface ArticleLikeRepository extends JpaRepository<ArticleLike, Long> 
     Integer countByArticle_ArticleId(Long articleId);
 
     boolean existsByArticle_ArticleIdAndUser_UserId(Long article, Long userId);
+
+    @Query("SELECT al.user.userId FROM ArticleLike al WHERE al.article.articleId = :articleId")
+    List<Long> findUserIdsByArticleId(@Param("articleId") Long articleId);
+
+    @Query("SELECT al FROM ArticleLike al WHERE al.article.articleId = :articleId AND al.user.userId IN :userIds")
+    List<ArticleLike> findAllByArticleIdAndUserIds(@Param("articleId") Long articleId, @Param("userIds") List<Long> userIds);
 }

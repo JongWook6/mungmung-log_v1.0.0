@@ -14,10 +14,10 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 public class BaseEntity {
 
     @Column(nullable = false)
-    private OffsetDateTime createdAt = OffsetDateTime.now();
+    protected OffsetDateTime createdAt = OffsetDateTime.now();
 
-    private OffsetDateTime updatedAt;
+    protected OffsetDateTime updatedAt;
 
-    private OffsetDateTime deletedAt;
+    protected OffsetDateTime deletedAt;
 
 }
