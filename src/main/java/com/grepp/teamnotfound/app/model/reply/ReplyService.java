@@ -47,7 +47,7 @@ public class ReplyService {
         Article article = articleRepository.findById(articleId)
             .orElseThrow(() -> new BoardException(BoardErrorCode.ARTICLE_NOT_FOUND));
 
-        if (user.getSuspensionEndAt() != null) {
+        if (user.getSuspensionEndAt() != null && user.getSuspensionEndAt().isAfter(OffsetDateTime.now())) {
             throw new BusinessException(UserErrorCode.USER_REPORTED);
         }
 
@@ -85,10 +85,9 @@ public class ReplyService {
             throw new BoardException(BoardErrorCode.REPLY_FORBIDDEN);
         }
 
-        if (user.getSuspensionEndAt() != null) {
+        if (user.getSuspensionEndAt() != null && user.getSuspensionEndAt().isAfter(OffsetDateTime.now())) {
             throw new BusinessException(UserErrorCode.USER_REPORTED);
         }
-
         reply.setContent(request.getContent());
         reply.setUpdatedAt(OffsetDateTime.now());
         Reply savedReply = replyRepository.save(reply);
