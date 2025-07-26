@@ -11,6 +11,7 @@ import com.grepp.teamnotfound.app.model.auth.token.entity.TokenBlackList;
 import com.grepp.teamnotfound.app.model.auth.token.repository.TokenBlackListRepository;
 import com.grepp.teamnotfound.app.model.user.UserService;
 import com.grepp.teamnotfound.app.model.user.entity.User;
+import com.grepp.teamnotfound.app.model.user.repository.UserRepository;
 import com.grepp.teamnotfound.infra.auth.token.JwtProvider;
 import com.grepp.teamnotfound.infra.error.exception.AuthException;
 import com.grepp.teamnotfound.infra.error.exception.code.AuthErrorCode;
@@ -30,15 +31,15 @@ import java.util.Date;
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final UserService userService;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final JwtProvider jwtProvider;
     private final RefreshTokenService refreshTokenService;
     private final TokenBlackListRepository tokenBlackListRepository;
+    private final UserRepository userRepository;
 
 
     public LoginResult login(LoginCommand request) {
-        User user = userService.findByEmail(request.getEmail())
+        User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));
 
         if (!user.getRole().isUser()) {
@@ -68,7 +69,7 @@ public class AuthService {
     }
 
     public LoginResult adminLogin(LoginCommand request) {
-        User user = userService.findByEmail(request.getEmail())
+        User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));
 
         if (!user.getRole().isAdmin()) {
