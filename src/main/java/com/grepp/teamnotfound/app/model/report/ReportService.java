@@ -48,7 +48,18 @@ public class ReportService {
     @Transactional
     public Long createReport(ReportCommand command) {
         User reporter = validateReporter(command.getReporterId());
-        User reported = findReportedUser(command.getReportType(), command.getContentId());
+        User reported;
+        if(command.getReportType().equals(ReportType.BOARD)) {
+            Article reportedArticle = articleRepository.findByArticleIdWithWriter(command.getContentId())
+                    .orElseThrow(() -> new BusinessException(BoardErrorCode.ARTICLE_NOT_FOUND));
+            reported = reportedArticle.getUser();
+            reportedArticle.isReported();
+        } else if (command.getReportType().equals(ReportType.REPLY)) {
+            Reply reportedReply = replyRepository.findByReplyIdWithWriter(command.getContentId())
+                    .orElseThrow(() -> new BusinessException(ReplyErrorCode.REPLY_NOT_FOUND));
+            reported = reportedReply.getUser();
+            reportedReply.isReported();
+        } else throw new BusinessException(ReportErrorCode.REPORT_TYPE_BAD_REQUEST);
 
         reporter.validateNotSelf(reported);
         validateDuplicateReport(reporter, command);
