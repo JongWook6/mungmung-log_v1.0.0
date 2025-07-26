@@ -1,6 +1,7 @@
 package com.grepp.teamnotfound.app.controller.api.dashboard;
 
 import com.grepp.teamnotfound.app.controller.api.dashboard.payload.*;
+import com.grepp.teamnotfound.app.model.ai_analysis.AiAnalysisService;
 import com.grepp.teamnotfound.app.model.auth.domain.Principal;
 import com.grepp.teamnotfound.app.model.dashboard.DashboardService;
 import com.grepp.teamnotfound.app.model.dashboard.dto.*;
@@ -13,7 +14,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.Map;
+import java.time.Period;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,18 +23,8 @@ import java.util.Map;
 public class DashboardApiController {
 
     private final DashboardService dashboardService;
+    private final AiAnalysisService aiAnalysisService;
     ModelMapper modelMapper = new ModelMapper();
-
-    @GetMapping("/{petId}/recommend")
-    public ResponseEntity<?> getDashboardRecommend(
-            @PathVariable Long petId,
-            @RequestParam LocalDate date,
-            @AuthenticationPrincipal Principal principal
-    ){
-        String recommend = dashboardService.getRecommend(petId, principal.getUserId(), date);
-
-        return ResponseEntity.ok(Map.of("recommend", recommend));
-    }
 
     @GetMapping("/{petId}/dog-profile")
     @PreAuthorize("isAuthenticated()")
@@ -44,7 +35,8 @@ public class DashboardApiController {
     ){
         PetDto petDto = dashboardService.getProfile(petId, principal.getUserId());
         ProfileResponse response = modelMapper.map(petDto, ProfileResponse.class);
-
+        response.setAge(Period.between(petDto.getBirthday(), date).getYears());
+        response.setAiAnalysis(aiAnalysisService.getAiAnalysis(petId, date));
         return ResponseEntity.ok(response);
     }
 
