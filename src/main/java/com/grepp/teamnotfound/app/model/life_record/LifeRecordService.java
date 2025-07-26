@@ -2,14 +2,17 @@ package com.grepp.teamnotfound.app.model.life_record;
 
 import com.grepp.teamnotfound.app.controller.api.life_record.payload.FeedingData;
 import com.grepp.teamnotfound.app.controller.api.life_record.payload.LifeRecordData;
+import com.grepp.teamnotfound.app.controller.api.life_record.payload.LifeRecordListRequest;
 import com.grepp.teamnotfound.app.controller.api.life_record.payload.WalkingData;
 import com.grepp.teamnotfound.app.model.life_record.dto.LifeRecordDto;
+import com.grepp.teamnotfound.app.model.life_record.dto.LifeRecordListDto;
 import com.grepp.teamnotfound.app.model.life_record.entity.LifeRecord;
 import com.grepp.teamnotfound.app.model.life_record.repository.LifeRecordRepository;
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.pet.repository.PetRepository;
 import com.grepp.teamnotfound.app.model.structured_data.FeedingService;
 import com.grepp.teamnotfound.app.model.structured_data.WalkingService;
+import com.grepp.teamnotfound.app.model.structured_data.code.FeedUnit;
 import com.grepp.teamnotfound.app.model.structured_data.entity.Feeding;
 import com.grepp.teamnotfound.app.model.structured_data.entity.Walking;
 import com.grepp.teamnotfound.infra.error.exception.LifeRecordException;
@@ -18,9 +21,12 @@ import com.grepp.teamnotfound.infra.error.exception.code.LifeRecordErrorCode;
 import com.grepp.teamnotfound.infra.error.exception.code.PetErrorCode;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -69,18 +75,20 @@ public class LifeRecordService {
     // 생활기록 조회
     @Transactional(readOnly = true)
     public LifeRecordData getLifeRecord(Long lifeRecordId){
+        ZoneId seoulZoneId = ZoneId.of("Asia/Seoul");
+
         LifeRecord lifeRecord = lifeRecordRepository.findByLifeRecordId(lifeRecordId)
                 .orElseThrow(() -> new LifeRecordException(LifeRecordErrorCode.LIFERECORD_NOT_FOUND));
 
         List<WalkingData> walkingList = lifeRecord.getWalkingList().stream()
                 .map(walking -> WalkingData.builder()
-                        .startTime(walking.getStartTime().toLocalDateTime())
-                        .endTime(walking.getEndTime().toLocalDateTime())
+                        .startTime(walking.getStartTime().atZoneSameInstant(seoulZoneId).toLocalDateTime())
+                        .endTime(walking.getEndTime().atZoneSameInstant(seoulZoneId).toLocalDateTime())
                         .pace(walking.getPace())
                         .build()).toList();
         List<FeedingData> feedingList = lifeRecord.getFeedingList().stream()
                 .map(feeding -> FeedingData.builder()
-                        .mealtime(feeding.getMealTime().toLocalDateTime())
+                        .mealtime(feeding.getMealTime().atZoneSameInstant(seoulZoneId).toLocalDateTime())
                         .amount(feeding.getAmount())
                         .unit(feeding.getUnit())
                         .build()).toList();
@@ -129,6 +137,12 @@ public class LifeRecordService {
         feedingService.deleteFeedingList(lifeRecordId);
     }
 
+    // 생활기록 리스트 조회
+    @Transactional(readOnly = true)
+    public Page<LifeRecordListDto> searchLifeRecords(Long userId, LifeRecordListRequest request, Pageable pageable) {
+        return lifeRecordRepository.search(userId, request, pageable);
+    } 
+  
     public List<LifeRecord> getSleepingLifeRecordList(Pet pet, LocalDate date){
         return lifeRecordRepository.findTop10ByPetAndDeletedAtNullAndRecordedAtBeforeAndSleepingTimeIsNotNullOrderByRecordedAtDesc(pet, date.plusDays(1));
 
@@ -155,5 +169,22 @@ public class LifeRecordService {
             mapList.put(lifeRecord.getLifeRecordId(), lifeRecord.getRecordedAt());
         }
         return mapList;
+    }
+
+    /*
+    * Bootify용 Service
+    */
+
+    @Transactional(readOnly = true)
+    public List<LifeRecordData> findAll() {
+        return lifeRecordRepository.findAll().stream()
+                .filter(lifeRecord -> lifeRecord.getDeletedAt() == null)
+                .map(lifeRecord -> getLifeRecord(lifeRecord.getLifeRecordId()))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<FeedUnit> getRecentFeedUnit(Long petId) {
+        return lifeRecordRepository.findRecentFeedUnit(petId);
     }
 }

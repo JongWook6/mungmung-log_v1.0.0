@@ -1,43 +1,36 @@
 package com.grepp.teamnotfound.app.model.recommend.dto;
 
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import com.grepp.teamnotfound.app.model.pet.code.PetPhase;
+import com.grepp.teamnotfound.app.model.pet.code.PetSize;
+import com.grepp.teamnotfound.app.model.pet.code.PetType;
+import com.grepp.teamnotfound.app.model.recommend.code.RecommendState;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 
 @Getter
-@Setter
+@Builder
 public class RecommendDto {
 
-    private Long recId;
-
-    @NotNull
-    @Size(max = 6)
-    private String age;
-
-    @NotNull
-    @Size(max = 20)
-    private String breed;
-
-    @NotNull
-    @Size(max = 20)
-    private String size;
-
-    @NotNull
-    @Size(max = 20)
-    private String weight;
-
-    @NotNull
-    @Size(max = 20)
-    private String walking;
-
-    @NotNull
-    @Size(max = 20)
-    private String sleeping;
-
-    @NotNull
-    @Size(max = 60)
+    private PetType breed;
+    private PetSize size;
+    private PetPhase age;
+    private RecommendState weightState;
+    private RecommendState walkingState;
+    private RecommendState sleepingState;
     private String content;
+
+    // 데이터를 저장할 때 사용
+    public static RecommendDto toDto(PetInfoDto petInfoDto, RecommendStateDto stateDto, GeminiResponse response) {
+        return RecommendDto.builder()
+                .breed(petInfoDto.getBreed())
+                .size(petInfoDto.getSize())
+                .age(petInfoDto.getAge())
+                .weightState(stateDto.getWeightState())
+                .walkingState(stateDto.getWalkingState())
+                .sleepingState(stateDto.getSleepingState())
+                .content(response.getRecommendation())
+                .build();
+    }
 
 }

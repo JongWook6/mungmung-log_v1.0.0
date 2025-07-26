@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<User, Long>, UserRepositoryCustom {
 
     Optional<User> findByEmail(String email);
 
@@ -24,4 +24,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u.nickname FROM User u where u.userId = :userid")
     String findNicknameByUserId(Long userid);
+
+    boolean existsByNickname(String nickname);
 }

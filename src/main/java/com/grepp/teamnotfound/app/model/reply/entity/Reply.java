@@ -58,4 +58,8 @@ public class Reply extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    public void report() {
+        this.reportedAt = OffsetDateTime.now();
+        super.updatedAt = this.reportedAt;
+    }
 }

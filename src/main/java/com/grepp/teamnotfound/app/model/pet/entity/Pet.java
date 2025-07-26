@@ -5,6 +5,7 @@ import com.grepp.teamnotfound.app.model.pet.code.PetSize;
 import com.grepp.teamnotfound.app.model.pet.code.PetType;
 import com.grepp.teamnotfound.app.model.user.entity.User;
 import com.grepp.teamnotfound.infra.entity.BaseEntity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -15,12 +16,16 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.time.Period;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Where;
 
 
 @Entity
@@ -76,6 +81,12 @@ public class Pet extends BaseEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToOne(mappedBy = "pet", fetch = FetchType.LAZY)
-    private PetImg petImg;
+    @OneToMany(mappedBy = "pet", cascade = CascadeType.ALL)
+    @Where(clause = "deleted_at IS NULL")
+    private List<PetImg> images = new ArrayList<>();
+
+    public Integer getAge(LocalDate birthDay) {
+        LocalDate now = LocalDate.now();
+        return Period.between(birthDay, now).getMonths();
+    }
 }
