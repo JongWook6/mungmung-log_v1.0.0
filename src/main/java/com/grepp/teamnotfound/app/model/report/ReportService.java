@@ -45,13 +45,12 @@ public class ReportService {
     }
 
 
+    @Transactional
     public Long createReport(ReportCommand command) {
         User reporter = validateReporter(command.getReporterId());
         User reported = findReportedUser(command.getReportType(), command.getContentId());
 
-        // 스스로 신고 불가
-        validateSelfReport(reporter, reported);
-        // 이미 본인이 신고한 경우 중복 신고 불가
+        reporter.validateNotSelf(reported);
         validateDuplicateReport(reporter, command);
 
         Report report = Report.of(command, reporter, reported);
@@ -63,12 +62,6 @@ public class ReportService {
     private void validateDuplicateReport(User reporter, ReportCommand command) {
         if (reportRepository.duplicateReport(reporter, command.getReportType(), command.getContentId())) {
             throw new BusinessException(ReportErrorCode.DUPLICATED_REPORT);
-        }
-    }
-
-    private void validateSelfReport(User reporter, User reported) {
-        if (reporter.equals(reported)) {
-            throw new BusinessException(ReportErrorCode.CANNOT_REPORT_SELF);
         }
     }
 
