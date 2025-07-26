@@ -17,6 +17,8 @@ import com.grepp.teamnotfound.app.model.dashboard.dto.WeightDashboardDto;
 import com.grepp.teamnotfound.app.model.pet.dto.PetDto;
 import java.time.LocalDate;
 import java.util.Map;
+
+import com.grepp.teamnotfound.app.model.recommend.GeminiService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
@@ -40,6 +42,8 @@ public class DashboardApiController {
 
     private final DashboardService dashboardService;
     private final AiAnalysisService aiAnalysisService;
+    private final GeminiService geminiService;
+
     ModelMapper modelMapper = new ModelMapper();
 
     @GetMapping("/{petId}/dog-profile")
@@ -52,7 +56,11 @@ public class DashboardApiController {
         PetDto petDto = dashboardService.getProfile(petId, principal.getUserId());
         ProfileResponse response = modelMapper.map(petDto, ProfileResponse.class);
         response.setAge(Period.between(petDto.getBirthday(), date).getYears());
-        response.setAiAnalysis(aiAnalysisService.getAiAnalysis(petId, date));
+
+        String analysis = aiAnalysisService.getAiAnalysis(petId, date);
+        if (analysis.isEmpty()) analysis = geminiService.generateAnalysis(petId, date);
+
+        response.setAiAnalysis(analysis);
         return ResponseEntity.ok(response);
     }
 

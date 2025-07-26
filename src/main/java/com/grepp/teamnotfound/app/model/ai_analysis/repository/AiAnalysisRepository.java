@@ -5,10 +5,14 @@ import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
+import java.util.Optional;
+
 @Repository
 public interface AiAnalysisRepository extends JpaRepository<AiAnalysis, Long> {
 
     AiAnalysis findFirstByPet(Pet pet);
 
+    Optional<AiAnalysis> findFirstByPetOrderByCreatedAt(Pet pet, LocalDate date);
 }
 
