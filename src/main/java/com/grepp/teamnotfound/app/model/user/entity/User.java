@@ -67,7 +67,7 @@ public class User extends BaseEntity {
 
     public void suspend(SuspensionPeriod period) {
         if (period.isPermanent()) {
-            this.suspensionEndAt = OffsetDateTime.MAX;
+            this.suspensionEndAt = OffsetDateTime.now().plusYears(7777);
             super.updatedAt = OffsetDateTime.now();
             return;
         }
