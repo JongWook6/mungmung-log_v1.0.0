@@ -1,5 +1,6 @@
 package com.grepp.teamnotfound.app.controller.api.auth;
 
+import com.grepp.teamnotfound.app.controller.api.auth.code.ProviderType;
 import com.grepp.teamnotfound.app.controller.api.auth.payload.EmailVerificationRequest;
 import com.grepp.teamnotfound.app.controller.api.auth.payload.EmailVerifyRequest;
 import com.grepp.teamnotfound.app.controller.api.auth.payload.LoginRequest;
@@ -95,7 +96,8 @@ public class AuthController {
     @Operation(summary = "소셜 로그인")
     @GetMapping("v1/social-auth/{provider}")
     public ResponseEntity<?> socialLogin(@PathVariable String provider) {
-        String url = customOAuth2UserService.getAuthUrl(provider);
+        ProviderType providerType = ProviderType.valueOf(provider.toUpperCase());
+        String url = customOAuth2UserService.getAuthUrl(providerType);
         return ResponseEntity.ok(url);
     }
 

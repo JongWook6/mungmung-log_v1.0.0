@@ -1,5 +1,6 @@
 package com.grepp.teamnotfound.app.model.auth.oauth;
 
+import com.grepp.teamnotfound.app.controller.api.auth.code.ProviderType;
 import com.grepp.teamnotfound.app.model.auth.code.Role;
 import com.grepp.teamnotfound.app.model.auth.oauth.dto.CustomOAuth2UserDto;
 import com.grepp.teamnotfound.app.model.auth.oauth.dto.OAuth2UserDto;
@@ -131,7 +132,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         return adj+dog+num;
     }
 
-    public String getAuthUrl(String provider) {
+    public String getAuthUrl(ProviderType provider) {
         return baseUrl + "/oauth2/authorization/" + provider;
     }
 }
