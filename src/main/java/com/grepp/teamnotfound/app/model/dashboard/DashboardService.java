@@ -52,14 +52,6 @@ public class DashboardService {
 
     ModelMapper modelMapper = new ModelMapper();
 
-    @Transactional
-    public String getRecommend(Long petId, Long userId, LocalDate date) {
-        Pet pet = petService.getPet(petId);
-        if(!pet.getUser().getUserId().equals(userId)) throw new UserException(UserErrorCode.USER_ACCESS_DENIED);
-
-        return dailyRecommendService.getRecommend(pet, date);
-    }
-
     @Transactional(readOnly = true)
     public PetDto getProfile(Long petId, Long userId) {
         Pet pet = petService.getPet(petId);
