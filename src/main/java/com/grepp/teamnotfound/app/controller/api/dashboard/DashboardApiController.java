@@ -1,6 +1,5 @@
 package com.grepp.teamnotfound.app.controller.api.dashboard;
 
-import com.grepp.teamnotfound.app.controller.api.dashboard.payload.*;
 import com.grepp.teamnotfound.app.model.ai_analysis.AiAnalysisService;
 import com.grepp.teamnotfound.app.controller.api.dashboard.payload.FeedingResponse;
 import com.grepp.teamnotfound.app.controller.api.dashboard.payload.NoteResponse;
@@ -8,6 +7,7 @@ import com.grepp.teamnotfound.app.controller.api.dashboard.payload.ProfileRespon
 import com.grepp.teamnotfound.app.controller.api.dashboard.payload.SleepingResponse;
 import com.grepp.teamnotfound.app.controller.api.dashboard.payload.WalkingResponse;
 import com.grepp.teamnotfound.app.controller.api.dashboard.payload.WeightResponse;
+import com.grepp.teamnotfound.app.model.ai_analysis.entity.AiAnalysis;
 import com.grepp.teamnotfound.app.model.auth.domain.Principal;
 import com.grepp.teamnotfound.app.model.dashboard.DashboardService;
 import com.grepp.teamnotfound.app.model.dashboard.dto.FeedingDashboardDto;
@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.grepp.teamnotfound.app.model.recommend.GeminiService;
+import com.grepp.teamnotfound.app.model.recommend.dto.GeminiResponse;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
@@ -61,7 +62,9 @@ public class DashboardApiController {
         String analysis = aiAnalysisService.getAiAnalysis(petId, date);
         if (analysis.isEmpty()) {
             List<String> notes = dashboardService.getWeekNotes(petId, date);
-            analysis = geminiService.generateAnalysis(notes);
+            GeminiResponse geminiResponse = geminiService.generateAnalysis(notes);
+            AiAnalysis aiAnalysis = aiAnalysisService.createAnalysis(petId, geminiResponse);
+            analysis = aiAnalysis.getContent();
         }
 
         response.setAiAnalysis(analysis);

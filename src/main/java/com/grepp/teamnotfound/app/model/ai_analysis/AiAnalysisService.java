@@ -5,6 +5,7 @@ import com.grepp.teamnotfound.app.model.ai_analysis.entity.AiAnalysis;
 import com.grepp.teamnotfound.app.model.ai_analysis.repository.AiAnalysisRepository;
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.pet.repository.PetRepository;
+import com.grepp.teamnotfound.app.model.recommend.dto.GeminiResponse;
 import com.grepp.teamnotfound.infra.error.exception.PetException;
 import com.grepp.teamnotfound.infra.error.exception.code.PetErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +40,10 @@ public class AiAnalysisService {
         }
 
         return null;
+    }
+
+    public AiAnalysis createAnalysis(Long petId, GeminiResponse geminiResponse) {
+        return AiAnalysis.builder().content(geminiResponse.getRecommendation()).pet(petRepository.findById(petId).get()).build();
     }
 }
 

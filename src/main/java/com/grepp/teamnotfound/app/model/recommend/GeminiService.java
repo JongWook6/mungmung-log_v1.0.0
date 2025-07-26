@@ -131,7 +131,37 @@ public class GeminiService {
         }
     }
 
-    public String generateAnalysis(List<String> notes) {
-        
+    // Gemini 응답 생성
+    public GeminiResponse generateAnalysis(List<String> notes) {
+        // 프롬프트 생성
+        String prompt = createAnalysisPrompt(notes);
+        // Gemini 응답 생성
+        String geminiApiResponse = getGeminiResponse(prompt);
+        // 응답 데이터로 변경
+        return parseGeminiResponse(geminiApiResponse);
+    }
+
+    private String createAnalysisPrompt(List<String> notes) {
+        return String.format("""
+            다음은 일주일 동안 보호자가 나(강아지)를 관찰하며 남긴 기록이야.
+            이 기록을 바탕으로, 내가 어떤 기분인지 보호자에게 한두 문장으로 이야기해줘.
+            
+            나는 강아지고, 보호자에게 말하듯 귀엽고 따뜻하게 말할게.
+            말투는 자연스럽고 친근하게 해줘. 너무 길거나 딱딱하지 않게.
+            
+            예시 : 요즘 너무 신나! 산책도 즐겁고 간식도 최고야!
+            예시 : 요즘 조금 기운이 없어... 보호자 옆에 꼭 붙어있고 싶어.
+            
+            # 강아지의 최근 관찰노트 (Pet's Recent Data)
+            {
+              "notes": [%s]
+            }
+            
+            # 출력 형식 (Output Format)
+            {
+              "recommendation": "여기에 강아지 입장에서 기분 요약"
+            }
+            """, notes.toString()
+        );
     }
 }
