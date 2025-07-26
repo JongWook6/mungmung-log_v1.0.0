@@ -75,18 +75,10 @@ public class AuthController {
     @Operation(summary = "최종 회원가입")
     @PostMapping("v2/register")
     public ResponseEntity<ApiResponse<?>> register(@RequestBody RegisterRequest request) {
-
-        RegisterCommand command = RegisterCommand.builder()
-                .email(request.getEmail())
-                .name(request.getName())
-                .nickname(request.getNickname())
-                .password(request.getPassword())
-                .build();
+        RegisterCommand command = RegisterCommand.of(request);
         Long userId = userService.registerUser(command);
         RegisterResponse response = new RegisterResponse(userId);
-
         notificationService.createManagement(userId);
-
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
@@ -94,13 +86,7 @@ public class AuthController {
     @PostMapping("v2/admin/register")
     @PreAuthorize("permitAll()")
     public ResponseEntity<ApiResponse<?>> registerAdmin(@RequestBody RegisterRequest request) {
-
-        RegisterCommand command = RegisterCommand.builder()
-                .email(request.getEmail())
-                .name(request.getName())
-                .nickname(request.getNickname())
-                .password(request.getPassword())
-                .build();
+        RegisterCommand command = RegisterCommand.of(request);
         Long userId = userService.registerAdmin(command);
         RegisterResponse response = new RegisterResponse(userId);
         return ResponseEntity.ok(ApiResponse.success(response));
@@ -117,26 +103,12 @@ public class AuthController {
     @Operation(summary = "회원 로그인")
     @PostMapping("v1/login")
     public ResponseEntity<ApiResponse<LoginResponse>> login(@RequestBody LoginRequest request, HttpServletResponse response) {
-
-        LoginCommand command = LoginCommand.builder()
-                .email(request.getEmail())
-                .password(request.getPassword())
-                .build();
-
+        LoginCommand command = LoginCommand.of(request);
         LoginResult dto = authService.login(command);
         createAuthTokenCookies(dto, response);
 
-        TokenResponse tokenResponse = TokenResponse.builder()
-                .accessToken(dto.getAccessToken())
-                .expiresIn(dto.getAtExpiresIn())
-                .grantType(GrantType.BEARER)
-                .refreshToken(dto.getRefreshToken())
-                .build();
-
-        LoginResponse loginResponse = LoginResponse.builder()
-                .tokenResponse(tokenResponse)
-                .userId(dto.getUserId())
-                .build();
+        TokenResponse tokenResponse = TokenResponse.of(dto);
+        LoginResponse loginResponse = LoginResponse.of(tokenResponse, dto);
         return ResponseEntity.ok(ApiResponse.success(loginResponse));
 
     }
@@ -147,27 +119,14 @@ public class AuthController {
     @PreAuthorize("permitAll()")
     public ResponseEntity<ApiResponse<LoginResponse>> adminLogin(@RequestBody LoginRequest request, HttpServletResponse response) {
 
-        LoginCommand command = LoginCommand.builder()
-                .email(request.getEmail())
-                .password(request.getPassword())
-                .build();
+        LoginCommand command = LoginCommand.of(request);
 
         LoginResult dto = authService.adminLogin(command);
         createAuthTokenCookies(dto, response);
 
-        TokenResponse tokenResponse = TokenResponse.builder()
-                .accessToken(dto.getAccessToken())
-                .expiresIn(dto.getAtExpiresIn())
-                .grantType(GrantType.BEARER)
-                .refreshToken(dto.getRefreshToken())
-                .build();
-
-        LoginResponse loginResponse = LoginResponse.builder()
-                .tokenResponse(tokenResponse)
-                .userId(dto.getUserId())
-                .build();
+        TokenResponse tokenResponse = TokenResponse.of(dto);
+        LoginResponse loginResponse = LoginResponse.of(tokenResponse, dto);
         return ResponseEntity.ok(ApiResponse.success(loginResponse));
-
     }
 
     private void createAuthTokenCookies(LoginResult dto, HttpServletResponse response) {

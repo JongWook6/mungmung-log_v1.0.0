@@ -25,14 +25,7 @@ public class ReportApiController {
     @Operation(summary = "커뮤니티 게시글/댓글 신고")
     public ResponseEntity<?> createReport(@RequestBody ReportRequest request,
                                           @AuthenticationPrincipal Principal principal) {
-
-        ReportCommand command = ReportCommand.builder()
-                .reporterId(principal.getUserId())
-                .reportType(request.getReportType())
-                .contentId(request.getContentId())
-                .reportCategory(request.getReportCategory())
-                .reason(request.getReason())
-                .build();
+        ReportCommand command = ReportCommand.of(principal, request);
         Long createId = reportService.createReport(command);
         return ResponseEntity.ok(ApiResponse.success(createId));
     }
