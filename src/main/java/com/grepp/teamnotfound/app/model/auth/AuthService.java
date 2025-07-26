@@ -37,7 +37,7 @@ public class AuthService {
     private final TokenBlackListRepository tokenBlackListRepository;
     private final UserRepository userRepository;
 
-
+    @Transactional
     public LoginResult login(LoginCommand request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));
@@ -57,7 +57,7 @@ public class AuthService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         TokenDto tokenDto = processTokenLogin(((Principal) authentication.getPrincipal()).getUserId());
-
+        user.updateLastLoginAt();
         return LoginResult.builder()
                 .userId(user.getUserId())
                 .accessToken(tokenDto.getAccessToken())
@@ -68,6 +68,7 @@ public class AuthService {
                 .build();
     }
 
+    @Transactional
     public LoginResult adminLogin(LoginCommand request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));
@@ -87,7 +88,7 @@ public class AuthService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         TokenDto tokenDto = processTokenLogin(((Principal) authentication.getPrincipal()).getUserId());
-
+        user.updateLastLoginAt();
         return LoginResult.builder()
                 .userId(user.getUserId())
                 .accessToken(tokenDto.getAccessToken())

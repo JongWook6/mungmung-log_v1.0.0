@@ -64,6 +64,9 @@ public class User extends BaseEntity {
     @Column
     private OffsetDateTime suspensionEndAt;
 
+    @Column
+    private OffsetDateTime lastLoginAt;
+
 
     public void suspend(SuspensionPeriod period) {
         if (period.isPermanent()) {
@@ -94,5 +97,9 @@ public class User extends BaseEntity {
         if(this.equals(reported)){
             throw new BusinessException(ReportErrorCode.CANNOT_REPORT_SELF);
         }
+    }
+
+    public void updateLastLoginAt() {
+        this.lastLoginAt = OffsetDateTime.now();
     }
 }
