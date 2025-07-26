@@ -11,4 +11,10 @@ public class TotalUsersDto {
 
     private OffsetDateTime date;
     private long total;
+
+    public static TotalUsersDto of(long total){
+        return TotalUsersDto.builder()
+                .date(OffsetDateTime.now())
+                .total(total).build();
+    }
 }
