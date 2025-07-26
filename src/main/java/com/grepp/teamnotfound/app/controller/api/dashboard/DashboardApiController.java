@@ -16,6 +16,7 @@ import com.grepp.teamnotfound.app.model.dashboard.dto.WalkingDashboardDto;
 import com.grepp.teamnotfound.app.model.dashboard.dto.WeightDashboardDto;
 import com.grepp.teamnotfound.app.model.pet.dto.PetDto;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 
 import com.grepp.teamnotfound.app.model.recommend.GeminiService;
@@ -58,7 +59,10 @@ public class DashboardApiController {
         response.setAge(Period.between(petDto.getBirthday(), date).getYears());
 
         String analysis = aiAnalysisService.getAiAnalysis(petId, date);
-        if (analysis.isEmpty()) analysis = geminiService.generateAnalysis(petId, date);
+        if (analysis.isEmpty()) {
+            List<String> notes = dashboardService.getWeekNotes(petId, date);
+            analysis = geminiService.generateAnalysis(notes);
+        }
 
         response.setAiAnalysis(analysis);
         return ResponseEntity.ok(response);

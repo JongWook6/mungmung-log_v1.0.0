@@ -171,6 +171,11 @@ public class LifeRecordService {
         return mapList;
     }
 
+    @Transactional
+    public List<String> getWeekNotes(Pet pet, LocalDate date) {
+        return lifeRecordRepository.findWeekNote(pet, date.minusWeeks(1), date);
+    }
+
     /*
     * Bootify용 Service
     */

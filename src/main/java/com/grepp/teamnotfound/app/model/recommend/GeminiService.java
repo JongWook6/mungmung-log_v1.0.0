@@ -7,6 +7,8 @@ import com.grepp.teamnotfound.app.model.recommend.dto.RecommendCheckDto;
 import com.grepp.teamnotfound.app.model.recommend.dto.GeminiRequestDto;
 import com.grepp.teamnotfound.infra.error.exception.GeminiException;
 import com.grepp.teamnotfound.infra.error.exception.code.GeminiErrorCode;
+
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -129,4 +131,7 @@ public class GeminiService {
         }
     }
 
+    public String generateAnalysis(List<String> notes) {
+        
+    }
 }

@@ -233,7 +233,6 @@ public class DashboardService {
     public List<String> getWeekNotes(Long petId, LocalDate date) {
         Pet pet = petService.getPet(petId);
 
-        Map<Long, LocalDate> lifeRecordIds = lifeRecordService.get7LifeRecordList(pet, date);
-        
+        return lifeRecordService.getWeekNotes(pet, date);
     }
 }
