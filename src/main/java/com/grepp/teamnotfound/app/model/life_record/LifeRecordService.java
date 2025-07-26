@@ -153,7 +153,7 @@ public class LifeRecordService {
     }
 
     public Map<Long, LocalDate> get7LifeRecordList(Pet pet, LocalDate date) {
-        List<LifeRecord> lifeRecords = lifeRecordRepository.findByPetAndDeletedAtNullAndRecordedAtBetweenOrderByRecordedAtDesc(pet, date.minusDays(8), date.minusDays(1));
+        List<LifeRecord> lifeRecords = lifeRecordRepository.findByPetAndDeletedAtNullAndRecordedAtBetweenOrderByRecordedAtDesc(pet, date.minusDays(8), date);
         Map<Long, LocalDate> mapList = new HashMap<>();
         for (LifeRecord lifeRecord : lifeRecords){
             mapList.put(lifeRecord.getLifeRecordId(), lifeRecord.getRecordedAt());
