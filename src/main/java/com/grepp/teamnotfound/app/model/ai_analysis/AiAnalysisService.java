@@ -28,7 +28,7 @@ public class AiAnalysisService {
     public String getAiAnalysis(Long petId, LocalDate date) {
         Pet pet = petRepository.findById(petId).orElseThrow(() -> new PetException(PetErrorCode.PET_NOT_FOUND));
 
-        Optional<AiAnalysis> aiAnalysis = aiAnalysisRepository.findFirstByPetOrderByCreatedAt(pet, date);
+        Optional<AiAnalysis> aiAnalysis = aiAnalysisRepository.findFirstByPetOrderByCreatedAtDesc(pet);
         if (aiAnalysis.isEmpty()){
             return null;
         }

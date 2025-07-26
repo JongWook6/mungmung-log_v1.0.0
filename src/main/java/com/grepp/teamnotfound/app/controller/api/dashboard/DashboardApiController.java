@@ -57,10 +57,10 @@ public class DashboardApiController {
     ){
         PetDto petDto = dashboardService.getProfile(petId, principal.getUserId());
         ProfileResponse response = modelMapper.map(petDto, ProfileResponse.class);
-        response.setAge(Period.between(petDto.getBirthday(), date).getYears());
+        response.setAge(Period.between(petDto.getBirthday(), date).getMonths());
 
         String analysis = aiAnalysisService.getAiAnalysis(petId, date);
-        if (analysis.isEmpty()) {
+        if (analysis == null) {
             List<String> notes = dashboardService.getWeekNotes(petId, date);
             GeminiResponse geminiResponse = geminiService.generateAnalysis(notes);
             AiAnalysis aiAnalysis = aiAnalysisService.createAnalysis(petId, geminiResponse);

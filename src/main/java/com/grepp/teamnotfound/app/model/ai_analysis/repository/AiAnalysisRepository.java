@@ -13,6 +13,6 @@ public interface AiAnalysisRepository extends JpaRepository<AiAnalysis, Long> {
 
     AiAnalysis findFirstByPet(Pet pet);
 
-    Optional<AiAnalysis> findFirstByPetOrderByCreatedAt(Pet pet, LocalDate date);
+    Optional<AiAnalysis> findFirstByPetOrderByCreatedAtDesc(Pet pet);
 }
 

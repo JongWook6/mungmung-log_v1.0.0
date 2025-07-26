@@ -16,7 +16,7 @@ import lombok.*;
 
 
 @Entity
-@Table(name = "AiAnalyses")
+@Table(name = "AiAnalysis")
 @Data
 @Builder
 @AllArgsConstructor

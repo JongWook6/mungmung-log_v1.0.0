@@ -137,6 +137,7 @@ public class GeminiService {
         String prompt = createAnalysisPrompt(notes);
         // Gemini 응답 생성
         String geminiApiResponse = getGeminiResponse(prompt);
+        System.out.println(geminiApiResponse);
         // 응답 데이터로 변경
         return parseGeminiResponse(geminiApiResponse);
     }
@@ -150,7 +151,6 @@ public class GeminiService {
             말투는 자연스럽고 친근하게 해줘. 너무 길거나 딱딱하지 않게.
             
             예시 : 요즘 너무 신나! 산책도 즐겁고 간식도 최고야!
-            예시 : 요즘 조금 기운이 없어... 보호자 옆에 꼭 붙어있고 싶어.
             
             # 강아지의 최근 관찰노트 (Pet's Recent Data)
             {
