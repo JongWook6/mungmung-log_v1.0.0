@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Optional;
 
 
@@ -35,15 +36,20 @@ public class AiAnalysisService {
 
         AiAnalysis analysis = aiAnalysis.get();
 
-        if(analysis.getCreatedAt().isAfter(OffsetDateTime.from(date.minusWeeks(1)))){
+        OffsetDateTime oneWeekAgo = date.minusWeeks(1).atStartOfDay().atOffset(ZoneOffset.ofHours(9));
+
+        if(analysis.getCreatedAt().isAfter(oneWeekAgo)){
             return analysis.getContent();
         }
 
         return null;
     }
 
-    public AiAnalysis createAnalysis(Long petId, GeminiResponse geminiResponse) {
-        return AiAnalysis.builder().content(geminiResponse.getRecommendation()).pet(petRepository.findById(petId).get()).build();
+    @Transactional
+    public AiAnalysis createAnalysis(Long petId, String geminiResponse) {
+        AiAnalysis aiAnalysis = AiAnalysis.builder().content(geminiResponse).pet(petRepository.findById(petId).get()).build();
+        aiAnalysisRepository.save(aiAnalysis);
+        return aiAnalysis;
     }
 }
 

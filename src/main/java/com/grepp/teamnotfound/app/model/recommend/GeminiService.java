@@ -132,14 +132,14 @@ public class GeminiService {
     }
 
     // Gemini 응답 생성
-    public GeminiResponse generateAnalysis(List<String> notes) {
+    public String generateAnalysis(List<String> notes) {
         // 프롬프트 생성
         String prompt = createAnalysisPrompt(notes);
         // Gemini 응답 생성
         String geminiApiResponse = getGeminiResponse(prompt);
         System.out.println(geminiApiResponse);
         // 응답 데이터로 변경
-        return parseGeminiResponse(geminiApiResponse);
+        return parseGeminiAnalysisResponse(geminiApiResponse);
     }
 
     private String createAnalysisPrompt(List<String> notes) {
@@ -163,5 +163,29 @@ public class GeminiService {
             }
             """, notes.toString()
         );
+    }
+
+    public String parseGeminiAnalysisResponse(String geminiApiResponse) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+
+            // FullResponse DTO 파싱
+            GeminiFullResponse fullDto = mapper.readValue(geminiApiResponse, GeminiFullResponse.class);
+
+            // 데이터 추출
+            return Optional.ofNullable(fullDto.getCandidates())
+                    .filter(candidates -> !candidates.isEmpty())
+                    .map(List::getFirst)
+                    .map(GeminiFullResponse.Candidate::getContent)
+                    .map(GeminiFullResponse.Content::getParts)
+                    .filter(parts -> !parts.isEmpty())
+                    .map(List::getFirst)
+                    .map(GeminiFullResponse.Part::getText)
+                    .map(text -> text.replace("```json", "").replace("```", "").trim())
+                    .orElseThrow(() -> new GeminiException(GeminiErrorCode.GEMINI_REQUIRED_CONTENT));
+
+        } catch (Exception e) {
+            throw new GeminiException(GeminiErrorCode.GEMINI_PARSING_ERROR);
+        }
     }
 }

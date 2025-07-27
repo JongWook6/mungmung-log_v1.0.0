@@ -62,7 +62,7 @@ public class DashboardApiController {
         String analysis = aiAnalysisService.getAiAnalysis(petId, date);
         if (analysis == null) {
             List<String> notes = dashboardService.getWeekNotes(petId, date);
-            GeminiResponse geminiResponse = geminiService.generateAnalysis(notes);
+            String geminiResponse = geminiService.generateAnalysis(notes);
             AiAnalysis aiAnalysis = aiAnalysisService.createAnalysis(petId, geminiResponse);
             analysis = aiAnalysis.getContent();
         }
