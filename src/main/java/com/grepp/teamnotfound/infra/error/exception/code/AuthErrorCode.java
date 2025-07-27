@@ -22,7 +22,9 @@ public enum AuthErrorCode implements BaseErrorCode{
     SECURITY_INCIDENT(HttpStatus.UNAUTHORIZED.value(),"AUTH_008","토큰 탈취가 의심됩니다." ),
 
     ALREADY_LOGGED_OUT(HttpStatus.BAD_REQUEST.value(), "AUTH_009", "이미 로그아웃되었습니다."),
-    UNSUPPORTED_PROVIDER(HttpStatus.BAD_REQUEST.value(), "AUTH_010", "지원하지 않는 소셜로그인입니다.");
+    UNSUPPORTED_PROVIDER(HttpStatus.BAD_REQUEST.value(), "AUTH_010", "지원하지 않는 소셜로그인입니다."),
+
+    DELETED_USER(HttpStatus.FORBIDDEN.value(), "AUTH_011", "탈퇴 처리된 사용자입니다.");
 
     private final int status;
     private final String code;

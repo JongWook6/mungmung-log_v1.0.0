@@ -42,6 +42,10 @@ public class AuthService {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));
 
+        if(user.isDeleted()){
+            throw new AuthException(AuthErrorCode.DELETED_USER);
+        }
+
         if (!user.getRole().isUser()) {
             throw new AuthException(AuthErrorCode.NOT_USER_LOGIN);
         }

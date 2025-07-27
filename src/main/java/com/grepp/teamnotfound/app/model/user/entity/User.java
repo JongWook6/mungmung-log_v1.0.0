@@ -102,4 +102,8 @@ public class User extends BaseEntity {
     public void updateLastLoginAt() {
         this.lastLoginAt = OffsetDateTime.now();
     }
+
+    public boolean isDeleted() {
+        return this.deletedAt != null;
+    }
 }
