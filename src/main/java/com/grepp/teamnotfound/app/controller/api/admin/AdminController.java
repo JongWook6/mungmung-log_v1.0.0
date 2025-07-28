@@ -46,6 +46,13 @@ public class AdminController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "정지 회원 활성 상태로 변경하기")
+    @PatchMapping("v1/users/{userId}/state")
+    public ResponseEntity<?> updateUserSuspensionEndAt(@PathVariable Long userId){
+        adminService.updateUserSuspensionEndAtNow(userId);
+        return ResponseEntity.ok("회원을 활성 상태로 변경하였습니다.");
+    }
+
     @Operation(summary = "신고 내역 목록 조회")
     @GetMapping("v1/reports")
     public ResponseEntity<ReportsListResponse> getReports(
