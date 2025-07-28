@@ -57,12 +57,7 @@ public class WalkingService {
         }
     }
 
-    // 산책 정보 삭제
-    @Transactional
-    public void deleteWalkingList(Long lifeRecordId){
-        walkingRepository.delete(lifeRecordId);
-    }
-
+    @Transactional(readOnly = true)
     public Map<LocalDate, List<Walking>> getWalkingList(Map<Long, LocalDate> lifeRecordIds) {
         List<Long> ids = new ArrayList<>(lifeRecordIds.keySet());
         List<Walking> walkings = walkingRepository.findAllByLifeRecord_LifeRecordIdIn(ids);

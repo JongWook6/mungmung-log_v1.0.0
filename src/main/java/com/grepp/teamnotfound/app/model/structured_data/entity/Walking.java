@@ -1,6 +1,7 @@
 package com.grepp.teamnotfound.app.model.structured_data.entity;
 
 import com.grepp.teamnotfound.app.model.life_record.entity.LifeRecord;
+import com.grepp.teamnotfound.app.model.structured_data.dto.WalkingDto;
 import com.grepp.teamnotfound.infra.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -49,5 +50,13 @@ public class Walking extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "life_record_id", nullable = false)
     private LifeRecord lifeRecord;
+
+    public static Walking from(WalkingDto dto) {
+        Walking walking = new Walking();
+        walking.setStartTime(dto.getStartTime());
+        walking.setEndTime(dto.getEndTime());
+        walking.setPace(dto.getPace());
+        return walking;
+    }
 
 }
