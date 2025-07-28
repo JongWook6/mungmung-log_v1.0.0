@@ -1,4 +1,4 @@
-package com.grepp.teamnotfound.app.controller.api.life_record.payload;
+package com.grepp.teamnotfound.app.controller.api.liferecord.payload;
 
 import jakarta.validation.constraints.Min;
 import java.time.LocalDate;

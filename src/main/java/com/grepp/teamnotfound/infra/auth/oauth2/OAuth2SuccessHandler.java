@@ -3,6 +3,7 @@ package com.grepp.teamnotfound.infra.auth.oauth2;
 import com.grepp.teamnotfound.app.model.auth.AuthService;
 import com.grepp.teamnotfound.app.model.auth.oauth.dto.CustomOAuth2UserDto;
 import com.grepp.teamnotfound.app.model.auth.token.dto.TokenDto;
+import com.grepp.teamnotfound.app.model.user.repository.UserRepository;
 import com.grepp.teamnotfound.infra.auth.token.TokenCookieFactory;
 import com.grepp.teamnotfound.infra.auth.token.code.TokenType;
 import jakarta.servlet.ServletException;
@@ -24,6 +25,7 @@ import java.io.IOException;
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final AuthService authService;
+    private final UserRepository userRepository;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -44,6 +46,11 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         response.addHeader("Set-Cookie", refreshTokenCookie.toString());
 
         log.info("3️⃣ User 회원 로그인: {}", customOAuth2User.getUsername());
+
+        userRepository.findById(userId).ifPresent(user -> {
+            user.updateLastLoginAt();
+            userRepository.save(user);
+        });
 
         // TODO 회원 로그인 후 메인화면(실재 화면 경로)
         getRedirectStrategy().sendRedirect(request, response, "/user/login");

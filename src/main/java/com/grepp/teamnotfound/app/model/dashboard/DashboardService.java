@@ -7,14 +7,12 @@ import com.grepp.teamnotfound.app.model.dashboard.dto.FeedingDashboardDto;
 import com.grepp.teamnotfound.app.model.dashboard.dto.SleepingDashboardDto;
 import com.grepp.teamnotfound.app.model.dashboard.dto.WalkingDashboardDto;
 import com.grepp.teamnotfound.app.model.dashboard.dto.WeightDashboardDto;
-import com.grepp.teamnotfound.app.model.life_record.LifeRecordService;
-import com.grepp.teamnotfound.app.model.life_record.entity.LifeRecord;
+import com.grepp.teamnotfound.app.model.liferecord.LifeRecordService;
+import com.grepp.teamnotfound.app.model.liferecord.entity.LifeRecord;
 import com.grepp.teamnotfound.app.model.pet.PetService;
 import com.grepp.teamnotfound.app.model.pet.dto.PetDto;
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.recommend.DailyRecommendService;
-import com.grepp.teamnotfound.app.model.recommend.RecommendService;
-import com.grepp.teamnotfound.app.model.recommend.repository.DailyRecommendRepository;
 import com.grepp.teamnotfound.app.model.schedule.dto.ScheduleDto;
 import com.grepp.teamnotfound.app.model.schedule.entity.Schedule;
 import com.grepp.teamnotfound.app.model.schedule.repository.ScheduleRepository;
@@ -46,19 +44,10 @@ public class DashboardService {
     private final PetService petService;
     private final WalkingService walkingService;
     private final FeedingService feedingService;
-    private final DailyRecommendService dailyRecommendService;
     private final LifeRecordService lifeRecordService;
     private final ScheduleRepository scheduleRepository;
 
     ModelMapper modelMapper = new ModelMapper();
-
-    @Transactional
-    public String getRecommend(Long petId, Long userId, LocalDate date) {
-        Pet pet = petService.getPet(petId);
-        if(!pet.getUser().getUserId().equals(userId)) throw new UserException(UserErrorCode.USER_ACCESS_DENIED);
-
-        return dailyRecommendService.getRecommend(pet, date);
-    }
 
     @Transactional(readOnly = true)
     public PetDto getProfile(Long petId, Long userId) {
@@ -79,7 +68,13 @@ public class DashboardService {
         if (feedingList.isEmpty()) return FeedingDashboardDto.builder().average(0.0).build();
         Map<LocalDate, Double> dailyFeeding = calculateDailyFeeding(feedingList);
 
-        double total = dailyFeeding.values().stream()
+        // 오늘 날짜 제외
+        List<Double> feedingExcludingDate = dailyFeeding.entrySet().stream()
+                .filter(entry -> !entry.getKey().equals(date))
+                .map(Map.Entry::getValue)
+                .toList();
+
+        double total = feedingExcludingDate.stream()
                 .mapToDouble(Double::doubleValue)
                 .sum();
 
@@ -90,9 +85,10 @@ public class DashboardService {
                 .findFirst()
                 .orElse(null);
 
+
         return FeedingDashboardDto.builder()
                 .amount(dailyFeeding.get(date))
-                .average(total / dailyFeeding.size())
+                .average(total / feedingExcludingDate.size())
                 .unit(unit)
                 .date(date)
                 .build();
@@ -230,4 +226,10 @@ public class DashboardService {
             .toList();
     }
 
+    @Transactional
+    public List<String> getWeekNotes(Long petId, LocalDate date) {
+        Pet pet = petService.getPet(petId);
+
+        return lifeRecordService.getWeekNotes(pet, date);
+    }
 }

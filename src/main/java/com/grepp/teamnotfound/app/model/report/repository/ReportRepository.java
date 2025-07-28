@@ -22,14 +22,11 @@ public interface ReportRepository extends JpaRepository<Report, Long>, ReportRep
             "and r.contentId = :contentId")
     boolean duplicateReport(@Param("reporter") User reporter, @Param("type") ReportType reportType, @Param("contentId") Long contentId);
 
-    @Query("select r from Report r where r.contentId = :contentId and r.category = :category and r.state = :reportState")
-    List<Report> findByContentIdAndReportCategoryAndState(@Param("contentId") Long contentId, @Param("category") ReportCategory category, @Param("reportState") ReportState reportState);
-
-    @Modifying(flushAutomatically = true, clearAutomatically = true)
-    @Query("update Report r set r.state = :reportState, r.adminReason = :adminReason " +
-            "where r.contentId = :contentId and r.category = :category and r.state = :currentState")
-    void bulkRejectPendingReports(@Param("contentId") Long contentId, @Param("category") ReportCategory category,
-                                 @Param("reportState") ReportState reportState, @Param("adminReason") String adminReason, @Param("currentState") ReportState currentState);
+    @Query("select r from Report r where r.contentId = :contentId and r.category = :category and r.type = :reportType and r.state = :reportState")
+    List<Report> findByContentIdAndReportCategoryAndReportTypeState(@Param("contentId") Long contentId,
+                                                                    @Param("category") ReportCategory category,
+                                                                    @Param("reportType") ReportType type,
+                                                                    @Param("reportState") ReportState reportState);
 
     @Query ("select r " +
             "from Report r " +

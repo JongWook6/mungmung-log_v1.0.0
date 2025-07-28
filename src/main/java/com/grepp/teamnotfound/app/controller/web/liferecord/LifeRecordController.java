@@ -1,8 +1,8 @@
-package com.grepp.teamnotfound.app.controller.web.life_record; // 패키지 경로는 프로젝트에 맞게 수정하세요.
+package com.grepp.teamnotfound.app.controller.web.liferecord; // 패키지 경로는 프로젝트에 맞게 수정하세요.
 
-import com.grepp.teamnotfound.app.controller.api.life_record.payload.LifeRecordData;
-import com.grepp.teamnotfound.app.model.life_record.LifeRecordService;
-import com.grepp.teamnotfound.app.model.life_record.dto.LifeRecordDto;
+import com.grepp.teamnotfound.app.controller.api.liferecord.payload.LifeRecordData;
+import com.grepp.teamnotfound.app.model.liferecord.LifeRecordService;
+import com.grepp.teamnotfound.app.model.liferecord.dto.LifeRecordDto;
 import com.grepp.teamnotfound.util.WebUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

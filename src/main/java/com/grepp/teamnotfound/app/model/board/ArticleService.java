@@ -36,7 +36,6 @@ import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -346,11 +345,41 @@ public class ArticleService {
 
     // DB 에서 좋아요 수 조회
     @Transactional(readOnly = true)
-    public Integer getActualLikeCount(Long articleId) {
+    public Integer getDBLikeCount(Long articleId) {
         articleRepository.findById(articleId)
             .orElseThrow(() -> new BoardException(BoardErrorCode.ARTICLE_NOT_FOUND));
 
         return articleRepository.countByArticleIdAndDeletedAtIsNullAndReportedAtIsNull(articleId);
+    }
+
+    @Transactional(readOnly = true)
+    public LikeResponse getNewestLikeCount(Long articleId, Long userId) {
+
+        if (!articleRepository.existsById(articleId)) {
+            throw new BoardException(BoardErrorCode.ARTICLE_NOT_FOUND);
+        }
+
+        Long likesCount = null;
+        boolean isLiked = false;
+
+        likesCount = redisLikeService.getArticleLikesCount(articleId);
+
+        if (userId != null) {
+            isLiked = redisLikeService.isUserLikedInRedis(articleId, userId);
+        }
+
+        //  DB 에서 조회가 필요한 경우
+        if (likesCount == null) {
+            Integer dbCount = articleLikeRepository.countByArticle_ArticleId(articleId);
+            likesCount = dbCount.longValue();
+            redisLikeService.setArticleLikesCount(articleId, likesCount);
+        }
+
+        if (!isLiked && userId != null) {
+            isLiked = articleLikeRepository.existsByArticle_ArticleIdAndUser_UserId(articleId, userId);
+        }
+
+        return new LikeResponse(articleId, likesCount.intValue() , isLiked);
     }
 
     @Transactional

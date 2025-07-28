@@ -1,6 +1,6 @@
-package com.grepp.teamnotfound.app.model.life_record.repository;
+package com.grepp.teamnotfound.app.model.liferecord.repository;
 
-import com.grepp.teamnotfound.app.model.life_record.entity.LifeRecord;
+import com.grepp.teamnotfound.app.model.liferecord.entity.LifeRecord;
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.structured_data.code.FeedUnit;
 import java.time.LocalDate;
@@ -28,6 +28,9 @@ public interface LifeRecordRepository extends JpaRepository<LifeRecord, Long>, L
     List<LifeRecord> findTop10ByPetAndDeletedAtNullAndRecordedAtBeforeAndWeightIsNotNullOrderByRecordedAtDesc(Pet pet, LocalDate date);
 
     List<LifeRecord> findByPetAndDeletedAtNullAndRecordedAtBetweenOrderByRecordedAtDesc(Pet pet, LocalDate date, LocalDate localDate);
+
+    @Query("SELECT l.content FROM LifeRecord l WHERE l.pet = :pet AND l.deletedAt IS NULL AND l.recordedAt BETWEEN :startDate AND :endDate ORDER BY l.recordedAt DESC")
+    List<String> findWeekNote(@Param("pet") Pet pet, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
     @Query("SELECT l FROM LifeRecord l WHERE l.recordedAt = :today AND l.deletedAt IS NULL")
     List<LifeRecord> findToday(LocalDate today);

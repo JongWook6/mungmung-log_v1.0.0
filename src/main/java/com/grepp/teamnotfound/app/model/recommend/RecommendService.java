@@ -6,8 +6,8 @@ import com.grepp.teamnotfound.app.model.recommend.dto.LifeRecordAvgDto;
 import com.grepp.teamnotfound.app.model.recommend.dto.LifeRecordListDto;
 import com.grepp.teamnotfound.app.model.recommend.dto.PetInfoDto;
 import com.grepp.teamnotfound.app.model.recommend.dto.RecommendCheckDto;
-import com.grepp.teamnotfound.app.model.life_record.entity.LifeRecord;
-import com.grepp.teamnotfound.app.model.life_record.repository.LifeRecordRepository;
+import com.grepp.teamnotfound.app.model.liferecord.entity.LifeRecord;
+import com.grepp.teamnotfound.app.model.liferecord.repository.LifeRecordRepository;
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.recommend.dto.RecommendStateDto;
 import com.grepp.teamnotfound.app.model.recommend.entity.Recommend;
@@ -34,10 +34,6 @@ public class RecommendService {
     private final StandardRepository standardRepository;
 
     ModelMapper modelMapper = new ModelMapper();
-
-    public Recommend matchDailyRecommend(Pet pet, LocalDate date) {
-        return null;
-    }
 
     // 반려견의 종+나이, 최근 10일 생활기록 평균 데이터 생성
     @Transactional(readOnly = true)
