@@ -98,7 +98,7 @@ public class ReportRepositoryImpl implements ReportRepositoryCustom{
         }
 
         return switch (sortBy){
-            case REPORTED_AT -> direction.isAsc() ? report.reportedAt.asc() : report.reportedAt.desc();
+            case REPORTED_AT -> direction.isAsc() ? report.createdAt.asc() : report.createdAt.desc();
             case REPORTER_NICKNAME -> direction.isAsc() ? report.reporter.nickname.asc() : report.reporter.nickname.desc();
             case REPORTED_NICKNAME -> direction.isAsc() ? report.reported.nickname.asc() : report.reported.nickname.desc();
             case CONTENT_TYPE -> {
