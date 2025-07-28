@@ -42,4 +42,12 @@ public interface ArticleRepository extends JpaRepository<Article, Long>, Article
             where a.articleId = :articleId
             """)
     Optional<Article> findWithBoardByArticleId(@Param("articleId") Long articleId);
+
+    @Query("""
+            select a
+            from Article a
+            join fetch a.user
+            where a.articleId = :articleId
+            """)
+    Optional<Article> findByArticleIdWithWriter(@Param("articleId") Long articleId);
 }

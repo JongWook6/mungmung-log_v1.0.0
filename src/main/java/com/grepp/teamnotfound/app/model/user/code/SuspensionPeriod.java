@@ -13,6 +13,8 @@ public enum SuspensionPeriod {
     SEVEN_DAYS(7),
     FOURTEEN_DAYS(14),
     THIRTY_DAYS(30),
+    THREE_MONTHS(90),
+    ONE_YEAR(365),
     PERMANENT(-1);      // 영구 정지
 
     private final int days;

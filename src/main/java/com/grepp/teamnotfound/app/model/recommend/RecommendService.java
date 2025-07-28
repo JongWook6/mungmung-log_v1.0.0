@@ -35,10 +35,6 @@ public class RecommendService {
 
     ModelMapper modelMapper = new ModelMapper();
 
-    public Recommend matchDailyRecommend(Pet pet, LocalDate date) {
-        return null;
-    }
-
     // 반려견의 종+나이, 최근 10일 생활기록 평균 데이터 생성
     @Transactional(readOnly = true)
     public RecommendCheckDto getRecommendCheck(Pet pet){

@@ -29,6 +29,9 @@ public interface LifeRecordRepository extends JpaRepository<LifeRecord, Long>, L
 
     List<LifeRecord> findByPetAndDeletedAtNullAndRecordedAtBetweenOrderByRecordedAtDesc(Pet pet, LocalDate date, LocalDate localDate);
 
+    @Query("SELECT l.content FROM LifeRecord l WHERE l.pet = :pet AND l.deletedAt IS NULL AND l.recordedAt BETWEEN :startDate AND :endDate ORDER BY l.recordedAt DESC")
+    List<String> findWeekNote(@Param("pet") Pet pet, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
     @Query("SELECT l FROM LifeRecord l WHERE l.recordedAt = :today AND l.deletedAt IS NULL")
     List<LifeRecord> findToday(LocalDate today);
 

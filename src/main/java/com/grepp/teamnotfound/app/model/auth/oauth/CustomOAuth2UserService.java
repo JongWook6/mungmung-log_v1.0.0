@@ -1,5 +1,6 @@
 package com.grepp.teamnotfound.app.model.auth.oauth;
 
+import com.grepp.teamnotfound.app.controller.api.auth.code.ProviderType;
 import com.grepp.teamnotfound.app.model.auth.code.Role;
 import com.grepp.teamnotfound.app.model.auth.oauth.dto.CustomOAuth2UserDto;
 import com.grepp.teamnotfound.app.model.auth.oauth.dto.OAuth2UserDto;
@@ -42,7 +43,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         // 리소스가 제공하는 유저 정보
         OAuth2User oAuth2User = super.loadUser(userRequest);
 
-        log.info("1️⃣ 리소스가 제공하는 유저 정보 - oAuth2User: {}", oAuth2User);
+        log.info("리소스가 제공하는 유저 정보 - oAuth2User: {}", oAuth2User);
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
 
         OAuth2UserInfo oAuth2UserInfo;
@@ -50,7 +51,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         // 각 provider별 Info 객체 제작
         if (registrationId.equals("google")) {
             oAuth2UserInfo = new GoogleOAuth2UserInfo(oAuth2User.getAttributes());
-        }else if(registrationId.equals("kakao")){
+        } else if (registrationId.equals("kakao")) {
             oAuth2UserInfo = new KakaoOAuth2UserInfo(oAuth2User.getAttributes());
 
         } else {
@@ -62,7 +63,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         Optional<User> optionalUser = userRepository.findByEmail(userEmail);
         User user;
         if (optionalUser.isEmpty()) {
-            log.info("2️⃣-1️⃣ 신규 생성되는 유저 email - oAuth2UserInfo.getEmail: {}", oAuth2UserInfo.getEmail());
+            log.info("신규 소셜 가입 요청 유저 email - oAuth2UserInfo.getEmail: {}", oAuth2UserInfo.getEmail());
 
             String tempNickname = generateUniqueNickname();
 
@@ -86,24 +87,35 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
             return new CustomOAuth2UserDto(userDto);
 
-        } else if (Objects.equals(optionalUser.get().getProvider(), oAuth2UserInfo.getProvider())) {
-            log.info("2️⃣-2️⃣ 기존에 존재하는 동일 공급자 email - oAuth2UserInfo.getEmail: {}", oAuth2UserInfo.getEmail());
+        } else {
+            // DB에 해당 email 값이 있는 상황
             user = optionalUser.get();
 
-            // 인증 객체 생성을 위한 dto
-            OAuth2UserDto userDto = OAuth2UserDto.builder()
-                    .email(user.getEmail())
-                    .name(user.getName())
-                    .userId(user.getUserId())
-                    .role("ROLE_USER")
-                    .build();
+            // del 여부 검증
+            if (user.isDeleted()) {
+                log.info("탈퇴한 유저 email - oAuth2UserInfo.getEmail: {}", oAuth2UserInfo.getEmail());
+                OAuth2Error error = new OAuth2Error("DELETED_USER", "탈퇴한 회원입니다.", null);
+                throw new OAuth2AuthenticationException(error, "탈퇴한 회원입니다.");
+            }
 
-            return new CustomOAuth2UserDto(userDto);
+            // provider 검증
+            if (Objects.equals(optionalUser.get().getProvider(), oAuth2UserInfo.getProvider())) {
+                log.info("기존에 동일한 공급자로 가입된 유저 email - oAuth2UserInfo.getEmail: {}", oAuth2UserInfo.getEmail());
 
-        } else {
-            log.info("2️⃣-3️⃣ 기존에 존재하는 다른 공급자 email - oAuth2UserInfo.getEmail: {}", oAuth2UserInfo.getEmail());
-            OAuth2Error error = new OAuth2Error("INVALID_PROVIDER", "다른 provider로 가입된 이메일", null);
-            throw new OAuth2AuthenticationException(error, "다른 provider로 가입된 이메일: " + oAuth2UserInfo.getEmail());
+                // 인증 객체 생성을 위한 dto
+                OAuth2UserDto userDto = OAuth2UserDto.builder()
+                        .email(user.getEmail())
+                        .name(user.getName())
+                        .userId(user.getUserId())
+                        .role("ROLE_USER")
+                        .build();
+
+                return new CustomOAuth2UserDto(userDto);
+            } else {
+                log.info("기존에 다른 공급자로 가입된 유저 email - oAuth2UserInfo.getEmail: {}", oAuth2UserInfo.getEmail());
+                OAuth2Error error = new OAuth2Error("INVALID_PROVIDER", "다른 provider로 가입된 이메일", null);
+                throw new OAuth2AuthenticationException(error, "다른 provider로 가입된 이메일: " + oAuth2UserInfo.getEmail());
+            }
         }
     }
 
@@ -128,10 +140,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String dog = dogs[random.nextInt(dogs.length)];
         int num = random.nextInt(10000);
 
-        return adj+dog+num;
+        return adj + dog + num;
     }
 
-    public String getAuthUrl(String provider) {
+    public String getAuthUrl(ProviderType provider) {
         return baseUrl + "/oauth2/authorization/" + provider;
     }
 }
