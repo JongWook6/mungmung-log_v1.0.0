@@ -1,13 +1,13 @@
-package com.grepp.teamnotfound.app.controller.api.life_record;
+package com.grepp.teamnotfound.app.controller.api.liferecord;
 
-import com.grepp.teamnotfound.app.controller.api.life_record.payload.LifeRecordListRequest;
-import com.grepp.teamnotfound.app.controller.api.life_record.payload.LifeRecordListResponse;
-import com.grepp.teamnotfound.app.controller.api.life_record.payload.LifeRecordData;
-import com.grepp.teamnotfound.app.controller.api.life_record.payload.PageInfo;
+import com.grepp.teamnotfound.app.controller.api.liferecord.payload.LifeRecordListRequest;
+import com.grepp.teamnotfound.app.controller.api.liferecord.payload.LifeRecordListResponse;
+import com.grepp.teamnotfound.app.controller.api.liferecord.payload.LifeRecordData;
+import com.grepp.teamnotfound.app.controller.api.liferecord.payload.PageInfo;
 import com.grepp.teamnotfound.app.model.auth.domain.Principal;
-import com.grepp.teamnotfound.app.model.life_record.LifeRecordService;
-import com.grepp.teamnotfound.app.model.life_record.dto.LifeRecordDto;
-import com.grepp.teamnotfound.app.model.life_record.dto.LifeRecordListDto;
+import com.grepp.teamnotfound.app.model.liferecord.LifeRecordService;
+import com.grepp.teamnotfound.app.model.liferecord.dto.LifeRecordDto;
+import com.grepp.teamnotfound.app.model.liferecord.dto.LifeRecordListDto;
 import com.grepp.teamnotfound.app.model.pet.PetService;
 import com.grepp.teamnotfound.app.model.structured_data.code.FeedUnit;
 import io.swagger.v3.oas.annotations.Operation;

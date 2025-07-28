@@ -1,4 +1,4 @@
-package com.grepp.teamnotfound.app.model.life_record.dto;
+package com.grepp.teamnotfound.app.model.liferecord.dto;
 
 import lombok.Builder;
 import lombok.Data;

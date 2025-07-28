@@ -1,6 +1,6 @@
-package com.grepp.teamnotfound.app.model.life_record.entity;
+package com.grepp.teamnotfound.app.model.liferecord.entity;
 
-import com.grepp.teamnotfound.app.model.life_record.dto.LifeRecordDto;
+import com.grepp.teamnotfound.app.model.liferecord.dto.LifeRecordDto;
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.structured_data.entity.Feeding;
 import com.grepp.teamnotfound.app.model.structured_data.entity.Walking;
