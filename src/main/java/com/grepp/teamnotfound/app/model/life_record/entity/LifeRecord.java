@@ -1,5 +1,6 @@
 package com.grepp.teamnotfound.app.model.life_record.entity;
 
+import com.grepp.teamnotfound.app.model.life_record.dto.LifeRecordDto;
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.structured_data.entity.Feeding;
 import com.grepp.teamnotfound.app.model.structured_data.entity.Walking;
@@ -74,6 +75,25 @@ public class LifeRecord extends BaseEntity {
     public void addFeeding(Feeding feeding) {
         this.feedingList.add(feeding);
         feeding.setLifeRecord(this);
+    }
+
+    public static LifeRecord create(Pet pet, LifeRecordDto dto) {
+        LifeRecord lifeRecord = new LifeRecord();
+        lifeRecord.setPet(pet);
+        lifeRecord.setRecordedAt(dto.getRecordAt());
+        lifeRecord.setContent(dto.getContent());
+        lifeRecord.setWeight(dto.getWeight());
+        lifeRecord.setSleepingTime(dto.getSleepTime());
+
+        dto.getWalkingList().stream()
+                .map(Walking::from)
+                .forEach(lifeRecord::addWalking);
+
+        dto.getFeedingList().stream()
+                .map(Feeding::from)
+                .forEach(lifeRecord::addFeeding);
+
+        return lifeRecord;
     }
 
 }

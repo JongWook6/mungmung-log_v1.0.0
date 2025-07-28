@@ -52,14 +52,7 @@ public class LifeRecordApiController {
 
         Page<LifeRecordListDto> page = lifeRecordService.searchLifeRecords(principal.getUserId(), request, pageable);
 
-        PageInfo pageInfo = PageInfo.builder()
-                .page(page.getNumber() + 1)
-                .size(page.getSize())
-                .totalPages(page.getTotalPages())
-                .totalElements((int) page.getTotalElements())
-                .hasNext(page.hasNext())
-                .hasPrevious(page.hasPrevious())
-                .build();
+        PageInfo pageInfo = PageInfo.of(page);
 
         return ResponseEntity.ok(new LifeRecordListResponse(page.getContent(), pageInfo));
     }

@@ -2,6 +2,7 @@ package com.grepp.teamnotfound.app.model.structured_data.entity;
 
 import com.grepp.teamnotfound.app.model.life_record.entity.LifeRecord;
 import com.grepp.teamnotfound.app.model.structured_data.code.FeedUnit;
+import com.grepp.teamnotfound.app.model.structured_data.dto.FeedingDto;
 import com.grepp.teamnotfound.infra.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -53,5 +54,13 @@ public class Feeding extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "life_record_id", nullable = false)
     private LifeRecord lifeRecord;
+
+    public static Feeding from(FeedingDto dto) {
+        Feeding feeding = new Feeding();
+        feeding.setMealTime(dto.getMealTime());
+        feeding.setAmount(dto.getAmount());
+        feeding.setUnit(dto.getUnit());
+        return feeding;
+    }
 
 }
