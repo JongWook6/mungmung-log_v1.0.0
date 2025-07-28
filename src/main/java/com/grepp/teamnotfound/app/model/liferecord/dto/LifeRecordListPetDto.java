@@ -1,7 +1,6 @@
-package com.grepp.teamnotfound.app.model.life_record.dto;
+package com.grepp.teamnotfound.app.model.liferecord.dto;
 
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
-import com.grepp.teamnotfound.app.model.pet.entity.PetImg;
 import com.grepp.teamnotfound.infra.code.ImgType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

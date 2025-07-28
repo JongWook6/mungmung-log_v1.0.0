@@ -1,11 +1,11 @@
-package com.grepp.teamnotfound.app.model.life_record;
+package com.grepp.teamnotfound.app.model.liferecord;
 
-import com.grepp.teamnotfound.app.controller.api.life_record.payload.LifeRecordData;
-import com.grepp.teamnotfound.app.controller.api.life_record.payload.LifeRecordListRequest;
-import com.grepp.teamnotfound.app.model.life_record.dto.LifeRecordDto;
-import com.grepp.teamnotfound.app.model.life_record.dto.LifeRecordListDto;
-import com.grepp.teamnotfound.app.model.life_record.entity.LifeRecord;
-import com.grepp.teamnotfound.app.model.life_record.repository.LifeRecordRepository;
+import com.grepp.teamnotfound.app.controller.api.liferecord.payload.LifeRecordData;
+import com.grepp.teamnotfound.app.controller.api.liferecord.payload.LifeRecordListRequest;
+import com.grepp.teamnotfound.app.model.liferecord.dto.LifeRecordDto;
+import com.grepp.teamnotfound.app.model.liferecord.dto.LifeRecordListDto;
+import com.grepp.teamnotfound.app.model.liferecord.entity.LifeRecord;
+import com.grepp.teamnotfound.app.model.liferecord.repository.LifeRecordRepository;
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import com.grepp.teamnotfound.app.model.pet.repository.PetRepository;
 import com.grepp.teamnotfound.app.model.structured_data.FeedingService;

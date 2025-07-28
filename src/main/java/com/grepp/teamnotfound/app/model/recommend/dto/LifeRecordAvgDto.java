@@ -1,6 +1,6 @@
 package com.grepp.teamnotfound.app.model.recommend.dto;
 
-import com.grepp.teamnotfound.app.model.life_record.entity.LifeRecord;
+import com.grepp.teamnotfound.app.model.liferecord.entity.LifeRecord;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
