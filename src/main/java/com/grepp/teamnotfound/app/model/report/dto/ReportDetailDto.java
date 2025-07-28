@@ -9,6 +9,8 @@ import com.grepp.teamnotfound.app.model.user.code.UserStateResponse;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.OffsetDateTime;
+
 @Getter
 @Builder
 public class ReportDetailDto {
@@ -25,6 +27,8 @@ public class ReportDetailDto {
     private String reportedNickname;
     private String adminReason;
     private UserStateResponse reportedState;
+    private OffsetDateTime reportedAt;          // 신고 처리일
+    private OffsetDateTime suspensionEndAt;     // 회원 상태 정지 종료일
 
 
     public static ReportDetailDto from(Report report, Article article) {
@@ -41,6 +45,8 @@ public class ReportDetailDto {
                 .reportedNickname(report.getReported().getNickname())
                 .adminReason(report.getAdminReason())
                 .reportedState(report.getReported().getUserState())
+                .reportedAt(report.getReportedAt())
+                .suspensionEndAt(report.getReported().getSuspensionEndAt())
                 .build();
     }
 }
