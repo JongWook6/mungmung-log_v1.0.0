@@ -1,4 +1,4 @@
-package com.grepp.teamnotfound.app.controller.api.life_record.payload;
+package com.grepp.teamnotfound.app.controller.api.liferecord.payload;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.time.LocalDateTime;

@@ -1,6 +1,6 @@
-package com.grepp.teamnotfound.app.model.life_record.dto;
+package com.grepp.teamnotfound.app.model.liferecord.dto;
 
-import com.grepp.teamnotfound.app.model.life_record.entity.LifeRecord;
+import com.grepp.teamnotfound.app.model.liferecord.entity.LifeRecord;
 import java.time.Duration;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;

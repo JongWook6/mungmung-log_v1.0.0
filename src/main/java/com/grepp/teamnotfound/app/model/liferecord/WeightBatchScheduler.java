@@ -1,7 +1,7 @@
-package com.grepp.teamnotfound.app.model.life_record;
+package com.grepp.teamnotfound.app.model.liferecord;
 
-import com.grepp.teamnotfound.app.model.life_record.entity.LifeRecord;
-import com.grepp.teamnotfound.app.model.life_record.repository.LifeRecordRepository;
+import com.grepp.teamnotfound.app.model.liferecord.entity.LifeRecord;
+import com.grepp.teamnotfound.app.model.liferecord.repository.LifeRecordRepository;
 import com.grepp.teamnotfound.app.model.pet.entity.Pet;
 import java.time.LocalDate;
 import java.util.List;
