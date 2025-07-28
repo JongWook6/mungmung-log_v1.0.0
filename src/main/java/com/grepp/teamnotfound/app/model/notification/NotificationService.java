@@ -1,5 +1,7 @@
 package com.grepp.teamnotfound.app.model.notification;
 
+import com.grepp.teamnotfound.app.model.board.entity.Article;
+import com.grepp.teamnotfound.app.model.board.repository.ArticleRepository;
 import com.grepp.teamnotfound.app.model.notification.code.NotiTarget;
 import com.grepp.teamnotfound.app.model.notification.code.NotiType;
 import com.grepp.teamnotfound.app.model.notification.dto.NotiReadDto;
@@ -11,7 +13,6 @@ import com.grepp.teamnotfound.app.model.notification.entity.ServiceNoti;
 import com.grepp.teamnotfound.app.model.notification.repository.NotiManagementRepository;
 import com.grepp.teamnotfound.app.model.notification.repository.ScheduleNotiRepository;
 import com.grepp.teamnotfound.app.model.notification.repository.ServiceNotiRepository;
-import com.grepp.teamnotfound.app.model.schedule.repository.ScheduleRepository;
 import com.grepp.teamnotfound.app.model.user.entity.User;
 import com.grepp.teamnotfound.app.model.user.repository.UserRepository;
 import com.grepp.teamnotfound.infra.error.exception.BusinessException;
@@ -40,7 +41,7 @@ public class NotificationService {
     private final NotiManagementRepository notiManagementRepository;
     private final ScheduleNotiRepository scheduleNotiRepository;
     private final ServiceNotiRepository serviceNotiRepository;
-    private final ScheduleRepository scheduleRepository;
+    private final ArticleRepository articleRepository;
 
     ModelMapper modelMapper = new ModelMapper();
 
@@ -71,11 +72,17 @@ public class NotificationService {
 
         List<ServiceNoti> serviceNotis = serviceNotiRepository.getAllNoti(user.getUserId(), monthBefore);
         for (ServiceNoti sn : serviceNotis) {
+            Article article = null;
+            if (sn.getTargetId() != null) {
+                article = articleRepository.findById(sn.getTargetId()).orElse(null);
+            }
+
             result.add(NotiUserDto.builder()
                 .notiId(sn.getServiceNotiId())
                 .content(sn.getContent())
                 .type(sn.getNotificationType())
                 .targetId(sn.getTargetId())
+                .boardType(article != null ? article.getBoard().getName() : null)
                 .isRead(sn.getIsRead())
                 .createdAt(sn.getCreatedAt())
                 .build());
