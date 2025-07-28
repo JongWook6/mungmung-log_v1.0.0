@@ -17,6 +17,7 @@ public class NotiUserDto {
     private NotiType type;
     private String content;
     private Long targetId;
+    private String boardType;
     private Boolean isRead;
     private OffsetDateTime createdAt;
 

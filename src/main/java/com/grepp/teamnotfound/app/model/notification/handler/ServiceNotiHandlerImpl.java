@@ -37,21 +37,31 @@ public class ServiceNotiHandlerImpl implements ServiceNotiHandler {
         noti.setNotificationType(notiType);
         noti.setUser(user);
 
+        String boardType = null;
+
         switch (notiType) {
             case LIKE: {
                 ArticleLike al = articleLikeRepository.findById(dto.getTargetId())
                     .orElseThrow(() -> new BusinessException(BoardErrorCode.ARTICLE_NOT_LIKED_YET));
+
                 String alNickname = al.getUser().getNickname();
                 noti.setContent(alNickname + "님에게 좋아요를 받았습니다.");
                 noti.setTargetId(al.getArticle().getArticleId()); // 좋아요 ID를 받아왔지만 클라이언트에는 해당 게시물을 넘겨주기로
+                boardType = al.getArticle().getBoard().getName();
                 break;
             }
             case COMMENT: {
                 Reply reply = replyRepository.findById(dto.getTargetId())
                     .orElseThrow(() -> new BusinessException(BoardErrorCode.REPLY_NOT_FOUND));
+
+                if (reply.getUser().getUserId().equals(user.getUserId())) {
+                    return null;
+                }
+
                 String replyNickname = reply.getUser().getNickname();
                 noti.setContent(replyNickname + "님에게 댓글을 받았습니다.");
                 noti.setTargetId(reply.getArticle().getArticleId()); // 댓글 ID를 받아왔지만 클라이언트에는 해당 게시물을 넘겨주기로
+                boardType = reply.getArticle().getBoard().getName();
                 break;
             }
             case REPORT_SUCCESS: {
@@ -91,6 +101,7 @@ public class ServiceNotiHandlerImpl implements ServiceNotiHandler {
             .content(saved.getContent())
             .targetId(saved.getTargetId())
             .type(notiType)
+            .boardType(boardType)
             .isRead(saved.getIsRead())
             .createdAt(saved.getCreatedAt())
             .build();

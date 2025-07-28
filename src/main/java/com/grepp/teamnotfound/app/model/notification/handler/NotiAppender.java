@@ -68,18 +68,20 @@ public class NotiAppender {
         }
 
         // SSE 전송
-        emitterRepository.get(userId).ifPresent(emitter -> {
-            try {
-                emitter.send(SseEmitter.event()
-                    .name("noti")
-                    .data(notiDto));
-                log.info("✅ 알림 전송 성공 - userId: {}, data: {}", userId, notiDto);
-            } catch (IOException e) {
-                log.error("❌ 알림 전송 실패 - userId: {}", userId, e);
-                emitterRepository.delete(userId);
-            }
+        if (notiDto != null) {
+            emitterRepository.get(userId).ifPresent(emitter -> {
+                try {
+                    emitter.send(SseEmitter.event()
+                        .name("noti")
+                        .data(notiDto));
+                    log.info("✅ 알림 전송 성공 - userId: {}, data: {}", userId, notiDto);
+                } catch (IOException e) {
+                    log.error("❌ 알림 전송 실패 - userId: {}", userId, e);
+                    emitterRepository.delete(userId);
+                }
 
-        });
+            });
+        }
     }
 }
 
