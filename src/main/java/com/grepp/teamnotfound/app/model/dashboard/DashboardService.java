@@ -1,6 +1,5 @@
 package com.grepp.teamnotfound.app.model.dashboard;
 
-import com.grepp.teamnotfound.app.controller.api.life_record.payload.LifeRecordData;
 import com.grepp.teamnotfound.app.model.dashboard.dto.DaySleeping;
 import com.grepp.teamnotfound.app.model.dashboard.dto.DayWalking;
 import com.grepp.teamnotfound.app.model.dashboard.dto.DayWeight;
