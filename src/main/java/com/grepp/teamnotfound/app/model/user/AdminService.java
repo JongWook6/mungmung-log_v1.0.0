@@ -23,6 +23,7 @@ import com.grepp.teamnotfound.infra.error.exception.BusinessException;
 import com.grepp.teamnotfound.infra.error.exception.code.BoardErrorCode;
 import com.grepp.teamnotfound.infra.error.exception.code.ReplyErrorCode;
 import com.grepp.teamnotfound.infra.error.exception.code.ReportErrorCode;
+import com.grepp.teamnotfound.infra.error.exception.code.UserErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -235,5 +236,11 @@ public class AdminService {
     public Page<ReportsListDto> getReportsList(ReportsListRequest request) {
         Pageable pageable = PageRequest.of(request.getPage() -1, request.getSize());
         return reportRepository.findReportListWithMeta(request, pageable);
+    }
+
+    public void updateUserSuspensionEndAtNow(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+        user.updateSuspensionEndAtNow();
     }
 }

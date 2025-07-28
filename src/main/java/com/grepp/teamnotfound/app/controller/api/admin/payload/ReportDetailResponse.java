@@ -4,6 +4,10 @@ import com.grepp.teamnotfound.app.model.report.dto.ReportDetailDto;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
+import static com.grepp.teamnotfound.util.TimeUtils.toKST;
+
 @Getter
 @Builder
 public class ReportDetailResponse {
@@ -20,6 +24,9 @@ public class ReportDetailResponse {
     private String reportedNickname;
     private String adminReason;
     private String reportedState;   // active, suspended, leave
+    private LocalDateTime createdAt;
+    private LocalDateTime reportedAt;          // 신고 처리일
+    private LocalDateTime suspensionEndAt;     // 회원 상태 정지 종료일
 
     public static ReportDetailResponse from(ReportDetailDto dto) {
         return ReportDetailResponse.builder()
@@ -35,6 +42,9 @@ public class ReportDetailResponse {
                 .reportedNickname(dto.getReportedNickname())
                 .adminReason(dto.getAdminReason())
                 .reportedState(dto.getReportedState().name())
+                .createdAt(toKST(dto.getCreatedAt()))
+                .reportedAt(toKST(dto.getReportedAt()))
+                .suspensionEndAt(toKST(dto.getSuspensionEndAt()))
                 .build();
     }
 }

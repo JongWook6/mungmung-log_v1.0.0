@@ -76,7 +76,7 @@ public class GeminiService {
             
             # 출력 형식 (Output Format)
             {
-              "recommendation": "여기에 반려견 정보를 제외한 맞춤형 제안 문구 3줄 이하"
+              "recommendation": "여기에 반려견 정보를 제외한 맞춤형 제안 문구 공백 포함 60자 이하"
             }
             """,
             // 반려견 정보
@@ -157,10 +157,6 @@ public class GeminiService {
               "notes": [%s]
             }
             
-            # 출력 형식 (Output Format)
-            {
-              "recommendation": "여기에 강아지 입장에서 기분 요약"
-            }
             """, notes.toString()
         );
     }
