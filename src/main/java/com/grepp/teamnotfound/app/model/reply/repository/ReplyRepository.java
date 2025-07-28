@@ -41,4 +41,12 @@ public interface ReplyRepository extends JpaRepository<Reply, Long> {
     Optional<Reply> findByIdFetchUser(@Param("replyId") Long replyId);
 
     Optional<Reply> findByReplyId(Long replyId);
+
+    @Query("""
+            select r
+            from Reply r
+            join fetch r.user
+            where r.replyId = :replyId
+            """)
+    Optional<Reply> findByReplyIdWithWriter(@Param("replyId") Long replyId);
 }

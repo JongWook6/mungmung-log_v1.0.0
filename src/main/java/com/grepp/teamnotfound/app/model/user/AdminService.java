@@ -49,10 +49,7 @@ public class AdminService {
     @Transactional(readOnly = true)
     public TotalUsersDto getTotalUsersCount() {
         long totalUsers = userRepository.count();
-        return TotalUsersDto.builder()
-                .date(OffsetDateTime.now())
-                .total(totalUsers)
-                .build();
+        return TotalUsersDto.of(totalUsers);
     }
 
     @Transactional(readOnly = true)
@@ -157,7 +154,7 @@ public class AdminService {
 
     @Transactional
     public void rejectReport(RejectReportDto dto) {
-        Report targetReport = reportRepository.findById(dto.getReportId())
+        Report targetReport = reportRepository.findByReportIdWithUsers(dto.getReportId())
                 .orElseThrow(() -> new BusinessException(ReportErrorCode.REPORT_NOT_FOUND));
 
         targetReport.reject(dto.getAdminReason());
@@ -167,12 +164,10 @@ public class AdminService {
             .build();
         notiAppender.append(targetReport.getReporter().getUserId(), NotiType.REPORT_FAIL, notiDto1);
 
-        // 같은 contentId, 같은 category, PENDING인 report에 대해 reject 처리
-        // 방법 1. report repo에서 List<Report> reports 를 가져옴
-        //        for 를 돌면서 report.reject(dto.getAdminReason());
-        List<Report> reports = reportRepository.findByContentIdAndReportCategoryAndState(
+        List<Report> reports = reportRepository.findByContentIdAndReportCategoryAndReportTypeState(
                 targetReport.getContentId(),
                 targetReport.getCategory(),
+                targetReport.getType(),
                 ReportState.PENDING
         );
         for (Report report : reports) {
@@ -183,23 +178,14 @@ public class AdminService {
                 .build();
             notiAppender.append(report.getReporter().getUserId(), NotiType.REPORT_FAIL, notiDtos);
         }
-
-        // 방법 2. 벌크 연산 - updatedAt 추가 필요
-//        reportRepository.bulkRejectPendingReports(
-//                targetReport.getContentId(),
-//                targetReport.getCategory(),
-//                ReportState.REJECT,
-//                dto.getAdminReason(),
-//                ReportState.PENDING
-//        );
     }
 
     @Transactional
     public void acceptReportAndSuspendUser(AcceptReportDto dto) {
-        Report targetReport = reportRepository.findById(dto.getReportId())
+        Report targetReport = reportRepository.findByReportIdWithUsers(dto.getReportId())
                 .orElseThrow(() -> new BusinessException(ReportErrorCode.REPORT_NOT_FOUND));
 
-        hideContentIfNot(targetReport);
+        insertReportedAtOfContent(targetReport);
         targetReport.accept(dto.getAdminReason());
 
         NotiServiceCreateDto notiDto1 = NotiServiceCreateDto.builder()
@@ -208,9 +194,10 @@ public class AdminService {
         notiAppender.append(targetReport.getReporter().getUserId(), NotiType.REPORT_SUCCESS, notiDto1);
         notiAppender.append(targetReport.getReported().getUserId(), NotiType.REPORTED, notiDto1);
 
-        List<Report> reports = reportRepository.findByContentIdAndReportCategoryAndState(
+        List<Report> reports = reportRepository.findByContentIdAndReportCategoryAndReportTypeState(
                 targetReport.getContentId(),
                 targetReport.getCategory(),
+                targetReport.getType(),
                 ReportState.PENDING
         );
         for (Report report : reports) {
@@ -227,7 +214,7 @@ public class AdminService {
         user.suspend(dto.getPeriod());
     }
 
-    private void hideContentIfNot(Report targetReport) {
+    private void insertReportedAtOfContent(Report targetReport) {
         if(targetReport.getType() == ReportType.BOARD){
             Article article = articleRepository.findByArticleId(targetReport.getContentId())
                     .orElseThrow(() -> new BusinessException(BoardErrorCode.ARTICLE_NOT_FOUND));

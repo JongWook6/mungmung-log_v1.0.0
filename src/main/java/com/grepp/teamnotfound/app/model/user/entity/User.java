@@ -4,6 +4,8 @@ import com.grepp.teamnotfound.app.model.auth.code.Role;
 import com.grepp.teamnotfound.app.model.user.code.SuspensionPeriod;
 import com.grepp.teamnotfound.app.model.user.code.UserStateResponse;
 import com.grepp.teamnotfound.infra.entity.BaseEntity;
+import com.grepp.teamnotfound.infra.error.exception.BusinessException;
+import com.grepp.teamnotfound.infra.error.exception.code.ReportErrorCode;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -62,10 +64,13 @@ public class User extends BaseEntity {
     @Column
     private OffsetDateTime suspensionEndAt;
 
+    @Column
+    private OffsetDateTime lastLoginAt;
+
 
     public void suspend(SuspensionPeriod period) {
         if (period.isPermanent()) {
-            this.suspensionEndAt = OffsetDateTime.MAX;
+            this.suspensionEndAt = OffsetDateTime.now().plusYears(7777);
             super.updatedAt = OffsetDateTime.now();
             return;
         }
@@ -87,4 +92,18 @@ public class User extends BaseEntity {
         } else
             return UserStateResponse.SUSPENDED;
         }
+
+    public void validateNotSelf(User reported) {
+        if(this.equals(reported)){
+            throw new BusinessException(ReportErrorCode.CANNOT_REPORT_SELF);
+        }
     }
+
+    public void updateLastLoginAt() {
+        this.lastLoginAt = OffsetDateTime.now();
+    }
+
+    public boolean isDeleted() {
+        return this.deletedAt != null;
+    }
+}

@@ -11,6 +11,7 @@ import com.grepp.teamnotfound.app.model.auth.token.entity.TokenBlackList;
 import com.grepp.teamnotfound.app.model.auth.token.repository.TokenBlackListRepository;
 import com.grepp.teamnotfound.app.model.user.UserService;
 import com.grepp.teamnotfound.app.model.user.entity.User;
+import com.grepp.teamnotfound.app.model.user.repository.UserRepository;
 import com.grepp.teamnotfound.infra.auth.token.JwtProvider;
 import com.grepp.teamnotfound.infra.error.exception.AuthException;
 import com.grepp.teamnotfound.infra.error.exception.code.AuthErrorCode;
@@ -30,16 +31,20 @@ import java.util.Date;
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final UserService userService;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final JwtProvider jwtProvider;
     private final RefreshTokenService refreshTokenService;
     private final TokenBlackListRepository tokenBlackListRepository;
+    private final UserRepository userRepository;
 
-
+    @Transactional
     public LoginResult login(LoginCommand request) {
-        User user = userService.findByEmail(request.getEmail())
+        User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));
+
+        if(user.isDeleted()){
+            throw new AuthException(AuthErrorCode.DELETED_USER);
+        }
 
         if (!user.getRole().isUser()) {
             throw new AuthException(AuthErrorCode.NOT_USER_LOGIN);
@@ -56,7 +61,7 @@ public class AuthService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         TokenDto tokenDto = processTokenLogin(((Principal) authentication.getPrincipal()).getUserId());
-
+        user.updateLastLoginAt();
         return LoginResult.builder()
                 .userId(user.getUserId())
                 .accessToken(tokenDto.getAccessToken())
@@ -67,8 +72,9 @@ public class AuthService {
                 .build();
     }
 
+    @Transactional
     public LoginResult adminLogin(LoginCommand request) {
-        User user = userService.findByEmail(request.getEmail())
+        User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));
 
         if (!user.getRole().isAdmin()) {
@@ -86,7 +92,7 @@ public class AuthService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         TokenDto tokenDto = processTokenLogin(((Principal) authentication.getPrincipal()).getUserId());
-
+        user.updateLastLoginAt();
         return LoginResult.builder()
                 .userId(user.getUserId())
                 .accessToken(tokenDto.getAccessToken())
