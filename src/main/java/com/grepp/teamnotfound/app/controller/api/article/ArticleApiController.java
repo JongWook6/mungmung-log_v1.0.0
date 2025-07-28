@@ -130,12 +130,17 @@ public class ArticleApiController {
 
     @GetMapping("/v1/{articleId}/like")
     @Operation(summary = "게시글 좋아요 개수")
+    @PreAuthorize("isAnonymous() or isAuthenticated()")
     public ResponseEntity<?> getLikeCount(
-        @PathVariable Long articleId
+        @PathVariable Long articleId,
+        @AuthenticationPrincipal Principal principal
     ) {
-        Integer likeCount = articleService.getActualLikeCount(articleId);
-        return ResponseEntity.ok(ApiResponse.success(Map.of("likes", likeCount)));
-    }
+        Long userId = null;
+        if (principal != null) {
+            userId = principal.getUserId();
+        }
 
-    // TODO 게시글 신고 기능
+        LikeResponse response = articleService.getNewestLikeCount(articleId, userId);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
 }
