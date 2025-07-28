@@ -62,6 +62,10 @@ public class DashboardApiController {
         String analysis = aiAnalysisService.getAiAnalysis(petId, date);
         if (analysis == null) {
             List<String> notes = dashboardService.getWeekNotes(petId, date);
+            if (notes.isEmpty()) {
+                response.setAiAnalysis("최근 관찰노트가 없어서 감정분석을 받기 어려워요!");
+                return ResponseEntity.ok(response);
+            }
             String geminiResponse = geminiService.generateAnalysis(notes);
             AiAnalysis aiAnalysis = aiAnalysisService.createAnalysis(petId, geminiResponse);
             analysis = aiAnalysis.getContent();

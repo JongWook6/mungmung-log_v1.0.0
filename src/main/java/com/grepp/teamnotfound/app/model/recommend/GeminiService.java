@@ -157,10 +157,6 @@ public class GeminiService {
               "notes": [%s]
             }
             
-            # 출력 형식 (Output Format)
-            {
-              "recommendation": "여기에 강아지 입장에서 기분 요약"
-            }
             """, notes.toString()
         );
     }
