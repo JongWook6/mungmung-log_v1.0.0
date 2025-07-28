@@ -104,7 +104,8 @@ public class SecurityConfig {
                 // TODO 프론트 서버로 수정 필요
                 "http://localhost:3000",
                 "http://localhost:8080",
-                "https://mungdiary-172598302113.asia-northeast3.run.app"
+                "https://mungdiary-172598302113.asia-northeast3.run.app".
+                "https://mungnote.vercel.app/"
         ));
         corsConfig.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         corsConfig.setAllowedHeaders(Collections.singletonList("*"));
