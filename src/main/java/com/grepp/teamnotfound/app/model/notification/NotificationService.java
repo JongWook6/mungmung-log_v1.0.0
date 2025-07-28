@@ -124,22 +124,43 @@ public class NotificationService {
         NotiManagement noti = notiManagementRepository.findByUser(user)
             .orElseThrow(() -> new BusinessException(NotificationErrorCode.NOTIFICATION_MANAGEMENT_NOT_FOUND));
 
-        if (target.equals(NotiTarget.SERVICE)) {
-            noti.setIsNotiService(!noti.getIsNotiService());
-        } else if (target.equals(NotiTarget.SCHEDULE)) {
-            noti.setIsNotiSchedule(!noti.getIsNotiSchedule());
-        } else {
-            Boolean allNotiState = noti.getIsNotiAll();
-            noti.setIsNotiService(!allNotiState);
-            noti.setIsNotiSchedule(!allNotiState);
-            noti.setIsNotiAll(!allNotiState);
-        }
-        noti.setUpdatedAt(OffsetDateTime.now());
+        boolean beforeService = noti.getIsNotiService();
+        boolean beforeSchedule = noti.getIsNotiSchedule();
+        boolean beforeAll = noti.getIsNotiAll();
 
+        switch (target) {
+            case SERVICE -> {
+                boolean afterService = !beforeService;
+                noti.setIsNotiService(afterService);
+
+                if (!afterService) {
+                    noti.setIsNotiAll(false); // 서비스 끄면 전체도 꺼야 함
+                } else if (noti.getIsNotiSchedule()) {
+                    noti.setIsNotiAll(true); // 서비스 켰고, 스케줄도 이미 켜져있으면 전체도 자동 ON
+                }
+            }
+            case SCHEDULE -> {
+                boolean afterSchedule = !beforeSchedule;
+                noti.setIsNotiSchedule(afterSchedule);
+
+                if (!afterSchedule) {
+                    noti.setIsNotiAll(false); // 스케줄 끄면 전체도 꺼야 함
+                } else if (noti.getIsNotiService()) {
+                    noti.setIsNotiAll(true); // 스케줄 켰고, 서비스도 이미 켜져있으면 전체도 자동 ON
+                }
+            }
+            case ALL -> {
+                boolean afterAll = !beforeAll;
+                noti.setIsNotiAll(afterAll);
+                noti.setIsNotiService(afterAll);
+                noti.setIsNotiSchedule(afterAll);
+            }
+        }
+
+        noti.setUpdatedAt(OffsetDateTime.now());
         notiManagementRepository.save(noti);
 
-        NotiUserSettingDto dto = modelMapper.map(noti, NotiUserSettingDto.class);
-        return dto;
+        return modelMapper.map(noti, NotiUserSettingDto.class);
     }
 
     private static final Set<NotiType> SERVICE_TYPES = EnumSet.of(
