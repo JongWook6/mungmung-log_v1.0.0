@@ -6,6 +6,7 @@ import com.grepp.teamnotfound.app.model.user.code.UserStateResponse;
 import com.grepp.teamnotfound.infra.entity.BaseEntity;
 import com.grepp.teamnotfound.infra.error.exception.BusinessException;
 import com.grepp.teamnotfound.infra.error.exception.code.ReportErrorCode;
+import com.grepp.teamnotfound.infra.error.exception.code.UserErrorCode;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -105,5 +106,16 @@ public class User extends BaseEntity {
 
     public boolean isDeleted() {
         return this.deletedAt != null;
+    }
+
+    public void updateSuspensionEndAtNow() {
+        OffsetDateTime now = OffsetDateTime.now();
+
+        if(this.suspensionEndAt == null || this.suspensionEndAt.isBefore(now)){
+            throw new BusinessException(UserErrorCode.USER_NOT_SUSPENDED);
+        }
+
+        this.suspensionEndAt = now;
+        this.updatedAt = suspensionEndAt;
     }
 }
