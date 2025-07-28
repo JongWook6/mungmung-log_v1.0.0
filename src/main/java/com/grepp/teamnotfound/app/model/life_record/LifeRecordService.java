@@ -109,7 +109,7 @@ public class LifeRecordService {
 
     @Transactional(readOnly = true)
     public Map<Long, LocalDate> get7LifeRecordList(Pet pet, LocalDate date) {
-        List<LifeRecord> lifeRecords = lifeRecordRepository.findByPetAndDeletedAtNullAndRecordedAtBetweenOrderByRecordedAtDesc(pet, date.minusDays(8), date.minusDays(1));
+        List<LifeRecord> lifeRecords = lifeRecordRepository.findByPetAndDeletedAtNullAndRecordedAtBetweenOrderByRecordedAtDesc(pet, date.minusDays(8), date);
         Map<Long, LocalDate> mapList = new HashMap<>();
         for (LifeRecord lifeRecord : lifeRecords){
             mapList.put(lifeRecord.getLifeRecordId(), lifeRecord.getRecordedAt());
@@ -132,6 +132,11 @@ public class LifeRecordService {
     @Transactional(readOnly = true)
     public Optional<FeedUnit> getRecentFeedUnit(Long petId) {
         return lifeRecordRepository.findRecentFeedUnit(petId);
+    }
+  
+    @Transactional
+    public List<String> getWeekNotes(Pet pet, LocalDate date) {
+        return lifeRecordRepository.findWeekNote(pet, date.minusWeeks(1), date);
     }
 
     /*

@@ -20,7 +20,8 @@ public enum ReportErrorCode implements BaseErrorCode{
     CANNOT_REPORT_SELF(HttpStatus.BAD_REQUEST.value(), "REPORT_008", "스스로 작성한 콘텐츠는 신고할 수 없습니다."),
 
     ALREADY_COMPLETE_REPORT(HttpStatus.BAD_REQUEST.value(), "REPORT_009", "이미 처리된 신고내역입니다."),
-    ALREADY_COMPLETE_CONTENTS(HttpStatus.BAD_REQUEST.value(), "REPORT_010", "이미 신고 내역이 처리된 콘텐츠입니다.");
+    ALREADY_COMPLETE_CONTENTS(HttpStatus.BAD_REQUEST.value(), "REPORT_010", "이미 신고 내역이 처리된 콘텐츠입니다."),
+    ALREADY_REPORTED_CONTENTS(HttpStatus.BAD_REQUEST.value(), "REPORT_011", "이미 숨김 처리된 콘텐츠입니다.");
 
 
     private final int status;

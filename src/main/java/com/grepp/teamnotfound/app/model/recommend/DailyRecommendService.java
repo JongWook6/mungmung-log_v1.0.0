@@ -20,21 +20,6 @@ public class DailyRecommendService {
     private final DailyRecommendRepository dailyRecommendRepository;
     private final RecommendService recommendService;
 
-    public String getRecommend(Pet pet, LocalDate date) {
-        Optional<DailyRecommend> dailyRecommend = dailyRecommendRepository.findByPetAndDate(pet, date);
-        if (dailyRecommend.isPresent()){
-            return dailyRecommend.get().getRec().getContent();
-        }else{
-            Recommend recommend = recommendService.matchDailyRecommend(pet, date);
-            DailyRecommend matchRecommend = DailyRecommend.builder()
-                    .rec(recommend)
-                    .date(date)
-                    .pet(pet)
-                    .build();
-            return recommend.getContent();
-        }
-    }
-
     // DailyRecommend 생성
     @Transactional
     public void createDailyRecommend(Pet pet, Recommend recommend) {

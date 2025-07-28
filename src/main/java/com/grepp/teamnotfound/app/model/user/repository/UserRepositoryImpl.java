@@ -93,7 +93,7 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
                                         .where(reply.user.userId.eq(user.userId)),
                                 "commentCount"
                         ),
-                        user.createdAt.as("lastLoginDate"),
+                        user.lastLoginAt.as("lastLoginDate"),
                         user.createdAt.as("joinDate"),
                         ExpressionUtils.as(statusExpression, "status"),
                         user.suspensionEndAt
@@ -144,8 +144,8 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
                 Order order = direction.isAsc() ? Order.ASC : Order.DESC;
                 yield new OrderSpecifier<>(order, commentCountQuery);
             }
-            // todo last_login
-            case LAST_LOGIN_DATE -> direction.isAsc() ? user.createdAt.asc() : user.createdAt.desc();
+
+            case LAST_LOGIN_DATE -> direction.isAsc() ? user.lastLoginAt.asc() : user.lastLoginAt.desc();
             case JOIN_DATE -> direction.isAsc() ? user.createdAt.asc() : user.createdAt.desc();
             // 설정
             case SUSPENSION_END_DATE -> direction.isAsc() ? user.suspensionEndAt.asc().nullsLast() : user.suspensionEndAt.desc().nullsLast();
