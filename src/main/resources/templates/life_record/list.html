@@ -9,7 +9,7 @@
   <div class="d-flex flex-wrap mb-4">
     <h1 class="flex-grow-1">[[#{lifeRecord.list.headline}]]</h1>
     <div>
-      <a th:href="@{/lifeRecords/add}" class="btn btn-primary ms-2">[[#{lifeRecord.list.createNew}]]</a>
+      <a th:href="@{/lifeRecords/add}" class="btn btn-primary ms-2">[[#{lifeRecord.create}]]</a>
     </div>
   </div>
   <div th:if="${lifeRecords.empty}">[[#{lifeRecord.list.empty}]]</div>
@@ -25,6 +25,7 @@
         <th scope="col">[[#{lifeRecord.sleepTime.label}]]</th>
         <th scope="col">[[#{lifeRecord.walkingList.label}]]</th>
         <th scope="col">[[#{lifeRecord.feedingList.label}]]</th>
+        <th scope="col">[[#{lifeRecord.delete}]]</th>
       </tr>
       </thead>
       <tbody>
@@ -41,7 +42,7 @@
           <div class="float-end text-nowrap">
             <form th:action="@{/lifeRecords/delete/{id}(id=${lifeRecord.lifeRecordId})}"
                   th:data-confirm-message="#{delete.confirm}" method="post" class="js-submit-confirm d-inline">
-              <button type="submit" class="btn btn-sm btn-secondary">[[#{lifeRecord.list.delete}]]</button>
+              <button type="submit" class="btn btn-sm btn-secondary">[[#{lifeRecord.delete}]]</button>
             </form>
           </div>
         </td>
