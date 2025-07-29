@@ -1,19 +1,16 @@
 package com.grepp.teamnotfound.app.model.user.entity;
 
 import com.grepp.teamnotfound.app.model.auth.code.Role;
+import com.grepp.teamnotfound.app.model.user.code.SuspensionPeriod;
+import com.grepp.teamnotfound.app.model.user.code.UserStateResponse;
 import com.grepp.teamnotfound.infra.entity.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.SequenceGenerator;
-import jakarta.persistence.Table;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.EnumType;
+import com.grepp.teamnotfound.infra.error.exception.BusinessException;
+import com.grepp.teamnotfound.infra.error.exception.code.ReportErrorCode;
+import com.grepp.teamnotfound.infra.error.exception.code.UserErrorCode;
+import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.OffsetDateTime;
 
 
 @Builder
@@ -51,7 +48,7 @@ public class User extends BaseEntity {
     private String name;
 
     @Setter
-    @Column(nullable = false, length = 10)
+    @Column(nullable = false, length = 50)
     private String nickname;
 
     @Column(nullable = false, length = 10)
@@ -59,10 +56,66 @@ public class User extends BaseEntity {
     private Role role;
 
     @Setter
-    @Column(nullable = false, length = 200)
+    @Column(length = 200)
     private String password;
 
     @Column(length = 20)
     private String provider;
 
+    @Column
+    private OffsetDateTime suspensionEndAt;
+
+    @Column
+    private OffsetDateTime lastLoginAt;
+
+
+    public void suspend(SuspensionPeriod period) {
+        if (period.isPermanent()) {
+            this.suspensionEndAt = OffsetDateTime.now().plusYears(7777);
+            super.updatedAt = OffsetDateTime.now();
+            return;
+        }
+        OffsetDateTime now = OffsetDateTime.now();
+        if (this.suspensionEndAt == null || this.suspensionEndAt.isBefore(now)) {
+            this.suspensionEndAt = now.plusDays(period.getDays());
+            super.updatedAt = OffsetDateTime.now();
+        } else {
+            this.suspensionEndAt = this.suspensionEndAt.plusDays(period.getDays());
+            super.updatedAt = OffsetDateTime.now();
+        }
+    }
+
+    public UserStateResponse getUserState() {
+        if (this.deletedAt != null) {
+            return UserStateResponse.LEAVE;
+        } else if(this.suspensionEndAt == null || this.suspensionEndAt.isBefore(OffsetDateTime.now())){
+            return UserStateResponse.ACTIVE;
+        } else
+            return UserStateResponse.SUSPENDED;
+        }
+
+    public void validateNotSelf(User reported) {
+        if(this.equals(reported)){
+            throw new BusinessException(ReportErrorCode.CANNOT_REPORT_SELF);
+        }
+    }
+
+    public void updateLastLoginAt() {
+        this.lastLoginAt = OffsetDateTime.now();
+    }
+
+    public boolean isDeleted() {
+        return this.deletedAt != null;
+    }
+
+    public void updateSuspensionEndAtNow() {
+        OffsetDateTime now = OffsetDateTime.now();
+
+        if(this.suspensionEndAt == null || this.suspensionEndAt.isBefore(now)){
+            throw new BusinessException(UserErrorCode.USER_NOT_SUSPENDED);
+        }
+
+        this.suspensionEndAt = now;
+        this.updatedAt = suspensionEndAt;
+    }
 }

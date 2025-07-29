@@ -31,7 +31,6 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,8 +53,8 @@ public class VaccinationService {
             VaccineName.DHPPL, 5,
             VaccineName.CORONAVIRUS, 2,
             VaccineName.KENNEL_COUGH, 2,
-            VaccineName.RABIES, 2,
-            VaccineName.INFLUENZA, 1
+            VaccineName.RABIES, 1,
+            VaccineName.INFLUENZA, 2
         ));
 
     /**
@@ -93,7 +92,7 @@ public class VaccinationService {
     @Transactional
     public void savePetVaccinations(Long petId, List<VaccineWriteRequest> requests) {
         if (requests == null || requests.isEmpty()) {
-            return;
+            vaccinationRepository.softDeleteAll(petId, OffsetDateTime.now());
         }
 
         Pet pet = petRepository.findById(petId)
@@ -122,7 +121,7 @@ public class VaccinationService {
 
             VaccineName name = dto.getName();
             VaccineType type = dto.getVaccineType();
-            Integer count = dto.getCount();
+            Integer count = type == VaccineType.ADDITIONAL ? null : dto.getCount();
             Integer expectedBooster = boosterCountMap.getOrDefault(name, -1);
 
             switch (type) {
@@ -131,7 +130,7 @@ public class VaccinationService {
                     break;
 
                 case BOOSTER:
-                    if (name.equals(VaccineName.INFLUENZA)) {
+                    if (name.equals(VaccineName.RABIES)) {
                         if (count != 1) {
                             throw new BusinessException(VaccinationErrorCode.VACCINATION_COUNT_MISMATCH);
                         }
@@ -143,7 +142,6 @@ public class VaccinationService {
                     break;
 
                 case ADDITIONAL:
-                    if (count <= expectedBooster) throw new BusinessException(VaccinationErrorCode.VACCINATION_COUNT_MISMATCH);
                     break;
 
                 default:
@@ -198,36 +196,33 @@ public class VaccinationService {
             if (VaccineType.ADDITIONAL.equals(dto.getVaccineType())) {
                 // 보강 접종(1년 단위)
                 ScheduleCreateRequestDto scheduleDto = ScheduleCreateRequestDto.builder()
-                        .userId(pet.getUser().getUserId())
                         .petId(pet.getPetId())
                         .name(vaccine.getName() + VaccineSchedule.ADDITIONAL.getWords())
                         .date(dto.getVaccineAt().plusMonths(vaccine.getAdditionalCycle()))
                         .cycle(ScheduleCycle.YEAR)
                         .cycleEnd(dto.getVaccineAt().plusYears(31))
                         .build();
-                scheduleService.createSchedule(scheduleDto);
+                scheduleService.createSchedule(userId, scheduleDto);
 
             } else if (dto.getCount() <= vaccine.getBoosterCount() + 1) {
                 // 추가 접종(2주 단위)
                 LocalDate cycleEndDate = dto.getVaccineAt().plusWeeks((long) (vaccine.getBoosterCount() + 1 - dto.getCount()) * vaccine.getBoosterCycle() + 1);
                 ScheduleCreateRequestDto scheduleDto = ScheduleCreateRequestDto.builder()
-                        .userId(pet.getUser().getUserId())
                         .petId(pet.getPetId()).name(vaccine.getName() + VaccineSchedule.BOOSTER.getWords())
                         .date(dto.getVaccineAt().plusWeeks(vaccine.getBoosterCycle()))
                         .cycle(ScheduleCycle.TWO_WEEK)
                         .cycleEnd(cycleEndDate)
                         .build();
-                scheduleService.createSchedule(scheduleDto);
+                scheduleService.createSchedule(userId, scheduleDto);
 
                 // 보강 접종 완료 후 추가 접종(1년 단위)
                 ScheduleCreateRequestDto scheduleDto2 = ScheduleCreateRequestDto.builder()
-                        .userId(pet.getUser().getUserId())
                         .petId(pet.getPetId()).name(vaccine.getName() + VaccineSchedule.ADDITIONAL.getWords())
                         .date(cycleEndDate.plusYears(1))
                         .cycle(ScheduleCycle.YEAR)
                         .cycleEnd(cycleEndDate.plusYears(31))
                         .build();
-                scheduleService.createSchedule(scheduleDto2);
+                scheduleService.createSchedule(userId, scheduleDto2);
             }
         }
     }

@@ -3,6 +3,8 @@ package com.grepp.teamnotfound.app.model.reply.entity;
 import com.grepp.teamnotfound.app.model.board.entity.Article;
 import com.grepp.teamnotfound.app.model.user.entity.User;
 import com.grepp.teamnotfound.infra.entity.BaseEntity;
+import com.grepp.teamnotfound.infra.error.exception.BusinessException;
+import com.grepp.teamnotfound.infra.error.exception.code.ReportErrorCode;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -58,4 +60,14 @@ public class Reply extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    public void report() {
+        this.reportedAt = OffsetDateTime.now();
+        super.updatedAt = this.reportedAt;
+    }
+
+    public void isReported() {
+        if (this.reportedAt != null) {
+            throw new BusinessException(ReportErrorCode.ALREADY_REPORTED_CONTENTS);
+        }
+    }
 }

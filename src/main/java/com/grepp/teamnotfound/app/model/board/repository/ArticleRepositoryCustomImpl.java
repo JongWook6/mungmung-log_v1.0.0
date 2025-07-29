@@ -1,10 +1,13 @@
 package com.grepp.teamnotfound.app.model.board.repository;
 
 import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleDetailResponse;
+import com.grepp.teamnotfound.app.model.board.code.BoardType;
+import com.grepp.teamnotfound.app.model.board.code.ProfileBoardType;
 import com.grepp.teamnotfound.app.model.board.code.SearchType;
 import com.grepp.teamnotfound.app.model.board.code.SortType;
 import com.grepp.teamnotfound.app.model.board.dto.ArticleImgDto;
 import com.grepp.teamnotfound.app.model.board.dto.ArticleListDto;
+import com.grepp.teamnotfound.app.model.board.dto.UserArticleListDto;
 import com.grepp.teamnotfound.app.model.board.entity.QArticle;
 import com.grepp.teamnotfound.app.model.board.entity.QArticleImg;
 import com.grepp.teamnotfound.app.model.board.entity.QArticleLike;
@@ -13,20 +16,16 @@ import com.grepp.teamnotfound.app.model.user.entity.QUser;
 import com.grepp.teamnotfound.app.model.user.entity.QUserImg;
 import com.grepp.teamnotfound.infra.code.ImgType;
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.Tuple;
-import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
-import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -145,7 +144,8 @@ public class ArticleRepositoryCustomImpl implements ArticleRepositoryCustom {
     }
 
     @Override
-    public Page<ArticleListDto> findArticleListWithMeta(int page, int size, SortType sortType, SearchType searchType, String keyword) {
+    public Page<ArticleListDto> findArticleListWithMeta(int page, int size, BoardType boardType, SortType sortType,
+        SearchType searchType, String keyword) {
 
         // 정렬 기준 리스트
         OrderSpecifier<?>[] orderSpecifiers = getOrderSpecifiers(sortType);
@@ -154,6 +154,7 @@ public class ArticleRepositoryCustomImpl implements ArticleRepositoryCustom {
         BooleanBuilder searchCondition = new BooleanBuilder();
         searchCondition.and(article.deletedAt.isNull());
         searchCondition.and(article.reportedAt.isNull());
+        searchCondition.and(article.board.name.eq(boardType.name()));
 
         // 검색 조건 추가
         if (searchType != null && keyword != null && !keyword.trim().isEmpty()) {
@@ -163,7 +164,8 @@ public class ArticleRepositoryCustomImpl implements ArticleRepositoryCustom {
                 case CONTENT ->
                     searchCondition.and(article.content.containsIgnoreCase(trimmedKeyword));
                 case TITLE_CONTENT -> searchCondition.and(
-                    article.title.containsIgnoreCase(trimmedKeyword).or(article.content.containsIgnoreCase(trimmedKeyword)));
+                    article.title.containsIgnoreCase(trimmedKeyword)
+                        .or(article.content.containsIgnoreCase(trimmedKeyword)));
                 case AUTHOR ->
                     searchCondition.and(user.nickname.containsIgnoreCase(trimmedKeyword));
             }
@@ -275,5 +277,134 @@ public class ArticleRepositoryCustomImpl implements ArticleRepositoryCustom {
             case LIKE -> new OrderSpecifier[]{articleLike.countDistinct().desc()};
             case VIEW -> new OrderSpecifier[]{article.views.desc()};
         };
+    }
+
+    @Override
+    public Page<UserArticleListDto> findUserArticleListWithMeta(
+        int page,
+        int size,
+        SortType sortType,
+        ProfileBoardType type,
+        Long userId
+    ) {
+        OrderSpecifier<?>[] orderSpecifiers = getOrderSpecifiers(sortType);
+
+        List<Long> ids = new ArrayList<>();
+        if (type.equals(ProfileBoardType.WRITE)) {
+            ids = queryFactory
+                .select(article.articleId)
+                .from(article)
+                .where(
+                    article.user.userId.eq(userId),
+                    article.deletedAt.isNull()
+                )
+                .fetch();
+        } else if (type.equals(ProfileBoardType.LIKE)) {
+            ids = queryFactory
+                .select(articleLike.article.articleId)
+                .from(articleLike)
+                .where(
+                    articleLike.user.userId.eq(userId),
+                    articleLike.article.deletedAt.isNull()
+                )
+                .fetch();
+        } else if (type.equals(ProfileBoardType.COMMENT)) {
+            ids = queryFactory
+                .select(reply.article.articleId)
+                .from(reply)
+                .where(
+                    reply.user.userId.eq(userId),
+                    reply.article.deletedAt.isNull()
+                )
+                .fetch();
+        } else {
+            return Page.empty();
+        }
+
+        if (ids.isEmpty()) {
+            return Page.empty();
+        }
+
+        List<UserArticleListDto> content = queryFactory
+            .select(Projections.fields(
+                UserArticleListDto.class,
+                article.articleId,
+                user.userId,
+                user.nickname,
+                userImg.savePath.append(userImg.renamedName).as("profileImgPath"),
+                article.createdAt,
+                article.updatedAt,
+                article.board.name,
+                article.title,
+                article.content,
+                articleLike.countDistinct().intValue().as("likes"),
+                reply.countDistinct().intValue().as("replies"),
+                article.views.intValue()
+            ))
+            .from(article)
+            .join(article.user, user)
+            .leftJoin(articleLike).on(articleLike.article.articleId.eq(article.articleId))
+            .leftJoin(reply).on(
+                reply.article.articleId.eq(article.articleId),
+                reply.deletedAt.isNull(),
+                reply.reportedAt.isNull()
+            )
+            .leftJoin(userImg).on(
+                userImg.user.userId.eq(user.userId),
+                userImg.deletedAt.isNull()
+            )
+            .where(article.articleId.in(ids))
+            .groupBy(
+                article.articleId,
+                user.userId,
+                user.nickname,
+                userImg.savePath,
+                userImg.renamedName,
+                article.createdAt,
+                article.updatedAt,
+                article.board.name,
+                article.title,
+                article.content,
+                article.views
+            )
+            .orderBy(orderSpecifiers)
+            .offset((long) page * size)
+            .limit(size)
+            .fetch();
+
+        List<Long> articleIds = content.stream().map(UserArticleListDto::getArticleId).toList();
+
+        if (!articleIds.isEmpty()) {
+            List<ArticleImgDto> thumbnails = queryFactory.select(Projections.constructor(
+                    ArticleImgDto.class,
+                    articleImg.articleImgId,
+                    article.articleId,
+                    articleImg.savePath.append(articleImg.renamedName),
+                    articleImg.type
+                ))
+                .from(articleImg)
+                .where(
+                    articleImg.article.articleId.in(articleIds),
+                    articleImg.deletedAt.isNull(),
+                    articleImg.type.eq(ImgType.THUMBNAIL)
+                )
+                .orderBy(articleImg.createdAt.desc())
+                .fetch();
+
+            Map<Long, ArticleImgDto> thumbnailMap = new LinkedHashMap<>();
+            for (ArticleImgDto imgDto : thumbnails) {
+                thumbnailMap.putIfAbsent(imgDto.getArticleId(), imgDto);
+            }
+
+            for (UserArticleListDto articleDto : content) {
+                ArticleImgDto thumbnail = thumbnailMap.get(articleDto.getArticleId());
+                articleDto.setArticleImgPath(thumbnail != null ? List.of(thumbnail) : List.of());
+            }
+        }
+
+        Long total = (long) ids.size();
+
+        return new PageImpl<>(content, PageRequest.of(page, size), total);
+
     }
 }

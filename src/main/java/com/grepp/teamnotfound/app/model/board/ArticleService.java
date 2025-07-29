@@ -6,9 +6,11 @@ import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleListResp
 import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleRequest;
 import com.grepp.teamnotfound.app.controller.api.article.payload.LikeResponse;
 import com.grepp.teamnotfound.app.controller.api.article.payload.PageInfo;
-import com.grepp.teamnotfound.app.model.board.code.BoardType;
-import com.grepp.teamnotfound.app.model.board.code.SearchType;
+import com.grepp.teamnotfound.app.controller.api.mypage.payload.UserProfileArticleResponse;
+import com.grepp.teamnotfound.app.model.board.code.ProfileBoardType;
+import com.grepp.teamnotfound.app.model.board.code.SortType;
 import com.grepp.teamnotfound.app.model.board.dto.ArticleListDto;
+import com.grepp.teamnotfound.app.model.board.dto.UserArticleListDto;
 import com.grepp.teamnotfound.app.model.board.entity.Article;
 import com.grepp.teamnotfound.app.model.board.entity.ArticleImg;
 import com.grepp.teamnotfound.app.model.board.entity.ArticleLike;
@@ -40,10 +42,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.time.OffsetDateTime;
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 public class ArticleService {
@@ -56,6 +54,7 @@ public class ArticleService {
     private final ArticleImgRepository articleImgRepository;
     private final ArticleLikeRepository articleLikeRepository;
     private final ReplyRepository replyRepository;
+    private final RedisLikeService redisLikeService;
 
     @Transactional
     public ArticleListResponse getArticles(ArticleListRequest request) {
@@ -63,6 +62,7 @@ public class ArticleService {
         Page<ArticleListDto> articleListPage = articleRepository.findArticleListWithMeta(
             request.getPage() - 1,
             request.getSize(),
+            request.getBoardType(),
             request.getSortType(),
             request.getSearchType(),
             request.getKeyword()
@@ -82,6 +82,10 @@ public class ArticleService {
 
         Board board = boardRepository.findByName(request.getBoardType().name())
             .orElseThrow(() -> new BoardException(BoardErrorCode.BOARD_NOT_FOUND));
+
+        if (user.getSuspensionEndAt() != null && user.getSuspensionEndAt().isAfter(OffsetDateTime.now())) {
+            throw new BusinessException(UserErrorCode.USER_REPORTED);
+        }
 
         Article article = Article.builder()
             .title(request.getTitle())
@@ -120,6 +124,10 @@ public class ArticleService {
 
         ArticleDetailResponse response = articleRepository.findDetailById(articleId, userId);
 
+        // Redis 카운터 캐시 값으로 덮어씀
+        Integer redisLikeCount = getArticleLikeCount(articleId);
+        response.setLikes(redisLikeCount);
+
         articleRepository.plusViewById(articleId);
         response.setViews(response.getViews() + 1);
 
@@ -142,6 +150,11 @@ public class ArticleService {
 
         if (!beforeArticle.getBoard().getName().equals(request.getBoardType().name())) {
             throw new BoardException(BoardErrorCode.BOARD_CONFLICT);
+        }
+
+        if (requestUser.getSuspensionEndAt() != null &&
+            requestUser.getSuspensionEndAt().isAfter(OffsetDateTime.now())) {
+            throw new BusinessException(UserErrorCode.USER_REPORTED);
         }
 
         beforeArticle.setTitle(request.getTitle());
@@ -170,6 +183,7 @@ public class ArticleService {
         // 게시글을 삭제하면 댓글, 이미지 모두 soft delete
         OffsetDateTime deletedTime = OffsetDateTime.now();
         article.setDeletedAt(deletedTime);
+        article.setUpdatedAt(deletedTime);
         articleImgRepository.softDeleteByArticleId(articleId, deletedTime);
         articleLikeRepository.hardDeleteByArticleId(articleId);
         replyRepository.softDeleteByArticleId(articleId, deletedTime);
@@ -253,6 +267,73 @@ public class ArticleService {
         return new LikeResponse(articleId, totalCount, false);
     }
 
+    @Transactional
+    public LikeResponse likeWithRedis(Long articleId, Long userId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));
+        Article article = articleRepository.findById(articleId)
+            .orElseThrow(() -> new BoardException(BoardErrorCode.ARTICLE_NOT_FOUND));
+
+        // Redis 캐시를 우선적으로 확인(빠른 응답)
+        // 중복 요청이면 무시
+        boolean isLikedInRedis = redisLikeService.isUserLikedInRedis(articleId, userId);
+        if (isLikedInRedis) {
+            Integer totalCount = getArticleLikeCount(articleId);
+            return new LikeResponse(articleId, totalCount, true);
+        }
+
+        redisLikeService.addLikeRequest(articleId, userId);
+        redisLikeService.setUserLikedStatus(articleId, userId, true);
+        redisLikeService.incrementArticleLikesCount(articleId); // 게시글 총 좋아요 카운터 증가
+
+        Integer totalCount = getArticleLikeCount(articleId);
+        boolean isLiked = redisLikeService.isUserLikedInRedis(articleId, userId);
+
+        return new LikeResponse(articleId, totalCount, isLiked);
+    }
+
+    @Transactional
+    public LikeResponse unlikeWithRedis(Long articleId, Long userId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));
+        Article article = articleRepository.findById(articleId)
+            .orElseThrow(() -> new BoardException(BoardErrorCode.ARTICLE_NOT_FOUND));
+
+        // Redis 캐시를 우선적으로 확인(빠른 응답)
+        // 중복 요청이면 무시
+        boolean isLikedInRedis = redisLikeService.isUserLikedInRedis(articleId, userId);
+        if (!isLikedInRedis) {
+            Integer totalCount = getArticleLikeCount(articleId);
+            return new LikeResponse(articleId, totalCount, false);
+        }
+
+        redisLikeService.addUnlikeRequest(articleId, userId);
+        redisLikeService.setUserLikedStatus(articleId, userId, false);
+        redisLikeService.decrementArticleLikesCount(articleId);
+
+        Integer totalCount = getArticleLikeCount(articleId);
+        boolean isLiked = redisLikeService.isUserLikedInRedis(articleId, userId);
+
+        return new LikeResponse(articleId, totalCount, isLiked);
+    }
+
+    // 캐시에서 좋아요 수 먼저 조회
+    private Integer getArticleLikeCount(Long articleId) {
+        // NOTE 게시글 리스트 조회에서도 실시간 좋아요 수가 필요할까?
+        Long count = redisLikeService.getArticleLikesCount(articleId);
+
+        if (count == null) {
+            Integer dbLikeCount = articleLikeRepository.countByArticle_ArticleId(articleId);
+            count = dbLikeCount.longValue();
+
+            // 캐시 저장
+            redisLikeService.setArticleLikesCount(articleId, count);
+        }
+
+        return count.intValue();
+    }
+
+    // DB 에서 댓글 수 조회
     @Transactional(readOnly = true)
     public Integer getReplyCount(Long articleId) {
         articleRepository.findById(articleId)
@@ -262,20 +343,67 @@ public class ArticleService {
             articleId);
     }
 
+    // DB 에서 좋아요 수 조회
     @Transactional(readOnly = true)
-    public Integer getLikeCount(Long articleId) {
+    public Integer getDBLikeCount(Long articleId) {
         articleRepository.findById(articleId)
             .orElseThrow(() -> new BoardException(BoardErrorCode.ARTICLE_NOT_FOUND));
 
         return articleRepository.countByArticleIdAndDeletedAtIsNullAndReportedAtIsNull(articleId);
     }
 
-    public int countArticles(OffsetDateTime monthStart, OffsetDateTime monthEnd) {
-        return articleRepository.countArticlesBetween(monthStart, monthEnd);
+    @Transactional(readOnly = true)
+    public LikeResponse getNewestLikeCount(Long articleId, Long userId) {
+
+        if (!articleRepository.existsById(articleId)) {
+            throw new BoardException(BoardErrorCode.ARTICLE_NOT_FOUND);
+        }
+
+        Long likesCount = null;
+        boolean isLiked = false;
+
+        likesCount = redisLikeService.getArticleLikesCount(articleId);
+
+        if (userId != null) {
+            isLiked = redisLikeService.isUserLikedInRedis(articleId, userId);
+        }
+
+        //  DB 에서 조회가 필요한 경우
+        if (likesCount == null) {
+            Integer dbCount = articleLikeRepository.countByArticle_ArticleId(articleId);
+            likesCount = dbCount.longValue();
+            redisLikeService.setArticleLikesCount(articleId, likesCount);
+        }
+
+        if (!isLiked && userId != null) {
+            isLiked = articleLikeRepository.existsByArticle_ArticleIdAndUser_UserId(articleId, userId);
+        }
+
+        return new LikeResponse(articleId, likesCount.intValue() , isLiked);
     }
 
-    public Long getRequiredArticleIdByReplyId(Long replyId) {
-        return replyRepository.findArticleIdByReplyId(replyId)
-                .orElseThrow(()-> new BusinessException(BoardErrorCode.ARTICLE_NOT_FOUND));
+    @Transactional
+    public UserProfileArticleResponse getUsersArticles(
+        Long userId,
+        ProfileBoardType type,
+        int page,
+        int size,
+        SortType sortType
+    ) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));
+
+        Page<UserArticleListDto> articleListPage = articleRepository.findUserArticleListWithMeta(
+            page - 1,
+            size,
+            sortType,
+            type,
+            user.getUserId()
+        );
+
+        return UserProfileArticleResponse.builder()
+            .articles(articleListPage.toList())
+            .pageInfo(PageInfo.fromPage(articleListPage))
+            .build();
     }
 }
