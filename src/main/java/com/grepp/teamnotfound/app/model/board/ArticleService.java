@@ -10,6 +10,7 @@ import com.grepp.teamnotfound.app.controller.api.mypage.payload.UserProfileArtic
 import com.grepp.teamnotfound.app.model.board.code.ProfileBoardType;
 import com.grepp.teamnotfound.app.model.board.code.SortType;
 import com.grepp.teamnotfound.app.model.board.dto.ArticleListDto;
+import com.grepp.teamnotfound.app.model.board.dto.LikeCheckDto;
 import com.grepp.teamnotfound.app.model.board.dto.UserArticleListDto;
 import com.grepp.teamnotfound.app.model.board.entity.Article;
 import com.grepp.teamnotfound.app.model.board.entity.ArticleImg;
@@ -129,8 +130,8 @@ public class ArticleService {
         ArticleDetailResponse response = articleRepository.findDetailById(articleId, userId);
 
         // Redis 카운터 캐시 값으로 덮어씀
-        Integer redisLikeCount = getArticleLikeCount(articleId);
-        response.setLikes(redisLikeCount);
+        response.setLikes(getArticleLikeCount(articleId));
+        response.setIsLiked(getUserLiked(articleId, userId));
 
         articleRepository.plusViewById(articleId);
         response.setViews(response.getViews() + 1);
@@ -271,15 +272,14 @@ public class ArticleService {
 
     @Transactional
     public LikeResponse likeWithRedis(Long articleId, Long userId) {
-        // TODO 좋아요 개수 조회와 관련된 메서드도 fallback 로직 추가 필요
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));
         Article article = articleRepository.findById(articleId)
             .orElseThrow(() -> new BoardException(BoardErrorCode.ARTICLE_NOT_FOUND));
 
         try {
-            boolean isLikedInRedis = redisLikeService.isUserLikedInRedis(articleId, userId);
-            if (isLikedInRedis) { // 중복 확인
+            boolean isLikedInRedis = getUserLiked(articleId, userId);
+            if (isLikedInRedis) { // 이미 좋아요 상태
                 Integer totalCount = getArticleLikeCount(articleId);
                 return new LikeResponse(articleId, totalCount, true);
             }
@@ -289,7 +289,7 @@ public class ArticleService {
             redisLikeService.incrementArticleLikesCount(articleId); // 게시글 총 좋아요 카운터 증가
 
             Integer totalCount = getArticleLikeCount(articleId);
-            boolean isLiked = redisLikeService.isUserLikedInRedis(articleId, userId);
+            boolean isLiked = getUserLiked(articleId, userId);
 
             return new LikeResponse(articleId, totalCount, isLiked);
         } catch (RedisConnectionFailureException | RedisSystemException e) {
@@ -318,8 +318,8 @@ public class ArticleService {
             .orElseThrow(() -> new BoardException(BoardErrorCode.ARTICLE_NOT_FOUND));
 
         try {
-            boolean isLikedInRedis = redisLikeService.isUserLikedInRedis(articleId, userId);
-            if (!isLikedInRedis) { // 중복 확인
+            boolean isLikedInRedis = getUserLiked(articleId, userId);
+            if (!isLikedInRedis) { // 이미 좋아요 취소
                 Integer totalCount = getArticleLikeCount(articleId);
                 return new LikeResponse(articleId, totalCount, false);
             }
@@ -329,7 +329,7 @@ public class ArticleService {
             redisLikeService.decrementArticleLikesCount(articleId);
 
             Integer totalCount = getArticleLikeCount(articleId);
-            boolean isLiked = redisLikeService.isUserLikedInRedis(articleId, userId);
+            boolean isLiked = getUserLiked(articleId, userId);
 
             return new LikeResponse(articleId, totalCount, isLiked);
         } catch (RedisConnectionFailureException | RedisSystemException e) {
@@ -356,6 +356,16 @@ public class ArticleService {
         }
 
         return count.intValue();
+    }
+
+    // 캐시에서 좋아요 상태 먼저 조회
+    private boolean getUserLiked(Long articleId, Long userId) {
+        if (userId == null) return false;
+        LikeCheckDto checkDto = redisLikeService.isUserLikedInRedis(articleId, userId);
+        if (!checkDto.redisAvailable()) {
+            return articleLikeRepository.existsByArticle_ArticleIdAndUser_UserId(articleId, userId);
+        }
+        return checkDto.isLiked();
     }
 
     // DB 에서 댓글 수 조회
@@ -390,7 +400,7 @@ public class ArticleService {
         likesCount = redisLikeService.getArticleLikesCount(articleId);
 
         if (userId != null) {
-            isLiked = redisLikeService.isUserLikedInRedis(articleId, userId);
+            isLiked = getUserLiked(articleId, userId);
         }
 
         //  DB 에서 조회가 필요한 경우

@@ -1,5 +1,8 @@
 package com.grepp.teamnotfound.app.model.board;
 
+import com.grepp.teamnotfound.app.model.board.dto.LikeCheckDto;
+import com.grepp.teamnotfound.app.model.board.repository.ArticleLikeRepository;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -17,7 +20,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Slf4j
 public class RedisLikeService {
-    // TODO Redis 가 다운되었을 경우에 대한 대비 필요
 
     private final RedisTemplate<String, Object> redisTemplate;
 
@@ -72,13 +74,14 @@ public class RedisLikeService {
     }
 
     // 사용자의 좋아요 상태를 Redis 에서 확인
-    public boolean isUserLikedInRedis(Long articleId, Long userId) {
+    public LikeCheckDto isUserLikedInRedis(Long articleId, Long userId) {
         try {
             String userLikeStatusKey = "user:liked_status:" + userId + ":" + articleId;
-            return Boolean.TRUE.equals(redisTemplate.hasKey(userLikeStatusKey));
+            boolean isLiked = Boolean.TRUE.equals(redisTemplate.hasKey(userLikeStatusKey));
+            return new LikeCheckDto(isLiked, true);
         } catch (Exception e) {
-            log.warn("[Redis fallback] isUserLikedInRedis fail - articleId: {}, userId: {}", articleId, userId, e);
-            return false;
+            log.warn("[Redis fallback] isUserLikedInRedis failed - articleId: {}, userId: {}", articleId, userId, e);
+            return new LikeCheckDto(false, false);
         }
     }
 
@@ -92,20 +95,30 @@ public class RedisLikeService {
     public Set<Long> getAllChangedArticleIdsAndClear() {
         String sourceKey = BATCH_ARTICLE_IDS_KEY;
 
-        List<Object> results = redisTemplate.execute(new SessionCallback<List<Object>>() {
-            @Override
-            public <K, V> List<Object> execute(RedisOperations<K, V> operations) throws DataAccessException {
-                operations.multi();
-                Set<Object> members = ((RedisTemplate<String, Object>) operations).opsForSet().members(sourceKey);
-                ((RedisTemplate<String, Object>) operations).delete(sourceKey);
-                return operations.exec();
-            }
-        });
+        try {
+            List<Object> results = redisTemplate.execute(new SessionCallback<List<Object>>() {
+                @Override
+                public <K, V> List<Object> execute(RedisOperations<K, V> operations)
+                    throws DataAccessException {
+                    operations.multi();
+                    Set<Object> members = ((RedisTemplate<String, Object>) operations).opsForSet().members(sourceKey);
+                    if (members == null) {
+                        operations.discard(); // 조회 실패시 delete 하지 않고 다음 배치 때 재시도
+                        return Collections.emptyList();
+                    }
 
-        if (results != null && !results.isEmpty() && results.getFirst() instanceof Set) {
-            return ((Set<Object>) results.getFirst()).stream()
-                .map(object -> Long.valueOf(object.toString()))
-                .collect(Collectors.toSet());
+                    ((RedisTemplate<String, Object>) operations).delete(sourceKey);
+                    return operations.exec();
+                }
+            });
+
+            if (results != null && !results.isEmpty() && results.getFirst() instanceof Set) {
+                return ((Set<Object>) results.getFirst()).stream()
+                    .map(object -> Long.valueOf(object.toString()))
+                    .collect(Collectors.toSet());
+            }
+        } catch (Exception e) {
+            log.error("[Redis fallback] getAllChangedArticleIdsAndClear failed", e);
         }
         return Collections.emptySet();
     }
@@ -123,13 +136,14 @@ public class RedisLikeService {
             List<Object> results = redisTemplate.execute(new SessionCallback<List<Object>>() {
                 @Override
                 public <K, V> List<Object> execute(RedisOperations<K, V> operations) throws DataAccessException {
-                    // 트랜잭션 시작
                     operations.multi();
-                    // Set 반환
                     Set<Object> members = ((RedisTemplate<String, Object>) operations).opsForSet().members(key);
-                    // 삭제된 키의 개수 반환
+                    if (members == null) {
+                        operations.discard(); // 조회 실패시 delete 하지 않고 다음 배치 때 재시도
+                        return Collections.emptyList();
+                    }
+
                     ((RedisTemplate<String, Object>) operations).delete(key);
-                    // 트랜잭션 내의 각 명령을 순서대로 실행
                     return operations.exec();
                 }
             });
@@ -139,7 +153,7 @@ public class RedisLikeService {
                 return (Set<Object>) results.getFirst();
             }
         } catch (Exception e) {
-            log.error("[Redis fallback] {} fail - key = {}", logContext, key, e);
+            log.error("[Redis fallback] {} failed - key = {}", logContext, key, e);
         }
         return Collections.emptySet();
     }
@@ -157,7 +171,7 @@ public class RedisLikeService {
             if (count instanceof Integer) return ((Integer) count).longValue();
             if (count instanceof Long) return (Long) count;
         } catch (Exception e) {
-            log.warn("[Redis fallback] getArticleLikesCount fail - articleId: {}", articleId, e);
+            log.warn("[Redis fallback] getArticleLikesCount failed - articleId: {}", articleId, e);
         }
         return null;
     }
