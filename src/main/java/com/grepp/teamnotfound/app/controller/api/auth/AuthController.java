@@ -96,7 +96,7 @@ public class AuthController {
     @Operation(summary = "소셜 로그인")
     @GetMapping("v1/social-auth/{provider}")
     public ResponseEntity<?> socialLogin(@PathVariable String provider) {
-        ProviderType providerType = ProviderType.valueOf(provider.toUpperCase());
+        ProviderType providerType = ProviderType.valueOf(provider.toLowerCase());
         String url = customOAuth2UserService.getAuthUrl(providerType);
         return ResponseEntity.ok(url);
     }
