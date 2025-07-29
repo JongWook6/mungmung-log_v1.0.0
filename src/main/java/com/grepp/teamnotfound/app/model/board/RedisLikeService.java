@@ -66,10 +66,9 @@ public class RedisLikeService {
     public void setUserLikedStatus(Long articleId, Long userId, boolean liked) {
         String userLikedKey = "user:liked_status:" + userId + ":" + articleId;
         if (liked) {
-            redisTemplate.opsForValue().set(userLikedKey, "1");
+            redisTemplate.opsForValue().set(userLikedKey, "1"); // 좋아요 상태
         } else {
-            redisTemplate.opsForValue().set(userLikedKey, "0");
-//            redisTemplate.delete(userLikedKey);
+            redisTemplate.opsForValue().set(userLikedKey, "0"); // 좋아요 취소 상태
         }
         redisTemplate.expire(userLikedKey, 7, TimeUnit.DAYS);
     }
@@ -81,14 +80,14 @@ public class RedisLikeService {
             Object value = redisTemplate.opsForValue().get(userLikeStatusKey);
 
             if (value == null) {
-                return new LikeCheckDto(false, false);
+                return new LikeCheckDto(false, false); // 캐시 미스
             } else {
                 boolean isLiked = "1".equals(value.toString());
-                return new LikeCheckDto(isLiked, true);
+                return new LikeCheckDto(isLiked, true); // 캐시 히트
             }
         } catch (Exception e) {
             log.warn("[Redis fallback] isUserLikedInRedis failed - articleId: {}, userId: {}", articleId, userId, e);
-            return new LikeCheckDto(false, false);
+            return new LikeCheckDto(false, false); // 레디스 연결 오류
         }
     }
 
