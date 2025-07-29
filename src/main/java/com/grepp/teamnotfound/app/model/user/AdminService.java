@@ -238,6 +238,7 @@ public class AdminService {
         return reportRepository.findReportListWithMeta(request, pageable);
     }
 
+    @Transactional
     public void updateUserSuspensionEndAtNow(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
