@@ -123,7 +123,7 @@ public class ScheduleService {
                     continue;
                 }
 
-                schedule.setPet(pet);
+                schedule1.setPet(pet);
                 schedule1.setName(request.getName());
                 schedule1.setScheduleDate(date);
                 schedule1.setCycle(request.getCycle());
@@ -154,6 +154,10 @@ public class ScheduleService {
             // 단독 일정을 반복일정으로 수정 시 추가 일정 생성
             if (!request.getCycle().equals(ScheduleCycle.NONE)) {
                 List<Schedule> schedules = scheduleRepository.findByNameAndCycleAndCycleEnd(schedule.getName(), schedule.getCycle(), schedule.getCycleEnd());
+
+                schedule.setDeletedAt(OffsetDateTime.now());
+                scheduleRepository.save(schedule);
+
                 LocalDate date = request.getDate();
                 for(;date.isBefore(request.getCycleEnd()); date = date.plusDays(request.getCycle().getDays(date))){
                     Schedule addSchedule = Schedule.builder()
