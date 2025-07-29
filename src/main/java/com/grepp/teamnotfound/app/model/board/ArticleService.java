@@ -37,13 +37,17 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.redis.RedisConnectionFailureException;
+import org.springframework.data.redis.RedisSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ArticleService {
 
     private final ArticleRepository articleRepository;
@@ -162,7 +166,6 @@ public class ArticleService {
         beforeArticle.setUpdatedAt(OffsetDateTime.now());
         Article savedArticle = articleRepository.save(beforeArticle);
 
-        // TODO 스토리지에 저장된 불필요한 사진 파일들에 대한 배치 스케줄러 도입 필요
         articleImgRepository.softDeleteByArticleId(articleId, OffsetDateTime.now());
         uploadAndSaveImgs(images, savedArticle);
     }
@@ -203,7 +206,6 @@ public class ArticleService {
                 .stream()
                 .map(fileDto -> {
                     ImgType type = ImgType.DESC;
-                    // NOTE 게시글을 작성할 때 썸네일을 설정할 수 있게? 아니면 첫번째 이미지?
                     if (imgList.getFirst().originName().equals(fileDto.originName())) {
                         type = ImgType.THUMBNAIL;
                     }
@@ -269,27 +271,43 @@ public class ArticleService {
 
     @Transactional
     public LikeResponse likeWithRedis(Long articleId, Long userId) {
+        // TODO 좋아요 개수 조회와 관련된 메서드도 fallback 로직 추가 필요
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));
         Article article = articleRepository.findById(articleId)
             .orElseThrow(() -> new BoardException(BoardErrorCode.ARTICLE_NOT_FOUND));
 
-        // Redis 캐시를 우선적으로 확인(빠른 응답)
-        // 중복 요청이면 무시
-        boolean isLikedInRedis = redisLikeService.isUserLikedInRedis(articleId, userId);
-        if (isLikedInRedis) {
+        try {
+            boolean isLikedInRedis = redisLikeService.isUserLikedInRedis(articleId, userId);
+            if (isLikedInRedis) { // 중복 확인
+                Integer totalCount = getArticleLikeCount(articleId);
+                return new LikeResponse(articleId, totalCount, true);
+            }
+
+            redisLikeService.addLikeRequest(articleId, userId);
+            redisLikeService.setUserLikedStatus(articleId, userId, true);
+            redisLikeService.incrementArticleLikesCount(articleId); // 게시글 총 좋아요 카운터 증가
+
             Integer totalCount = getArticleLikeCount(articleId);
+            boolean isLiked = redisLikeService.isUserLikedInRedis(articleId, userId);
+
+            return new LikeResponse(articleId, totalCount, isLiked);
+        } catch (RedisConnectionFailureException | RedisSystemException e) {
+            log.warn("[Redis fallback] Like Request - articleId: {}, userId: {}", articleId, userId, e);
+
+            boolean alreadyLiked = articleLikeRepository.existsByArticle_ArticleIdAndUser_UserId(articleId, userId);
+            if (!alreadyLiked) { // 중복 확인
+                ArticleLike like = ArticleLike.builder()
+                    .article(article)
+                    .user(user)
+                    .createdAt(OffsetDateTime.now())
+                    .build();
+                articleLikeRepository.save(like);
+            }
+
+            Integer totalCount = articleLikeRepository.countByArticle_ArticleId(articleId);
             return new LikeResponse(articleId, totalCount, true);
         }
-
-        redisLikeService.addLikeRequest(articleId, userId);
-        redisLikeService.setUserLikedStatus(articleId, userId, true);
-        redisLikeService.incrementArticleLikesCount(articleId); // 게시글 총 좋아요 카운터 증가
-
-        Integer totalCount = getArticleLikeCount(articleId);
-        boolean isLiked = redisLikeService.isUserLikedInRedis(articleId, userId);
-
-        return new LikeResponse(articleId, totalCount, isLiked);
     }
 
     @Transactional
@@ -299,27 +317,34 @@ public class ArticleService {
         Article article = articleRepository.findById(articleId)
             .orElseThrow(() -> new BoardException(BoardErrorCode.ARTICLE_NOT_FOUND));
 
-        // Redis 캐시를 우선적으로 확인(빠른 응답)
-        // 중복 요청이면 무시
-        boolean isLikedInRedis = redisLikeService.isUserLikedInRedis(articleId, userId);
-        if (!isLikedInRedis) {
+        try {
+            boolean isLikedInRedis = redisLikeService.isUserLikedInRedis(articleId, userId);
+            if (!isLikedInRedis) { // 중복 확인
+                Integer totalCount = getArticleLikeCount(articleId);
+                return new LikeResponse(articleId, totalCount, false);
+            }
+
+            redisLikeService.addUnlikeRequest(articleId, userId);
+            redisLikeService.setUserLikedStatus(articleId, userId, false);
+            redisLikeService.decrementArticleLikesCount(articleId);
+
             Integer totalCount = getArticleLikeCount(articleId);
+            boolean isLiked = redisLikeService.isUserLikedInRedis(articleId, userId);
+
+            return new LikeResponse(articleId, totalCount, isLiked);
+        } catch (RedisConnectionFailureException | RedisSystemException e) {
+            log.warn("[Redis fallback] Unlike Request - articleId: {}, userId: {}", articleId, userId);
+
+            Optional<ArticleLike> like = articleLikeRepository.findByArticle_ArticleIdAndUser_UserId(articleId, userId);
+            like.ifPresent(articleLikeRepository::delete);
+
+            Integer totalCount = articleLikeRepository.countByArticle_ArticleId(articleId);
             return new LikeResponse(articleId, totalCount, false);
         }
-
-        redisLikeService.addUnlikeRequest(articleId, userId);
-        redisLikeService.setUserLikedStatus(articleId, userId, false);
-        redisLikeService.decrementArticleLikesCount(articleId);
-
-        Integer totalCount = getArticleLikeCount(articleId);
-        boolean isLiked = redisLikeService.isUserLikedInRedis(articleId, userId);
-
-        return new LikeResponse(articleId, totalCount, isLiked);
     }
 
     // 캐시에서 좋아요 수 먼저 조회
     private Integer getArticleLikeCount(Long articleId) {
-        // NOTE 게시글 리스트 조회에서도 실시간 좋아요 수가 필요할까?
         Long count = redisLikeService.getArticleLikesCount(articleId);
 
         if (count == null) {
