@@ -17,7 +17,7 @@ public class ProfileResponse {
     private String breed;
     private LocalDate metDay;
     private Integer age;
-    private PetImgDto image;
+    private String imgUrl;
     private Boolean sex;
     private String aiAnalysis;
 }

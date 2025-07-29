@@ -193,7 +193,7 @@ public class VaccinationService {
             scheduleService.deleteVaccinationSchedule(pet, vaccine.getName().name() + " 추가_접종일");
 
             // 각 백신에 맞는 일정 등록 로직
-            if (VaccineType.ADDITIONAL.equals(dto.getVaccineType())) {
+            if (VaccineType.ADDITIONAL.equals(dto.getVaccineType()) && dto.getDeletedAt() == null) {
                 // 보강 접종(1년 단위)
                 ScheduleCreateRequestDto scheduleDto = ScheduleCreateRequestDto.builder()
                         .petId(pet.getPetId())
@@ -204,7 +204,7 @@ public class VaccinationService {
                         .build();
                 scheduleService.createSchedule(userId, scheduleDto);
 
-            } else if (dto.getCount() <= vaccine.getBoosterCount() + 1) {
+            } else if (dto.getCount() <= vaccine.getBoosterCount() + 1 && dto.getDeletedAt() == null) {
                 // 추가 접종(2주 단위)
                 LocalDate cycleEndDate = dto.getVaccineAt().plusWeeks((long) (vaccine.getBoosterCount() + 1 - dto.getCount()) * vaccine.getBoosterCycle() + 1);
                 ScheduleCreateRequestDto scheduleDto = ScheduleCreateRequestDto.builder()
