@@ -22,9 +22,9 @@ public class ReportDetailResponse {
     private String status;      // pending, reject, accept
     private String reporterNickname;
     private String reportedNickname;
-    private String adminReason;
+    private String adminReason;     // 관리자 작성 사유
     private String reportedState;   // active, suspended, leave
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt;           // 신고일
     private LocalDateTime reportedAt;          // 신고 처리일
     private LocalDateTime suspensionEndAt;     // 회원 상태 정지 종료일
 
