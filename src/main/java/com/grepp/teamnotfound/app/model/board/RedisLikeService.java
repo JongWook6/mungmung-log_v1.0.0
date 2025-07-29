@@ -67,18 +67,25 @@ public class RedisLikeService {
         String userLikedKey = "user:liked_status:" + userId + ":" + articleId;
         if (liked) {
             redisTemplate.opsForValue().set(userLikedKey, "1");
-            redisTemplate.expire(userLikedKey, 7, TimeUnit.DAYS);
         } else {
-            redisTemplate.delete(userLikedKey);
+            redisTemplate.opsForValue().set(userLikedKey, "0");
+//            redisTemplate.delete(userLikedKey);
         }
+        redisTemplate.expire(userLikedKey, 7, TimeUnit.DAYS);
     }
 
     // 사용자의 좋아요 상태를 Redis 에서 확인
     public LikeCheckDto isUserLikedInRedis(Long articleId, Long userId) {
         try {
             String userLikeStatusKey = "user:liked_status:" + userId + ":" + articleId;
-            boolean isLiked = Boolean.TRUE.equals(redisTemplate.hasKey(userLikeStatusKey));
-            return new LikeCheckDto(isLiked, true);
+            Object value = redisTemplate.opsForValue().get(userLikeStatusKey);
+
+            if (value == null) {
+                return new LikeCheckDto(false, false);
+            } else {
+                boolean isLiked = "1".equals(value.toString());
+                return new LikeCheckDto(isLiked, true);
+            }
         } catch (Exception e) {
             log.warn("[Redis fallback] isUserLikedInRedis failed - articleId: {}, userId: {}", articleId, userId, e);
             return new LikeCheckDto(false, false);

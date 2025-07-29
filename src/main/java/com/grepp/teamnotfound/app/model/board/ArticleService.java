@@ -362,7 +362,7 @@ public class ArticleService {
     private boolean getUserLiked(Long articleId, Long userId) {
         if (userId == null) return false;
         LikeCheckDto checkDto = redisLikeService.isUserLikedInRedis(articleId, userId);
-        if (!checkDto.redisAvailable()) {
+        if (!checkDto.isRedisAvailable()) {
             return articleLikeRepository.existsByArticle_ArticleIdAndUser_UserId(articleId, userId);
         }
         return checkDto.isLiked();
