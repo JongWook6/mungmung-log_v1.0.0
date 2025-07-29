@@ -107,7 +107,7 @@ public class ReportRepositoryImpl implements ReportRepositoryCustom{
                         .otherwise(1);
                 yield direction.isAsc() ? typeOrder.asc() : typeOrder.desc();
             }
-            case REASON -> direction.isAsc()? report.reason.asc() : report.reason.desc();
+            case REASON -> direction.isAsc()? report.category.asc() : report.category.desc();
             case STATUS -> {
                 NumberExpression<Integer> statusOrder = new CaseBuilder()
                         .when(report.state.eq(ReportState.REJECT)).then(3)
