@@ -144,6 +144,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     }
 
     public String getAuthUrl(ProviderType provider) {
-        return baseUrl + "/oauth2/authorization/" + provider;
+        return baseUrl + "/oauth2/authorization/" + provider.toString().toLowerCase();
     }
 }
