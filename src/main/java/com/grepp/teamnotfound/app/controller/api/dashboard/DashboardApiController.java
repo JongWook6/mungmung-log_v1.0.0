@@ -57,7 +57,10 @@ public class DashboardApiController {
     ){
         PetDto petDto = dashboardService.getProfile(petId, principal.getUserId());
         ProfileResponse response = modelMapper.map(petDto, ProfileResponse.class);
-        response.setAge(Period.between(petDto.getBirthday(), date).getMonths());
+        
+        Period period = Period.between(petDto.getBirthday(), date);
+        int totalMonths = period.getYears() * 12 + period.getMonths();
+        response.setAge(totalMonths);
 
         String analysis = aiAnalysisService.getAiAnalysis(petId, date);
         if (analysis == null) {
