@@ -53,6 +53,6 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         });
 
         // TODO 회원 로그인 후 메인화면(실재 화면 경로)
-        getRedirectStrategy().sendRedirect(request, response, "/user/login");
+        getRedirectStrategy().sendRedirect(request, response, "http://localhost:3000/");
     }
 }
