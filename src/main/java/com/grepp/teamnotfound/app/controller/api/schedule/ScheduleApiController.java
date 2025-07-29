@@ -22,7 +22,7 @@ import java.util.Map;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping(value = "/api/dashboard/v2", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/api/schedule/v2", produces = MediaType.APPLICATION_JSON_VALUE)
 @PreAuthorize("isAuthenticated()")
 public class ScheduleApiController {
 
@@ -85,5 +85,14 @@ public class ScheduleApiController {
     ){
         scheduleService.checkIsDone(principal.getUserId(), scheduleId);
         return ResponseEntity.ok(HttpStatus.ACCEPTED);
+    }
+
+    @GetMapping("/vaccination/{petId}")
+    public ResponseEntity<?> NextVaccination(
+            @AuthenticationPrincipal Principal principal,
+            @PathVariable Long petId
+    ){
+        List<ScheduleDto> schedules = scheduleService.getNextVaccination(principal.getUserId(), petId);
+        return ResponseEntity.ok(Map.of("data", schedules));
     }
 }

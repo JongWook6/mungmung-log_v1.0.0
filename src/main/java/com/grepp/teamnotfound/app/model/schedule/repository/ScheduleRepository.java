@@ -7,6 +7,8 @@ import com.grepp.teamnotfound.app.model.user.entity.User;
 import feign.Param;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -23,4 +25,6 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
 
     @Query("SELECT s FROM Schedule s WHERE s.scheduleDate = :tomorrow AND s.isDone = false AND s.deletedAt IS NULL")
     List<Schedule> findSchedulesForNotification(LocalDate tomorrow);
+
+    Optional<Schedule> findTop1ByPetAndNameContainingAndDeletedAtNullAndScheduleDateAfterOrderByScheduleDateAsc(Pet pet, String name, LocalDate today);
 }
