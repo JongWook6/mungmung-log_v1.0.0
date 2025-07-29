@@ -10,6 +10,7 @@ import com.grepp.teamnotfound.app.model.schedule.entity.Schedule;
 import com.grepp.teamnotfound.app.model.schedule.repository.ScheduleRepository;
 import com.grepp.teamnotfound.app.model.user.entity.User;
 import com.grepp.teamnotfound.app.model.user.repository.UserRepository;
+import com.grepp.teamnotfound.app.model.vaccination.code.VaccineName;
 import com.grepp.teamnotfound.infra.error.exception.PetException;
 import com.grepp.teamnotfound.infra.error.exception.ScheduleException;
 import com.grepp.teamnotfound.infra.error.exception.UserException;
@@ -21,6 +22,8 @@ import java.time.OffsetDateTime;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -216,5 +219,35 @@ public class ScheduleService {
         List<Schedule> schedules = scheduleRepository.findByPetAndNameContainingAndDeletedAtNull(pet, keywords);
         schedules.forEach(schedule -> schedule.setDeletedAt(OffsetDateTime.now()));
         scheduleRepository.saveAll(schedules);
+    }
+
+    @Transactional
+    public List<ScheduleDto> getNextVaccination(Long userId, Long petId) {
+        Pet pet = petRepository.findById(petId).orElseThrow(() -> new PetException(PetErrorCode.PET_NOT_FOUND));
+        userRepository.findById(userId).orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+
+        List<Schedule> schedules = new ArrayList<>();
+        for (VaccineName name: VaccineName.values()){
+            Optional<Schedule> schedule = scheduleRepository.findTop1ByPetAndNameContainingAndDeletedAtNullAndScheduleDateAfterOrderByScheduleDateAsc(pet, name.name(), LocalDate.now());
+            if (schedule.isPresent()){
+                schedules.add(schedule.get());
+            }
+        }
+
+        List<ScheduleDto> scheduleDtos = new ArrayList<>();
+
+        schedules.forEach(schedule ->
+                scheduleDtos.add(ScheduleDto.builder()
+                        .scheduleId(schedule.getScheduleId())
+                        .date(schedule.getScheduleDate())
+                        .name(schedule.getName())
+                        .cycle(schedule.getCycle())
+                        .cycleEnd(schedule.getCycleEnd())
+                        .isDone(schedule.getIsDone())
+                        .petName(schedule.getPet().getName())
+                        .petId(schedule.getPet().getPetId()).build())
+        );
+
+        return scheduleDtos;
     }
 }
