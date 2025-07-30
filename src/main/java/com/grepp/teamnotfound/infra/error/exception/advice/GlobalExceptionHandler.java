@@ -103,7 +103,7 @@ public class GlobalExceptionHandler {
             .body(new ErrorResponse(
                 HttpStatus.PAYLOAD_TOO_LARGE.value(),
                 "PAYLOAD_TOO_LARGE",
-                "파일 크기가 너무 큽니다. 최대 5MB 까지 업로드할 수 있습니다.",
+                "파일 크기가 너무 큽니다. 최대 3MB 까지 업로드할 수 있습니다.",
                 LocalDateTime.now()
             ));
     }
