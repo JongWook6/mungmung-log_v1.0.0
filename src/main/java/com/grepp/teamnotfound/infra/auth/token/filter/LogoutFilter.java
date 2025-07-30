@@ -46,11 +46,21 @@ public class LogoutFilter extends OncePerRequestFilter {
 
             if (accessToken != null) {
                 // 1. 로그아웃 수행
+                log.info("서비스 로그아웃");
                 authService.logout(accessToken);
+
+                log.info("헤더 생성");
+                expiatedCookies(response);
+
                 response.setStatus(HttpStatus.OK.value());
                 response.setContentType(MediaType.APPLICATION_JSON_VALUE);
                 objectMapper.writeValue(response.getWriter(), ApiResponse.success("로그아웃에 성공했습니다."));
             } else {
+
+                log.info("헤더 생성");
+                expiatedCookies(response);
+
+                log.info("이미 로그아웃이므로 ok");
                 response.setStatus(HttpStatus.OK.value());
                 response.setContentType(MediaType.APPLICATION_JSON_VALUE);
                 objectMapper.writeValue(response.getWriter(), ApiResponse.success("이미 로그아웃된 상태입니다."));
@@ -63,15 +73,18 @@ public class LogoutFilter extends OncePerRequestFilter {
         } catch (Exception e) {
             sendLogoutErrorResponse(response, AuthErrorCode.UNAUTHENTICATED, AuthErrorCode.UNAUTHORIZED.getMessage());
         } finally {
-            expiatedCookies(response);
+            log.info("finally 호출");
+//            expiatedCookies(response);
         }
     }
 
     private void expiatedCookies(HttpServletResponse response) {
+        log.info("응답 쿠키 제작 ");
         ResponseCookie expiredAccessToken = TokenCookieFactory.createExpiredToken(TokenType.ACCESS_TOKEN);
         ResponseCookie expiredRefreshToken = TokenCookieFactory.createExpiredToken(TokenType.REFRESH_TOKEN);
         ResponseCookie expiredSessionId = TokenCookieFactory.createExpiredToken(TokenType.AUTH_SERVER_SESSION_ID);
 
+        log.info("헤더에 셋 쿠키");
         response.addHeader("Set-Cookie", expiredAccessToken.toString());
         response.addHeader("Set-Cookie", expiredRefreshToken.toString());
         response.addHeader("Set-Cookie", expiredSessionId.toString());
