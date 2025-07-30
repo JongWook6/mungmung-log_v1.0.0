@@ -21,6 +21,8 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
 
 @Slf4j
 @RestControllerAdvice
@@ -92,5 +94,29 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(response);
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorResponse> handleMaxSizeException(MaxUploadSizeExceededException e) {
+        return ResponseEntity
+            .status(HttpStatus.PAYLOAD_TOO_LARGE)
+            .body(new ErrorResponse(
+                HttpStatus.PAYLOAD_TOO_LARGE.value(),
+                "PAYLOAD_TOO_LARGE",
+                "파일 크기가 너무 큽니다. 최대 5MB 까지 업로드할 수 있습니다.",
+                LocalDateTime.now()
+            ));
+    }
+
+    @ExceptionHandler(MultipartException.class)
+    public ResponseEntity<ErrorResponse> handleMultipartException(MultipartException ex) {
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "BAD_REQUEST",
+                "파일 업로드 중 오류가 발생했습니다. 파일이나 요청의 형식을 확인해주세요.",
+                LocalDateTime.now()
+            ));
     }
 }
