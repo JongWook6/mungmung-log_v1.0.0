@@ -57,14 +57,14 @@ public class GeminiService {
 
         // 전체 프롬프트를 구성
         return String.format("""
-            너는 반려동물의 건강 데이터를 보고 맞춤형 제안을 해주는 AI 전문가야.
-            주어진 '건강 가이드라인'과 '반려견의 최근 10일 몸무게, 수면시간, 산책량 기록 및 평균'과 '반려견의 최근 10일 몸무게, 수면시간, 산책량 상태'을 보고 자세한 맞춤형 제안을 해줘.
+            너는 반려동물의 건강 데이터를 분석하여 맞춤형 조언을 해주는 AI 헬스케어 전문가야.
+            주어진 '반려견의 정보'에 포함된 건강 상태(state)와 '최근 10일 기록'을 분석해서, 가장 중요한 문제 하나에 대한 핵심 조언을 생성해 줘.
             
             # 반려견의 정보 (Pet's Information)
+            # 'VERY_LOW', 'LOW', 'NORMAL', "HIGH", "VERY_HIGH" 등의 문자열 상태값을 전달합니다.
             {
-              "breed": "%s",
-              "age": %s,
-              "size": "%s"
+              "weightState": "%s", "sleepingState": "%s", "walkingState": "%s",
+              "breed": "%s", "age": %s, "size": "%s"
             }
             
             # 반려견의 최근 10일 기록 (Pet's Recent Data)
@@ -74,15 +74,21 @@ public class GeminiService {
               "walkingList": [%s], "avgWalking": %.2f
             }
             
+            # 수행 작업 (Task to Perform)
+            1. '반려견의 정보'에 있는 세 가지 상태(weightState, sleepingState, walkingState)를 확인해.
+            2. 'NORMAL'이 아닌 상태 중, 가장 우려되는 항목을 하나만 선택해.
+            3. 만약 모든 상태가 '정상'이라면, "지금처럼 건강하게 잘 관리해주세요!"와 같이 긍정적인 메시지를 생성해.
+            4. 문제가 되는 항목이 선택되면, 해당 항목의 '최근 10일 기록' 리스트를 보고 추세(지속적인 증가/감소 등)를 파악해.
+            5. 진단된 상태와 데이터 추세를 종합해서, 보호자가 즉시 실천할 수 있는 구체적인 조언을 '출력 형식'에 맞춰 생성해.
+            
             # 출력 형식 (Output Format)
             {
               "recommendation": "여기에 반려견 정보를 제외한 맞춤형 제안 문구 공백 포함 60자 이하"
             }
             """,
             // 반려견 정보
-            checkDto.getPetInfoDto().getBreed(),
-            checkDto.getPetInfoDto().getAge(),
-            checkDto.getPetInfoDto().getSize(),
+            checkDto.getStateDto().getWeightState(), checkDto.getStateDto().getSleepingState(), checkDto.getStateDto().getWalkingState(),
+            checkDto.getPetInfoDto().getBreed(), checkDto.getPetInfoDto().getAge(), checkDto.getPetInfoDto().getSize(),
 
             // 반려견 기록 데이터
             weightListStr, checkDto.getAvgDto().getAvgWeight(),
