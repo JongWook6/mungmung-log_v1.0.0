@@ -21,6 +21,7 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
@@ -87,6 +88,6 @@ public class Pet extends BaseEntity {
 
     public Integer getAge(LocalDate birthDay) {
         LocalDate now = LocalDate.now();
-        return Period.between(birthDay, now).getMonths();
+        return (int) ChronoUnit.MONTHS.between(birthDay, now);
     }
 }

@@ -70,7 +70,7 @@ public class RedisLikeService {
         } else {
             redisTemplate.opsForValue().set(userLikedKey, "0"); // 좋아요 취소 상태
         }
-        redisTemplate.expire(userLikedKey, 7, TimeUnit.DAYS);
+        redisTemplate.expire(userLikedKey, 1, TimeUnit.HOURS);
     }
 
     // 사용자의 좋아요 상태를 Redis 에서 확인

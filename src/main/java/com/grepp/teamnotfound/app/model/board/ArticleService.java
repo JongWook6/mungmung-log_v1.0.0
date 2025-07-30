@@ -394,27 +394,11 @@ public class ArticleService {
             throw new BoardException(BoardErrorCode.ARTICLE_NOT_FOUND);
         }
 
-        Long likesCount = null;
-        boolean isLiked = false;
-
-        likesCount = redisLikeService.getArticleLikesCount(articleId);
-
-        if (userId != null) {
-            isLiked = getUserLiked(articleId, userId);
-        }
-
-        //  DB 에서 조회가 필요한 경우
-        if (likesCount == null) {
-            Integer dbCount = articleLikeRepository.countByArticle_ArticleId(articleId);
-            likesCount = dbCount.longValue();
-            redisLikeService.setArticleLikesCount(articleId, likesCount);
-        }
-
-        if (!isLiked && userId != null) {
-            isLiked = articleLikeRepository.existsByArticle_ArticleIdAndUser_UserId(articleId, userId);
-        }
-
-        return new LikeResponse(articleId, likesCount.intValue() , isLiked);
+        return new LikeResponse(
+            articleId,
+            getArticleLikeCount(articleId),
+            getUserLiked(articleId, userId)
+        );
     }
 
     @Transactional
