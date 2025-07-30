@@ -7,12 +7,12 @@ import com.grepp.teamnotfound.app.model.board.ArticleService;
 import com.grepp.teamnotfound.app.model.board.code.ProfileBoardType;
 import com.grepp.teamnotfound.app.model.pet.PetService;
 import com.grepp.teamnotfound.app.model.user.UserService;
-import com.grepp.teamnotfound.app.model.user.dto.UserDto;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,6 +30,7 @@ public class ProfileApiController {
     private final ArticleService articleService;
 
     @GetMapping("/v1/users/{userId}")
+    @PreAuthorize("isAnonymous() or isAuthenticated()")
     public ResponseEntity<?> getUser(
         @PathVariable Long userId
     ) {
@@ -37,6 +38,7 @@ public class ProfileApiController {
     }
 
     @GetMapping("/v1/users/{userId}/pet")
+    @PreAuthorize("isAnonymous() or isAuthenticated()")
     public ResponseEntity<List<?>> getUserPets(
         @PathVariable Long userId
     ) {
@@ -45,6 +47,7 @@ public class ProfileApiController {
     }
 
     @GetMapping("/v1/users/{userId}/board")
+    @PreAuthorize("isAnonymous() or isAuthenticated()")
     public ResponseEntity<?> getUserBoard(
         @PathVariable Long userId,
         @ModelAttribute @Valid UserProfileArticleRequest request
