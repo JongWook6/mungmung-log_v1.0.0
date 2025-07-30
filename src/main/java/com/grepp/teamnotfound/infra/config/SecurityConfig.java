@@ -76,6 +76,8 @@ public class SecurityConfig {
                         // get 게시글 상세 조회 /api/community/articles/v1/{articleId}
                         // get 게시글 댓글 개수 /api/community/articles/v1/{articleId}/reply
                         .requestMatchers(GET, "/api/community/articles/v1/**").permitAll()
+                        // get 특정 게시글의 댓글 리스트 조회 /api/community/articles/{articleId}/replies/v1
+                        .requestMatchers(GET, "/api/community/articles/*/replies/v1/**").permitAll()
                         // get /api/profile/v1/users/{userId}
                         // get /api/profile/v1/users/{userId}/pet
                         // get /api/profile/v1/users/{userId}/board
