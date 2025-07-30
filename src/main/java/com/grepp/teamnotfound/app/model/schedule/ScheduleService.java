@@ -106,17 +106,6 @@ public class ScheduleService {
         Schedule schedule = scheduleRepository.findById(request.getScheduleId()).orElseThrow(() -> new ScheduleException(ScheduleErrorCode.SCHEDULE_NOT_FOUND));
         // 사이클 전체 or 해당 일정만 수정
         if (request.getCycleLink()){
-            if (request.getCycle() == ScheduleCycle.NONE) {
-                // 단일 일정만 수정
-                schedule.setPet(pet);
-                schedule.setName(request.getName());
-                schedule.setScheduleDate(request.getDate());
-                schedule.setCycle(request.getCycle());
-                schedule.setCycleEnd(request.getCycleEnd());
-                schedule.setUpdatedAt(OffsetDateTime.now());
-                scheduleRepository.save(schedule);
-                return;
-            }
             List<Schedule> schedules = scheduleRepository.findByNameAndCycleAndCycleEnd(schedule.getName(), schedule.getCycle(), schedule.getCycleEnd());
             LocalDate date = request.getDate();
             for(Schedule schedule1: schedules){
