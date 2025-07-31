@@ -26,7 +26,7 @@ public class OAuth2FailureHandler extends SimpleUrlAuthenticationFailureHandler 
 
         String errorMessage;
         if (exception.getMessage().contains("다른 provider로 가입된 이메일")) {
-            errorMessage = "이미 다른 계정으로 가입된 이메일입니다.";
+            errorMessage = "이미 다른 소셜 계정으로 가입된 이메일입니다.";
         } else if (exception.getMessage().contains("지원하지 않는 OAuth2 provider")) {
             errorMessage = "지원하지 않는 소셜 로그인입니다.";
         } else if(exception.getMessage().contains("멍멍일지")){
