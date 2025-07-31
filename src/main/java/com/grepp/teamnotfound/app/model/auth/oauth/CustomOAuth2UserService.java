@@ -111,6 +111,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                         .build();
 
                 return new CustomOAuth2UserDto(userDto);
+            } else if(Objects.equals(optionalUser.get().getProvider(), "local")) {
+                log.info("로컬로 가입된 유저 email - oAuth2UserInfo.getEmail: {}", oAuth2UserInfo.getEmail());
+                OAuth2Error error = new OAuth2Error("INVALID_PROVIDER", "멍멍일지로 가입된 이메일", null);
+                throw new OAuth2AuthenticationException(error, "멍멍일지로 가입된 이메일: " + oAuth2UserInfo.getEmail());
             } else {
                 log.info("기존에 다른 공급자로 가입된 유저 email - oAuth2UserInfo.getEmail: {}", oAuth2UserInfo.getEmail());
                 OAuth2Error error = new OAuth2Error("INVALID_PROVIDER", "다른 provider로 가입된 이메일", null);

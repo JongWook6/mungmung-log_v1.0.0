@@ -29,12 +29,14 @@ public class OAuth2FailureHandler extends SimpleUrlAuthenticationFailureHandler 
             errorMessage = "이미 다른 계정으로 가입된 이메일입니다.";
         } else if (exception.getMessage().contains("지원하지 않는 OAuth2 provider")) {
             errorMessage = "지원하지 않는 소셜 로그인입니다.";
+        } else if(exception.getMessage().contains("멍멍일지")){
+            errorMessage = "멍멍일지로 가입된 이메일입니다. 멍멍일지 로그인을 시도해주세요.";
         }
         else {
             errorMessage = "소셜 로그인에 실패했습니다.";
         }
 
-        String failRedirectUri = "/error/login?error=" + URLEncoder.encode(errorMessage, StandardCharsets.UTF_8);
+        String failRedirectUri = "https://mungnote.vercel.app/login?error=" + URLEncoder.encode(errorMessage, StandardCharsets.UTF_8);
 
         getRedirectStrategy().sendRedirect(request, response, failRedirectUri);
     }
