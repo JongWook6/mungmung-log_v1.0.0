@@ -28,9 +28,6 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private final AuthService authService;
     private final UserRepository userRepository;
 
-    @Value("${app.frontend.redirect-uri}")
-    private String uri;
-
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
@@ -56,7 +53,8 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             userRepository.save(user);
         });
 
-        // TODO 회원 로그인 후 메인화면(실재 화면 경로)
-        getRedirectStrategy().sendRedirect(request, response, uri);
+        String successRedirectUri = "https://mungnote.vercel.app/login/callback";
+
+        getRedirectStrategy().sendRedirect(request, response, successRedirectUri);
     }
 }
