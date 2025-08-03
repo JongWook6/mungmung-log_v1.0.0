@@ -19,7 +19,8 @@ public enum UserErrorCode implements BaseErrorCode{
     USER_ACCESS_DENIED(HttpStatus.FORBIDDEN.value(), "USER_007", "해당 사용자 정보에 대한 접근 권한이 없습니다."),
     INVALID_PASSWORD_FORMAT(HttpStatus.BAD_REQUEST.value(), "USER_008", "비밀번호는 영문/숫자/특수문자를 포함한 8~20자여야 합니다."),
     USER_REPORTED(HttpStatus.FORBIDDEN.value(), "USER_009", "신고로 인해 게시글/댓글 작성이 제한되었습니다."),
-    USER_NOT_SUSPENDED(HttpStatus.BAD_REQUEST.value(), "USER_010", "정지된 회원이 아닙니다.");
+    USER_NOT_SUSPENDED(HttpStatus.BAD_REQUEST.value(), "USER_010", "정지된 회원이 아닙니다."),
+    USER_ALREADY_SOCIAL_SIGNED(HttpStatus.CONFLICT.value(), "USER_011", "소셜 로그인으로 가입한 이메일입니다.");
 
     private final int status;
     private final String code;

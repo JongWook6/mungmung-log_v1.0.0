@@ -42,6 +42,10 @@ public class AuthService {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));
 
+        if(!"local".equals(user.getProvider())){
+            throw new AuthException(UserErrorCode.USER_ALREADY_SOCIAL_SIGNED);
+        }
+
         if(user.isDeleted()){
             throw new AuthException(AuthErrorCode.DELETED_USER);
         }
