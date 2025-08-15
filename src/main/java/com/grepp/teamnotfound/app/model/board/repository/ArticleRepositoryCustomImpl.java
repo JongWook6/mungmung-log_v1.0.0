@@ -1,5 +1,7 @@
 package com.grepp.teamnotfound.app.model.board.repository;
 
+import static com.querydsl.core.group.GroupBy.groupBy;
+
 import com.grepp.teamnotfound.app.controller.api.article.payload.ArticleDetailResponse;
 import com.grepp.teamnotfound.app.model.board.code.BoardType;
 import com.grepp.teamnotfound.app.model.board.code.ProfileBoardType;
@@ -140,6 +142,82 @@ public class ArticleRepositoryCustomImpl implements ArticleRepositoryCustom {
             .fetch();
 
         detailResponse.setImages(images);
+        return detailResponse;
+    }
+
+    @Override
+    public ArticleDetailResponse findFullDetailById(Long articleId) {
+
+        // 1. 게시글 기본 정보 및 작성자 프로필 이미지 경로 조회
+        ArticleDetailResponse detailResponse = queryFactory
+            .select(
+                Projections.fields(
+                    ArticleDetailResponse.class,
+                    article.articleId,
+                    user.userId,
+                    user.nickname,
+                    userImg.savePath.append(userImg.renamedName).as("profileImgPath"),
+                    article.createdAt,
+                    article.updatedAt,
+                    article.title,
+                    article.content,
+                    article.views
+                )
+            )
+            .from(article)
+            .join(article.user, user)
+            .leftJoin(userImg).on(
+                userImg.user.userId.eq(user.userId),
+                userImg.deletedAt.isNull()
+            )
+            .where(
+                article.articleId.eq(articleId),
+                article.deletedAt.isNull(),
+                article.reportedAt.isNull()
+            )
+            .fetchOne();
+
+        // 2. 게시글 이미지가 없다면 early return
+        if (detailResponse == null) {
+            return null;
+        }
+
+        // 3. 게시글 이미지 리스트 별도 조회
+        List<ArticleImgDto> images = queryFactory
+            .select(
+                Projections.constructor(
+                    ArticleImgDto.class,
+                    articleImg.article.articleId,
+                    articleImg.articleImgId,
+                    articleImg.savePath.append(articleImg.renamedName),
+                    articleImg.type
+                )
+            )
+            .from(articleImg)
+            .where(
+                articleImg.article.articleId.eq(articleId),
+                articleImg.deletedAt.isNull()
+            )
+            .fetch();
+
+        // 4. 댓글 수 및 좋아요 수 별도 조회
+        Long likeCount = queryFactory
+            .select(articleLike.count())
+            .from(articleLike)
+            .where(articleLike.article.articleId.eq(articleId))
+            .fetchOne();
+
+        Long replyCount = queryFactory
+            .select(reply.count())
+            .from(reply)
+            .where(reply.article.articleId.eq(articleId))
+            .fetchOne();
+
+        // 5. 조회된 정보들을 응답 객체에 설정
+        detailResponse.setImages(images);
+        detailResponse.setLikes(likeCount.intValue());
+        detailResponse.setReplies(replyCount.intValue());
+
         return detailResponse;
     }
 

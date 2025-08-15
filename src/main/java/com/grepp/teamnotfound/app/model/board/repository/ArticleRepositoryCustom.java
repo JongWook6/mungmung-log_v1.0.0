@@ -13,6 +13,8 @@ public interface ArticleRepositoryCustom {
 
     ArticleDetailResponse findDetailById(Long articleId, Long loginUserId);
 
+    ArticleDetailResponse findFullDetailById(Long articleId);
+
     ArticleDetailResponse findSimpleDetailById(Long articleId, Long loginUserId);
 
     Page<ArticleListDto> findArticleListWithMeta(int page, int size, BoardType boardType, SortType sortType, SearchType searchType, String keyword);

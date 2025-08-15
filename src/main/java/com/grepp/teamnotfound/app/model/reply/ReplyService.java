@@ -62,7 +62,7 @@ public class ReplyService {
             .content(request.getContent())
             .build();
         Reply savedReply = replyRepository.save(reply);
-        redisReplyService.incrementArticleReplyCount(articleId);
+//        redisReplyService.incrementArticleReplyCount(articleId);
 
         NotiServiceCreateDto notiDto = NotiServiceCreateDto.builder()
             .targetId(reply.getReplyId())
@@ -133,7 +133,7 @@ public class ReplyService {
         reply.setDeletedAt(deletedTime);
         reply.setUpdatedAt(deletedTime);
         replyRepository.save(reply);
-        redisReplyService.decrementArticleReplyCount(articleId);
+//        redisReplyService.decrementArticleReplyCount(articleId);
     }
 
     @Transactional(readOnly = true)

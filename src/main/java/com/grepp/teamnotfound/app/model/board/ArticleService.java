@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.RedisSystemException;
@@ -109,6 +110,35 @@ public class ArticleService {
         return savedArticle.getArticleId();
     }
 
+    @Cacheable(value = "article:detail", key = "#articleId")
+    public ArticleDetailResponse findDetailWithCache(Long articleId) {
+        // 캐시 미스 시에만 실행됨
+        ArticleDetailResponse response = articleRepository.findFullDetailById(articleId);
+
+        if (response == null) {
+            throw new BoardException(BoardErrorCode.ARTICLE_NOT_FOUND);
+        }
+
+        return response;
+    }
+
+    @Transactional
+    public ArticleDetailResponse getArticleDetail(Long articleId, Long userId) {
+        if (userId != null) {
+            userRepository.findById(userId)
+                .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));
+        }
+
+        ArticleDetailResponse response = findDetailWithCache(articleId);
+
+        plusViewCountAsync(articleId);
+
+        boolean isUserLiked = getUserLiked(articleId, userId);
+        response.setIsLiked(isUserLiked);
+
+        return response;
+    }
+
     // 읽기 + 쓰기
     @Transactional
     public ArticleDetailResponse findByArticleIdAndUserId(Long articleId, Long userId) {
@@ -125,14 +155,17 @@ public class ArticleService {
         }
 
         // Redis 캐시에서 댓글 수 조회
-        Long cachedReplyCount = redisReplyService.getArticleReplyCount(articleId);
-        if (cachedReplyCount != null) {
-            response.setReplies(cachedReplyCount.intValue());
-        } else {
-            Integer dbReplyCount = replyRepository.countRepliesByArticleId(articleId);
-            response.setReplies(dbReplyCount);
-            redisReplyService.setArticleReplyCount(articleId, dbReplyCount.longValue());
-        }
+//        Long cachedReplyCount = redisReplyService.getArticleReplyCount(articleId);
+//        if (cachedReplyCount != null) {
+//            response.setReplies(cachedReplyCount.intValue());
+//        } else {
+//            Integer dbReplyCount = replyRepository.countRepliesByArticleId(articleId);
+//            response.setReplies(dbReplyCount);
+//            redisReplyService.setArticleReplyCount(articleId, dbReplyCount.longValue());
+//        }
+
+        Integer dbReplyCount = replyRepository.countRepliesByArticleId(articleId);
+        response.setReplies(dbReplyCount);
 
         // Redis 카운터 캐시 값으로 덮어씀
         response.setLikes(getArticleLikeCount(articleId));
