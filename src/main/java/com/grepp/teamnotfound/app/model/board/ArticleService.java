@@ -115,19 +115,11 @@ public class ArticleService {
                 .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));
         }
 
-        Article article = articleRepository.findById(articleId)
-            .orElseThrow(() -> new BoardException(BoardErrorCode.ARTICLE_NOT_FOUND));
-
-        // JOIN 해서 상세 정보를 모두 가져오기 전에 빠른 리턴
-        if (article.getDeletedAt() != null) {
-            throw new BoardException(BoardErrorCode.ARTICLE_DELETED);
-        }
-
-        if (article.getReportedAt() != null) {
-            throw new BoardException(BoardErrorCode.ARTICLE_REPORTED);
-        }
-
         ArticleDetailResponse response = articleRepository.findDetailById(articleId, userId);
+
+        if (response == null) {
+            throw new BoardException(BoardErrorCode.ARTICLE_NOT_FOUND);
+        }
 
         // Redis 카운터 캐시 값으로 덮어씀
         response.setLikes(getArticleLikeCount(articleId));
