@@ -98,12 +98,6 @@ jobs:
             KAKAO_CLIENT_ID=${{ steps.get_secrets.outputs.KAKAO_CLIENT_ID }},\
             KAKAO_SECRET=${{ steps.get_secrets.outputs.KAKAO_SECRET }}"
 
-      - name: Debug REDIS_SECRET length
-        run: |
-          echo "Length: ${#REDIS_SECRET}"
-        env:
-          REDIS_SECRET: ${{ steps.get_secrets.outputs.REDIS_SECRET }}
-
       # END - Docker auth and build
 
       - name: Show Cloud Run URL
