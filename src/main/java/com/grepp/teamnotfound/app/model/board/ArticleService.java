@@ -155,17 +155,17 @@ public class ArticleService {
         }
 
         // Redis 캐시에서 댓글 수 조회
-//        Long cachedReplyCount = redisReplyService.getArticleReplyCount(articleId);
-//        if (cachedReplyCount != null) {
-//            response.setReplies(cachedReplyCount.intValue());
-//        } else {
-//            Integer dbReplyCount = replyRepository.countRepliesByArticleId(articleId);
-//            response.setReplies(dbReplyCount);
-//            redisReplyService.setArticleReplyCount(articleId, dbReplyCount.longValue());
-//        }
+        Long cachedReplyCount = redisReplyService.getArticleReplyCount(articleId);
+        if (cachedReplyCount != null) {
+            response.setReplies(cachedReplyCount.intValue());
+        } else {
+            Integer dbReplyCount = replyRepository.countRepliesByArticleId(articleId);
+            response.setReplies(dbReplyCount);
+            redisReplyService.setArticleReplyCount(articleId, dbReplyCount.longValue());
+        }
 
-        Integer dbReplyCount = replyRepository.countRepliesByArticleId(articleId);
-        response.setReplies(dbReplyCount);
+//        Integer dbReplyCount = replyRepository.countRepliesByArticleId(articleId);
+//        response.setReplies(dbReplyCount);
 
         // Redis 카운터 캐시 값으로 덮어씀
         response.setLikes(getArticleLikeCount(articleId));
