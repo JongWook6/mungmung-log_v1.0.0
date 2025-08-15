@@ -42,6 +42,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.RedisSystemException;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -128,9 +129,14 @@ public class ArticleService {
         response.setIsLiked(getUserLiked(articleId, userId));
 
         response.setViews(response.getViews() + 1);
-        articleRepository.plusViewById(articleId);
+        plusViewCountAsync(articleId);
 
         return response;
+    }
+
+    @Async
+    public void plusViewCountAsync(Long articleId) {
+        articleRepository.plusViewById(articleId);
     }
 
     @Transactional
