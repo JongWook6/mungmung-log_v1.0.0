@@ -23,6 +23,9 @@ public interface ReplyRepository extends JpaRepository<Reply, Long> {
 
     Integer countByArticle_ArticleIdAndDeletedAtIsNullAndReportedAtIsNull(Long articleId);
 
+    @Query("SELECT COUNT(r) FROM Reply r WHERE r.article.articleId = :articleId AND r.deletedAt IS NULL AND r.reportedAt IS NULL ")
+    int countRepliesByArticleId(@Param("articleId") Long articleId);
+
     Page<Reply> findByArticle_ArticleIdAndDeletedAtIsNullAndReportedAtIsNull(Long articleId, Pageable pageable);
 
 

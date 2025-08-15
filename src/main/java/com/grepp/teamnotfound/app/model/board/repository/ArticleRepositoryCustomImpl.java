@@ -144,6 +144,93 @@ public class ArticleRepositoryCustomImpl implements ArticleRepositoryCustom {
     }
 
     @Override
+    public ArticleDetailResponse findSimpleDetailById(Long articleId, Long loginUserId) {
+
+        // 서브 쿼리: 로그인 사용자의 좋아요 여부
+        BooleanExpression isLikedSubquery;
+        if (loginUserId != null) {
+            isLikedSubquery = JPAExpressions
+                .selectOne()
+                .from(articleLike)
+                .where(
+                    articleLike.article.articleId.eq(articleId),
+                    articleLike.user.userId.eq(loginUserId)
+                )
+                .exists();
+        } else {
+            isLikedSubquery = Expressions.FALSE;
+        }
+
+        // 메인 쿼리: 좋아요/댓글 수 없이 기본 정보만
+        ArticleDetailResponse detailResponse = queryFactory
+            .select(
+                Projections.fields(
+                    ArticleDetailResponse.class,
+                    article.articleId,
+                    user.userId,
+                    user.nickname,
+                    userImg.savePath.append(userImg.renamedName).as("profileImgPath"),
+                    article.createdAt,
+                    article.updatedAt,
+                    article.title,
+                    article.content,
+                    article.views,
+                    isLikedSubquery.as("isLiked")
+                )
+            )
+            .from(article)
+            .join(article.user, user)
+            .leftJoin(userImg).on(
+                userImg.user.userId.eq(user.userId),
+                userImg.deletedAt.isNull()
+            )
+            .where(
+                article.articleId.eq(articleId),
+                article.deletedAt.isNull(),
+                article.reportedAt.isNull()
+            )
+            .groupBy(
+                article.articleId,
+                user.userId,
+                user.nickname,
+                userImg.savePath,
+                userImg.renamedName,
+                article.createdAt,
+                article.updatedAt,
+                article.title,
+                article.content,
+                article.views
+            )
+            .fetchOne();
+
+        if (detailResponse == null) {
+            return null;
+        }
+
+        // 이미지 리스트는 별도로 조회
+        List<ArticleImgDto> images = queryFactory
+            .select(
+                Projections.constructor(
+                    ArticleImgDto.class,
+                    articleImg.article.articleId,
+                    articleImg.articleImgId,
+                    articleImg.savePath.append(articleImg.renamedName),
+                    articleImg.type
+                )
+            )
+            .from(articleImg)
+            .where(
+                articleImg.article.articleId.eq(articleId),
+                articleImg.deletedAt.isNull()
+            )
+            .fetch();
+
+        detailResponse.setImages(images);
+
+        return detailResponse;
+    }
+
+    @Override
     public Page<ArticleListDto> findArticleListWithMeta(int page, int size, BoardType boardType, SortType sortType,
         SearchType searchType, String keyword) {
 

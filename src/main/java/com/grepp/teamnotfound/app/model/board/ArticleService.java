@@ -115,18 +115,20 @@ public class ArticleService {
                 .orElseThrow(() -> new AuthException(UserErrorCode.USER_NOT_FOUND));
         }
 
-        ArticleDetailResponse response = articleRepository.findDetailById(articleId, userId);
+        ArticleDetailResponse response = articleRepository.findSimpleDetailById(articleId, userId);
 
         if (response == null) {
             throw new BoardException(BoardErrorCode.ARTICLE_NOT_FOUND);
         }
 
+        response.setReplies(replyRepository.countRepliesByArticleId(articleId));
+
         // Redis 카운터 캐시 값으로 덮어씀
         response.setLikes(getArticleLikeCount(articleId));
         response.setIsLiked(getUserLiked(articleId, userId));
 
-        articleRepository.plusViewById(articleId);
         response.setViews(response.getViews() + 1);
+        articleRepository.plusViewById(articleId);
 
         return response;
     }
