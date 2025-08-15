@@ -41,6 +41,7 @@ public class ReplyService {
     private final UserImgRepository userImgRepository;
     private final ReplyRepository replyRepository;
     private final NotiAppender notiAppender;
+    private final RedisReplyService redisReplyService;
 
     @Transactional
     public ReplyDetailResponse createReply(ReplyRequest request, Long articleId, Long userId) {
@@ -61,6 +62,7 @@ public class ReplyService {
             .content(request.getContent())
             .build();
         Reply savedReply = replyRepository.save(reply);
+        redisReplyService.incrementArticleReplyCount(articleId);
 
         NotiServiceCreateDto notiDto = NotiServiceCreateDto.builder()
             .targetId(reply.getReplyId())
@@ -131,6 +133,7 @@ public class ReplyService {
         reply.setDeletedAt(deletedTime);
         reply.setUpdatedAt(deletedTime);
         replyRepository.save(reply);
+        redisReplyService.decrementArticleReplyCount(articleId);
     }
 
     @Transactional(readOnly = true)

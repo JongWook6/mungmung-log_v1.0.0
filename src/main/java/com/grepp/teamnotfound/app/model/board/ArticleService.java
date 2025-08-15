@@ -20,6 +20,7 @@ import com.grepp.teamnotfound.app.model.board.repository.ArticleImgRepository;
 import com.grepp.teamnotfound.app.model.board.repository.ArticleLikeRepository;
 import com.grepp.teamnotfound.app.model.board.repository.ArticleRepository;
 import com.grepp.teamnotfound.app.model.board.repository.BoardRepository;
+import com.grepp.teamnotfound.app.model.reply.RedisReplyService;
 import com.grepp.teamnotfound.app.model.reply.repository.ReplyRepository;
 import com.grepp.teamnotfound.app.model.user.entity.User;
 import com.grepp.teamnotfound.app.model.user.repository.UserRepository;
@@ -61,6 +62,7 @@ public class ArticleService {
     private final ArticleLikeRepository articleLikeRepository;
     private final ReplyRepository replyRepository;
     private final RedisLikeService redisLikeService;
+    private final RedisReplyService redisReplyService;
 
     @Transactional
     public ArticleListResponse getArticles(ArticleListRequest request) {
@@ -122,7 +124,15 @@ public class ArticleService {
             throw new BoardException(BoardErrorCode.ARTICLE_NOT_FOUND);
         }
 
-        response.setReplies(replyRepository.countRepliesByArticleId(articleId));
+        // Redis 캐시에서 댓글 수 조회
+        Long cachedReplyCount = redisReplyService.getArticleReplyCount(articleId);
+        if (cachedReplyCount != null) {
+            response.setReplies(cachedReplyCount.intValue());
+        } else {
+            Integer dbReplyCount = replyRepository.countRepliesByArticleId(articleId);
+            response.setReplies(dbReplyCount);
+            redisReplyService.setArticleReplyCount(articleId, dbReplyCount.longValue());
+        }
 
         // Redis 카운터 캐시 값으로 덮어씀
         response.setLikes(getArticleLikeCount(articleId));
