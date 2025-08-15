@@ -27,7 +27,6 @@
 #
 # 3. Change the values in the "env" block to match your values.
 
-
 name: 'Build and Deploy to Cloud Run'
 
 on:
@@ -37,9 +36,10 @@ on:
 jobs:
   deploy:
     runs-on: 'ubuntu-latest'
-    
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: google-github-actions/auth@v2
         with:
           credentials_json: '${{ secrets.GCP_CREDENTIALS }}' # 또는 WIF 방식
@@ -48,20 +48,36 @@ jobs:
         with:
           project_id: ${{ secrets.GCP_PROJECT }}
 
+      # --- Secret Manager에서 시크릿 가져오기 ---
+      # 시크릿 이름을 정의하고, 해당 시크릿의 최신 버전을 가져옵니다.
+      - name: 'Get secrets from Secret Manager'
+        id: get_secrets
+        uses: google-github-actions/get-secretmanager-secrets@v2
+        with:
+          secrets: |-
+            JWT_SECRET: projects/${{ secrets.GCP_PROJECT }}/secrets/JWT_SECRET/versions/latest
+            REDIS_SECRET: projects/${{ secrets.GCP_PROJECT }}/secrets/REDIS_SECRET/versions/latest
+            POSTGRESQL_SECRET: projects/${{ secrets.GCP_PROJECT }}/secrets/POSTGRESQL_SECRET/versions/latest
+            SPRING_MAIL_SECRET: projects/${{ secrets.GCP_PROJECT }}/secrets/SPRING_MAIL_SECRET/versions/latest
+            GEMINI_SECRET: projects/${{ secrets.GCP_PROJECT }}/secrets/GEMINI_SECRET/versions/latest
+            GOOGLE_CLIENT_ID: projects/${{ secrets.GCP_PROJECT }}/secrets/GOOGLE_CLIENT_ID/versions/latest
+            GOOGLE_SECRET: projects/${{ secrets.GCP_PROJECT }}/secrets/GOOGLE_SECRET/versions/latest
+            NAVER_CLIENT_ID: projects/${{ secrets.GCP_PROJECT }}/secrets/NAVER_CLIENT_ID/versions/latest
+            NAVER_SECRET: projects/${{ secrets.GCP_PROJECT }}/secrets/NAVER_SECRET/versions/latest
+            KAKAO_CLIENT_ID: projects/${{ secrets.GCP_PROJECT }}/secrets/KAKAO_CLIENT_ID/versions/latest
+            KAKAO_SECRET: projects/${{ secrets.GCP_PROJECT }}/secrets/KAKAO_SECRET/versions/latest
+
       # BEGIN - Docker auth and build
-      #
-      # If you already have a container image, you can omit these steps.
       - name: 'Docker Auth'
         run: |
           gcloud auth configure-docker ${{ secrets.GCP_REGION }}-docker.pkg.dev --quiet
-
 
       - name: 'Build and Push Container'
         run: |
           IMAGE=${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${{ secrets.GCP_REPOSITORY }}/${{ secrets.SERVICE_NAME }}:${{ github.sha }}
           docker build -t $IMAGE .
           docker push $IMAGE
-          
+
       - name: 'Deploy to Cloud Run'
         run: |
           IMAGE=${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${{ secrets.GCP_REPOSITORY }}/${{ secrets.SERVICE_NAME }}:${{ github.sha }}
@@ -70,9 +86,19 @@ jobs:
             --platform managed \
             --region ${{ secrets.GCP_REGION }} \
             --allow-unauthenticated \
-            --set-env-vars "JWT_SECRET=${{ secrets.JWT_SECRET }},REDIS_SECRET=${{ secrets.REDIS_SECRET }},POSTGRESQL_SECRET=${{ secrets.POSTGRESQL_SECRET }},SPRING_MAIL_SECRET=${{ secrets.SPRING_MAIL_SECRET }},GEMINI_SECRET=${{ secrets.GEMINI_SECRET }},GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }},GOOGLE_SECRET=${{ secrets.GOOGLE_SECRET }},NAVER_CLIENT_ID=${{ secrets.NAVER_CLIENT_ID }},NAVER_SECRET=${{ secrets.NAVER_SECRET }},KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }},KAKAO_SECRET=${{ secrets.KAKAO_SECRET }}"
+            --set-env-vars "JWT_SECRET=${{ steps.get_secrets.outputs.JWT_SECRET }},\
+            REDIS_SECRET=${{ steps.get_secrets.outputs.REDIS_SECRET }},\
+            POSTGRESQL_SECRET=${{ steps.get_secrets.outputs.POSTGRESQL_SECRET }},\
+            SPRING_MAIL_SECRET=${{ steps.get_secrets.outputs.SPRING_MAIL_SECRET }},\
+            GEMINI_SECRET=${{ steps.get_secrets.outputs.GEMINI_SECRET }},\
+            GOOGLE_CLIENT_ID=${{ steps.get_secrets.outputs.GOOGLE_CLIENT_ID }},\
+            GOOGLE_SECRET=${{ steps.get_secrets.outputs.GOOGLE_SECRET }},\
+            NAVER_CLIENT_ID=${{ steps.get_secrets.outputs.NAVER_CLIENT_ID }},\
+            NAVER_SECRET=${{ steps.get_secrets.outputs.NAVER_SECRET }},\
+            KAKAO_CLIENT_ID=${{ steps.get_secrets.outputs.KAKAO_CLIENT_ID }},\
+            KAKAO_SECRET=${{ steps.get_secrets.outputs.KAKAO_SECRET }}"
 
-        # END - Docker auth and build
+      # END - Docker auth and build
 
       - name: Show Cloud Run URL
         run: |
