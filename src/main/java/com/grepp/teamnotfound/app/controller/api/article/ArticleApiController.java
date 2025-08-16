@@ -104,8 +104,7 @@ public class ArticleApiController {
         @PathVariable Long articleId,
         @AuthenticationPrincipal Principal principal
     ) {
-//        LikeResponse response = articleService.likeWithRedis(articleId, principal.getUserId());
-        LikeResponse response = articleService.likeArticle(articleId, principal.getUserId());
+        LikeResponse response = articleService.likeWithRedis(articleId, principal.getUserId());
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
@@ -116,8 +115,7 @@ public class ArticleApiController {
         @PathVariable Long articleId,
         @AuthenticationPrincipal Principal principal
     ) {
-//        LikeResponse response = articleService.unlikeWithRedis(articleId, principal.getUserId());
-        LikeResponse response = articleService.unlikeArticle(articleId, principal.getUserId());
+        LikeResponse response = articleService.unlikeWithRedis(articleId, principal.getUserId());
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
